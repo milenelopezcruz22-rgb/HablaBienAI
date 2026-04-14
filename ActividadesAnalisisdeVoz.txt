@@ -1,0 +1,34 @@
+Semana 4
+Crear rama feature analisis voz
+Estructura base del modulo
+
+Semanas 5 a 7
+Crear endpoint procesar voz
+Recibir media_id
+Simular transcripcion y muletillas
+Probar flujo basico
+Pruebas iniciales de integracion con datos mock
+
+Semanas 8 a 10
+Obtener video y audio
+Crear tabla voz
+Guardar resultados
+Endpoint obtener datos por media_id
+Integracion basica con captura usando media_id
+
+Semanas 11 a 13
+Integrar speech to text
+Generar transcripcion real
+Detectar muletillas
+Pruebas continuas con otros modulos
+
+Semanas 14 a 15
+Calcular metricas basicas
+Limpiar texto
+Ajustes generales
+Validar flujo completo con sistema
+
+Semanas 16 a 17
+Pruebas finales integradas
+Correccion de errores
+Estabilizacion del modulo
