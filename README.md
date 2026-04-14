@@ -1,5 +1,5 @@
 <div align="center">
-🎤 HablaBien-IA
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Studio%20Microphone.png" width="60px" /> HablaBien-IA
 Entrenador Personal de Oratoria con Inteligencia Artificial
 </div>
 
