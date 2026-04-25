@@ -57,14 +57,14 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 ┌─────────────────────────────────────────────────────────────┐
 │                     HABLA BIEN · IA                         │
 │                                                             │
-│   🎤 VOZ          🧍 CUERPO         🧠 FUSIÓN IA            │
+│       VOZ             CUERPO            FUSIÓN IA           │
 │   ─────────       ────────────      ─────────────           │
 │   Muletillas      Postura           Gemini 1.5 Flash        │
 │   Velocidad       Manos             Análisis integrado      │
 │   Pausas          Contacto visual   Puntuación 0-100        │
 │                                                             │
-│              📊 DASHBOARD DE RESULTADOS                     │
-│              📈 HISTORIAL DE PROGRESO                       │
+│                 DASHBOARD DE RESULTADOS                     │
+│                 HISTORIAL DE PROGRESO                       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -248,11 +248,11 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 ┌──────────────────────┬──────────────────────────────────────────┐
 │ DIMENSIÓN            │ QUÉ MIDE                                 │
 ├──────────────────────┼──────────────────────────────────────────┤
-│ 🎤 Voz               │ Muletillas/min · Velocidad · Pausas      │
-│ 🧍 Postura           │ Alineación de hombros · Encorvamiento    │
-│ 👀 Contacto visual   │ % de tiempo mirando a la cámara          │
-│ 🙌 Manos             │ Movimiento excesivo por nerviosismo       │
-│ ⚡ Energía / Tono    │ Monotonía vs. dinamismo (análisis Gemini)│
+│    Voz               │ Muletillas/min · Velocidad · Pausas      │
+│    Postura           │ Alineación de hombros · Encorvamiento    │
+│    Contacto visual   │ % de tiempo mirando a la cámara          │
+│    Manos             │ Movimiento excesivo por nerviosismo      │
+│    Energía / Tono    │ Monotonía vs. dinamismo (análisis Gemini)│
 └──────────────────────┴──────────────────────────────────────────┘
 ```
 
