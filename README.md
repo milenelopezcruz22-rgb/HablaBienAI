@@ -28,6 +28,13 @@
 > *¿Tienes el conocimiento pero te traiciona el nerviosismo al hablar?*
 > **Habla Bien IA** analiza tu voz, postura y lenguaje corporal en tiempo real
 > y te da feedback personalizado para que domines cada sustentación.
+
+<br/>
+
+[Ver Demo](#) · [Reportar Bug](../../issues) · [Solicitar Feature](../../issues)
+
+<br/>
+
 </div>
 
 ---
@@ -150,8 +157,8 @@ habla-bien-ia/
 
 ```
 Semana 1-6   ██████░░░░░░░░░░░░  APF1 · Repositorio + M1 + M2 base
-Semana 7-11  ░░░░░░██████░░░░░░  APF2 · CI/CD + M2 + M3 + M4 inicio
-Semana 12-15 ░░░░░░░░░░░░████░░  APF3 · Despliegue + M4 + M5
+Semana 7-11  ░░░░░░██████░░░░░░  APF2 · CI/CD + M2 completo + M3 + M4 inicio
+Semana 12-15 ░░░░░░░░░░░░████░░  APF3 · Despliegue + M4 completo + M5
 Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Sistema completo + M6
 ```
 
@@ -161,6 +168,25 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | APF2 | 11 | 20% | ⏳ Pendiente |
 | APF3 | 15 | 20% | ⏳ Pendiente |
 | Proyecto Final | 18 | 40% | ⏳ Pendiente |
+
+---
+
+## 📦 Estado de los módulos
+
+| Módulo | Nombre | Tecnología | Estado |
+|--------|--------|------------|--------|
+| **M1** | Captura de medios | React · WebRTC | 🔄 **En desarrollo** |
+| **M2** | Análisis de voz *(base)* | Python · FastAPI · Whisper API | 🔄 **Introductorio** |
+| M3 | Análisis de lenguaje corporal | MediaPipe Pose | ⏳ Pendiente — APF2 |
+| M4 | Módulo de fusión | Gemini 1.5 Flash | ⏳ Pendiente — APF2/3 |
+| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
+| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+
+> **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo o subir un video. Al finalizar, extrae el audio y lo prepara para enviarlo al backend.
+>
+> **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo envía a Whisper para obtener la transcripción. Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia. Las métricas avanzadas (velocidad, pausas, tono) se completarán en la Unidad 2.
+>
+> **M3 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
 ---
 
@@ -181,7 +207,11 @@ code .
 
 ### 2. Levantar el backend
 ```bash
-PENDIENTE
+cd backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
 ```
 
 ### 3. Levantar el frontend
@@ -193,7 +223,7 @@ npm run dev
 
 ### 4. Con Docker (recomendado)
 ```bash
-PENDIENTE
+docker-compose up --build
 ```
 
 La app estará disponible en `http://localhost:5173`
@@ -259,7 +289,7 @@ git commit -m "fix(m2): corregir encoding de audio para Whisper"
 
 ## 📄 Licencia
 
-Este proyecto fue desarrollado como parte del curso **Herramientas de Desarrollo** — Universidad Nacional de Piura · 2026.
+Este proyecto fue desarrollado como parte del curso **Herramientas de Desarrollo** — UTP · 2026.
 
 ---
 
@@ -267,6 +297,6 @@ Este proyecto fue desarrollado como parte del curso **Herramientas de Desarrollo
 
 **Habla Bien · IA** — Porque el talento merece ser escuchado. 🎤
 
-*Ingeniería de Software · UNP · Piura, Perú*
+*Ingeniería de Sistemas e Informatica · UTP · Piura, Perú*
 
 </div>
