@@ -53,18 +53,16 @@
 
 El estudiante activa su cámara o sube un video. La IA analiza **tres capas simultáneas**:
 
-```
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
 | Muletillas | Postura | Gemini 1.5 Flash |
 | Velocidad de habla | Movimiento de manos | Análisis integrado |
 | Pausas largas | Contacto visual | Puntuación 0 – 100 |
- 
+
 | 📊 Dashboard de resultados | 📈 Historial de progreso |
 |---------------------------|-------------------------|
 | Radar chart con 5 dimensiones | Evolución sesión por sesión |
 | Línea de tiempo de errores | Comparativa mes a mes |
-```
 
 ---
 
@@ -242,17 +240,13 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 
 ## 📊 Métricas que analiza la IA
 
-```
-┌──────────────────────┬──────────────────────────────────────────┐
-│ DIMENSIÓN            │ QUÉ MIDE                                 │
-├──────────────────────┼──────────────────────────────────────────┤
-│    Voz               │ Muletillas/min · Velocidad · Pausas      │
-│    Postura           │ Alineación de hombros · Encorvamiento    │
-│    Contacto visual   │ % de tiempo mirando a la cámara          │
-│    Manos             │ Movimiento excesivo por nerviosismo      │
-│    Energía / Tono    │ Monotonía vs. dinamismo (análisis Gemini)│
-└──────────────────────┴──────────────────────────────────────────┘
-```
+| Dimensión | Qué mide |
+|-----------|----------|
+| 🎤 Voz | Muletillas/min · Velocidad · Pausas |
+| 🧍 Postura | Alineación de hombros · Encorvamiento |
+| 👀 Contacto visual | % de tiempo mirando a la cámara |
+| 🙌 Manos | Movimiento excesivo por nerviosismo |
+| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Gemini) |
 
 ---
 
