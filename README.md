@@ -54,18 +54,16 @@
 El estudiante activa su cámara o sube un video. La IA analiza **tres capas simultáneas**:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     HABLA BIEN · IA                         │
-│                                                             │
-│       VOZ             CUERPO            FUSIÓN IA           │
-│   ─────────       ────────────      ─────────────           │
-│   Muletillas      Postura           Gemini 1.5 Flash        │
-│   Velocidad       Manos             Análisis integrado      │
-│   Pausas          Contacto visual   Puntuación 0-100        │
-│                                                             │
-│                 DASHBOARD DE RESULTADOS                     │
-│                 HISTORIAL DE PROGRESO                       │
-└─────────────────────────────────────────────────────────────┘
+| 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
+|--------|-----------|-------------|
+| Muletillas | Postura | Gemini 1.5 Flash |
+| Velocidad de habla | Movimiento de manos | Análisis integrado |
+| Pausas largas | Contacto visual | Puntuación 0 – 100 |
+ 
+| 📊 Dashboard de resultados | 📈 Historial de progreso |
+|---------------------------|-------------------------|
+| Radar chart con 5 dimensiones | Evolución sesión por sesión |
+| Línea de tiempo de errores | Comparativa mes a mes |
 ```
 
 ---
