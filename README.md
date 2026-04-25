@@ -174,17 +174,14 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/TU-USUARIO/habla-bien-ia.git
+git clone [URL-repositorio]
 cd habla-bien-ia
+code .
 ```
 
 ### 2. Levantar el backend
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+PENDIENTE
 ```
 
 ### 3. Levantar el frontend
@@ -196,7 +193,7 @@ npm run dev
 
 ### 4. Con Docker (recomendado)
 ```bash
-docker-compose up --build
+PENDIENTE
 ```
 
 La app estará disponible en `http://localhost:5173`
