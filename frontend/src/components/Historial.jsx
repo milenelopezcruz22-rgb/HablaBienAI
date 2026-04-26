@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sesionesData, nivelEstilos } from "../../constants";
+import { sesionesData, nivelEstilos } from "../constants";
 
 export default function Historial({ busqueda }) {
   const sesionesFiltradas = sesionesData.filter((s) =>
