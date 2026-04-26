@@ -25,6 +25,8 @@
 
 <br/>
 
+> 💡 **TL;DR para correr el proyecto:** `cd frontend && npm install && npm run dev`
+
 > *¿Tienes el conocimiento pero te traiciona el nerviosismo al hablar?*
 > **Habla Bien IA** analiza tu voz, postura y lenguaje corporal en tiempo real
 > y te da feedback personalizado para que domines cada sustentación.
@@ -194,6 +196,30 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 - Docker Desktop
 - Git
 
+### 📦 Dependencias del frontend
+
+Antes de correr el proyecto instala todas las dependencias con un solo comando:
+
+```bash
+cd frontend
+npm install
+```
+
+Si por alguna razón faltan paquetes, instálalos manualmente:
+
+```bash
+npm install react-router-dom lucide-react chart.js react-chartjs-2
+```
+
+| Paquete | Uso |
+|---------|-----|
+| `react-router-dom` | Navegación entre páginas (SPA) |
+| `lucide-react` | Íconos de la interfaz |
+| `chart.js` | Motor de gráficas |
+| `react-chartjs-2` | Wrapper de Chart.js para React |
+
+> ⚠️ **Importante:** `main.jsx` solo debe renderizar `<App />`. El `BrowserRouter`, `Navbar` y rutas ya están definidos dentro de `App.jsx`. No agregues `<Navbar />` ni páginas directamente en `main.jsx`.
+
 ### 1. Clonar el repositorio
 ```bash
 git clone [URL-repositorio]
@@ -222,7 +248,7 @@ npm run dev
 docker-compose up --build
 ```
 
-La app estará disponible en `http://localhost:5173`
+La app estará disponible en `http://localhost:3000`
 La API en `http://localhost:8000/docs`
 
 ---
