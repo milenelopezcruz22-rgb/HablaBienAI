@@ -57,7 +57,7 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
-| Muletillas | Postura | Groq API (Llama 3) |
+| Muletillas | Postura | Gemini 1.5 Flash |
 | Velocidad de habla | Movimiento de manos | Análisis integrado |
 | Pausas largas | Contacto visual | Puntuación 0 – 100 |
 
@@ -73,17 +73,13 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 ```
 habla-bien-ia/
 │
-├── 📁 frontend/                    # React 18 · Interfaz de usuario
+├── 📁 frontend/                    # React 19 · Interfaz de usuario
 │   └── src/
-│       ├── components/
-│       │   ├── Camera/             # M1 · Captura de video y audio (WebRTC)
-│       │   ├── Dashboard/          # M5 · Resultados y puntuación
-│       │   ├── Feedback/           # M5 · Recomendaciones de la IA
-│       │   └── History/            # M6 · Historial de sesiones
-│       ├── pages/                  # Vistas principales de la app
-│       ├── hooks/                  # Custom hooks (useCamera, useMediaPipe)
-│       ├── services/               # Llamadas a la API del backend
-│       └── assets/                 # Imágenes, íconos, fuentes
+│       ├── components/             # Componentes UI (BodyMetrics, RadarChart, etc.)
+│       ├── pages/                  # Vistas: Inicio, Dashboard, GrabarSesion, Historial
+│       ├── hooks/                  # useCamera · useBodyAnalysis · useAnalysis
+│       ├── constants/              # Configuración y datos mock
+│       └── icons/                  # Íconos SVG personalizados
 │
 ├── 📁 backend/                     # Python 3.11 · FastAPI · Motor de IA
 │   └── app/
@@ -91,7 +87,7 @@ habla-bien-ia/
 │       ├── core/                   # Configuración, settings, conexión DB
 │       ├── models/                 # Modelos de base de datos (SQLAlchemy)
 │       ├── schemas/                # Esquemas Pydantic (validación de datos)
-│       ├── services/               # M2 · faster-whisper  M3 · MediaPipe  M4 · Groq
+│       ├── services/               # M2 · Whisper  M3 · MediaPipe  M4 · Groq
 │       └── tests/                  # Tests unitarios e integración
 │
 ├── 📁 docs/                        # Documentación técnica del proyecto
@@ -114,9 +110,10 @@ habla-bien-ia/
 ### Frontend
 | Tecnología | Uso |
 |------------|-----|
-| **React 18** | Interfaz de usuario y gestión de estado |
+| **React 19** | Interfaz de usuario y gestión de estado |
 | **WebRTC** | Acceso a cámara y micrófono en tiempo real |
-| **MediaPipe Pose** | Análisis de postura directamente en el navegador |
+| **MediaPipe Pose** | Análisis de postura y cuerpo completo en el navegador |
+| **MediaPipe Hands** | Detección de gestos y posición de manos |
 | **Chart.js** | Gráficas de puntuación y progreso |
 
 ### Backend
@@ -124,7 +121,7 @@ habla-bien-ia/
 |------------|-----|
 | **Python 3.11** | Lenguaje principal del servidor |
 | **FastAPI** | Framework REST de alto rendimiento |
-| **faster-whisper (Local)** | Transcripción rápida y local (sin costos de API) |
+| **faster-whisper** | Transcripción de audio local (sin costos de API) |
 | **Groq API (Llama 3)** | Análisis avanzado del discurso y feedback |
 | **SQLAlchemy** | ORM para la base de datos |
 | **PostgreSQL** | Almacenamiento del historial de sesiones |
@@ -141,13 +138,13 @@ habla-bien-ia/
 
 ## 👥 Equipo de desarrollo
 
-| Rol | Responsabilidad | Módulos |
-|-----|----------------|---------|
-| 🖥️ **Frontend Dev 1** | Captura de medios y análisis corporal | M1 · M3 |
-| 🎨 **Frontend Dev 2** | Dashboard, feedback e historial | M5 · M6 (vista) |
-| 🐍 **Backend Dev 1** | Análisis de voz y transcripción | M2 |
-| 🤖 **Backend Dev 2** | Fusión IA e historial | M4 · M6 (API) |
-| ⚙️ **DevOps / Líder** | Git, CI/CD, despliegue e integración | Todos |
+| Integrante | Rol | Responsabilidad | Módulos |
+|------------|-----|----------------|---------|
+| 👨‍💻 **Israel Ramos Silva** | Frontend Dev | Captura de medios y análisis corporal | M1 · M3 |
+| 👩‍💻 **Milene Lopez Cruz** | Frontend Dev | Dashboard, feedback e historial | M5 · M6 (vista) |
+| 👨‍💻 **Jhon Peña Campos** | Backend Dev | Análisis de voz y transcripción | M2 |
+| 👨‍💻 **Jeix Lopez Castillo** | Backend Dev | Fusión IA e historial | M4 · M6 (API) |
+| 👨‍💻 **Raul Seminario** | DevOps / Líder | Git, CI/CD, despliegue e integración | Todos |
 
 ---
 
@@ -162,8 +159,8 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 
 | Entrega | Semana | Peso | Estado |
 |---------|--------|------|--------|
-| APF1 | 6 | 20% | 🔄 En progreso |
-| APF2 | 11 | 20% | ⏳ Pendiente |
+| APF1 | 6 | 20% | ✅ **Completado** |
+| APF2 | 11 | 20% | 🔄 En progreso |
 | APF3 | 15 | 20% | ⏳ Pendiente |
 | Proyecto Final | 18 | 40% | ⏳ Pendiente |
 
@@ -174,17 +171,19 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | Módulo | Nombre | Tecnología | Estado |
 |--------|--------|------------|--------|
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
-| **M2** | Análisis de voz | Python · FastAPI · faster-whisper | ✅ **Completado** |
-| **M3** | Análisis de lenguaje corporal | MediaPipe Pose | 🔄 **En desarrollo** |
-| **M4** | Módulo de fusión | Groq API (Llama 3) | 🔄 **En desarrollo** |
+| **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | 🔄 **En desarrollo** |
+| **M3** | Análisis de lenguaje corporal | MediaPipe Pose + Hands | ✅ **Completado** |
+| M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
 | M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
 | M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
 
-> **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo o subir un video. Al finalizar, extrae el audio y lo prepara para enviarlo al backend.
+> **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
 >
-> **M2:** Endpoint en FastAPI que recibe el archivo de audio y lo transcribe localmente con `faster-whisper`. Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia. Calcula un score de voz automático (0-100) basado en la proporción de palabras de relleno.
+> **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo procesa con **faster-whisper** (transcripción local, sin costos de API). Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia.
 >
-> **M3 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
+> **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** (33 landmarks) y **MediaPipe Hands** (21 landmarks por mano). Detecta postura (hombros, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), gestos de manos (abierta, puño, señalando), brazos cruzados, y valida el encuadre (rostro, hombros, brazos, manos visibles). Todo corre en el navegador del cliente.
+>
+> **M4 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
 ---
 
@@ -217,19 +216,6 @@ npm install react-router-dom lucide-react chart.js react-chartjs-2
 | `lucide-react` | Íconos de la interfaz |
 | `chart.js` | Motor de gráficas |
 | `react-chartjs-2` | Wrapper de Chart.js para React |
-
-### 📦 Dependencias del backend
-
-Si por alguna razón faltan paquetes de Python, instálalos manualmente:
-
-```bash
-pip install faster-whisper groq
-```
-
-| Paquete | Uso |
-|---------|-----|
-| `faster-whisper` | Transcripción de audio local (sin costos de API) |
-| `groq` | Cliente oficial de Groq API para análisis con Llama 3 |
 
 > ⚠️ **Importante:** `main.jsx` solo debe renderizar `<App />`. El `BrowserRouter`, `Navbar` y rutas ya están definidos dentro de `App.jsx`. No agregues `<Navbar />` ni páginas directamente en `main.jsx`.
 
@@ -282,10 +268,10 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 | Dimensión | Qué mide |
 |-----------|----------|
 | 🎤 Voz | Muletillas/min · Velocidad · Pausas |
-| 🧍 Postura | Alineación de hombros · Encorvamiento |
+| 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto |
 | 👀 Contacto visual | % de tiempo mirando a la cámara |
-| 🙌 Manos | Movimiento excesivo por nerviosismo |
-| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq) |
+| 🙌 Manos | Gestos (abierta/puño/señalando) · Brazos cruzados |
+| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq Llama 3) |
 
 ---
 
