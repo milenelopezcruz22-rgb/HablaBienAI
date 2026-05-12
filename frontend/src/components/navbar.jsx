@@ -1,4 +1,3 @@
-import React from "react";
 import { MicrophoneIcon, VideoIcon, ChartLineIcon, HistoryIcon, HomeOutlineIcon } from "../icons";
 import { NavLink } from 'react-router-dom';
 

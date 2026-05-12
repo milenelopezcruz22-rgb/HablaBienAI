@@ -1,4 +1,3 @@
-import React from "react";
 import { MicrophoneIcon } from "../icons";
 import { ChartHistogramIcon } from "../icons";
 import { BulbIcon } from "../icons";

@@ -1,4 +1,3 @@
-import React from "react";
 import { PlayIcon } from "../icons";
 import Cards from "../components/cards";
 import { Link } from "react-router-dom";

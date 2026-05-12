@@ -17,13 +17,17 @@ export const useCamera = () => {
                 audio: true,
             });
             setStream(mediaStream);
-            if (videoRef.current) videoRef.current.srcObject = mediaStream;
+            if (videoRef.current) {
+                videoRef.current.srcObject = mediaStream;
+                videoRef.current.play().catch(e => console.warn("Error al reproducir video:", e));
+            }
             setError(null);
             setVideoBlob(null);
         } catch (err) {
             setError(
                 "No se pudo acceder a la cámara o micrófono. Verifica los permisos.",
             );
+            console.error(err);
         }
     }, []);
 
