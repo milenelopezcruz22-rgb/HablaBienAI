@@ -57,7 +57,7 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
-| Muletillas | Postura | Gemini 1.5 Flash |
+| Muletillas | Postura | Groq API (Llama 3) |
 | Velocidad de habla | Movimiento de manos | Análisis integrado |
 | Pausas largas | Contacto visual | Puntuación 0 – 100 |
 
@@ -91,7 +91,7 @@ habla-bien-ia/
 │       ├── core/                   # Configuración, settings, conexión DB
 │       ├── models/                 # Modelos de base de datos (SQLAlchemy)
 │       ├── schemas/                # Esquemas Pydantic (validación de datos)
-│       ├── services/               # M2 · Whisper  M3 · MediaPipe  M4 · Gemini
+│       ├── services/               # M2 · faster-whisper  M3 · MediaPipe  M4 · Groq
 │       └── tests/                  # Tests unitarios e integración
 │
 ├── 📁 docs/                        # Documentación técnica del proyecto
@@ -124,8 +124,8 @@ habla-bien-ia/
 |------------|-----|
 | **Python 3.11** | Lenguaje principal del servidor |
 | **FastAPI** | Framework REST de alto rendimiento |
-| **Whisper API (OpenAI)** | Transcripción de audio y detección de muletillas |
-| **Gemini 1.5 Flash** | Análisis multimodal e IA de feedback |
+| **faster-whisper (Local)** | Transcripción rápida y local (sin costos de API) |
+| **Groq API (Llama 3)** | Análisis avanzado del discurso y feedback |
 | **SQLAlchemy** | ORM para la base de datos |
 | **PostgreSQL** | Almacenamiento del historial de sesiones |
 
@@ -173,16 +173,16 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 
 | Módulo | Nombre | Tecnología | Estado |
 |--------|--------|------------|--------|
-| **M1** | Captura de medios | React · WebRTC | 🔄 **En desarrollo** |
-| **M2** | Análisis de voz *(base)* | Python · FastAPI · Whisper API | 🔄 **Introductorio** |
-| M3 | Análisis de lenguaje corporal | MediaPipe Pose | ⏳ Pendiente — APF2 |
-| M4 | Módulo de fusión | Gemini 1.5 Flash | ⏳ Pendiente — APF2/3 |
+| **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
+| **M2** | Análisis de voz | Python · FastAPI · faster-whisper | ✅ **Completado** |
+| **M3** | Análisis de lenguaje corporal | MediaPipe Pose | 🔄 **En desarrollo** |
+| **M4** | Módulo de fusión | Groq API (Llama 3) | 🔄 **En desarrollo** |
 | M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
 | M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo o subir un video. Al finalizar, extrae el audio y lo prepara para enviarlo al backend.
 >
-> **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo envía a Whisper para obtener la transcripción. Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia. Las métricas avanzadas (velocidad, pausas, tono) se completarán en la Unidad 2.
+> **M2:** Endpoint en FastAPI que recibe el archivo de audio y lo transcribe localmente con `faster-whisper`. Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia. Calcula un score de voz automático (0-100) basado en la proporción de palabras de relleno.
 >
 > **M3 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
@@ -217,6 +217,19 @@ npm install react-router-dom lucide-react chart.js react-chartjs-2
 | `lucide-react` | Íconos de la interfaz |
 | `chart.js` | Motor de gráficas |
 | `react-chartjs-2` | Wrapper de Chart.js para React |
+
+### 📦 Dependencias del backend
+
+Si por alguna razón faltan paquetes de Python, instálalos manualmente:
+
+```bash
+pip install faster-whisper groq
+```
+
+| Paquete | Uso |
+|---------|-----|
+| `faster-whisper` | Transcripción de audio local (sin costos de API) |
+| `groq` | Cliente oficial de Groq API para análisis con Llama 3 |
 
 > ⚠️ **Importante:** `main.jsx` solo debe renderizar `<App />`. El `BrowserRouter`, `Navbar` y rutas ya están definidos dentro de `App.jsx`. No agregues `<Navbar />` ni páginas directamente en `main.jsx`.
 
@@ -272,7 +285,7 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 | 🧍 Postura | Alineación de hombros · Encorvamiento |
 | 👀 Contacto visual | % de tiempo mirando a la cámara |
 | 🙌 Manos | Movimiento excesivo por nerviosismo |
-| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Gemini) |
+| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq) |
 
 ---
 
