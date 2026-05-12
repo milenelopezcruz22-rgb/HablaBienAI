@@ -174,9 +174,9 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
 | **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | ✅ **Completado** | |
 | **M3** | Análisis de lenguaje corporal | MediaPipe Pose + Hands | ✅ **Completado** |
-| **M4** | Módulo de fusión | Groq API (Llama 3) | ✅ **Completado** | |
+| **M4** | Módulo de fusión | Groq API (Llama 3) | 🔄 **En desarrollo**  | |
 | M5 | Evaluación y feedback | React · Chart.js | 🔄 **En desarrollo** |
-| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | 🔄 **En desarrollo**  |
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
 >
