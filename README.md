@@ -138,13 +138,14 @@ habla-bien-ia/
 
 ## 👥 Equipo de desarrollo
 
-| Integrante | Rol | Responsabilidad | Módulos |
-|------------|-----|----------------|---------|
-| 👨‍💻 **Israel Ramos Silva** | Frontend Dev | Captura de medios y análisis corporal | M1 · M3 |
-| 👩‍💻 **Milene Lopez Cruz** | Frontend Dev | Dashboard, feedback e historial | M5 · M6 (vista) |
-| 👨‍💻 **Jhon Peña Campos** | Backend Dev | Análisis de voz y transcripción | M2 |
-| 👨‍💻 **Jeix Lopez Castillo** | Backend Dev | Fusión IA e historial | M4 · M6 (API) |
-| 👨‍💻 **Raul Seminario** | DevOps / Líder | Git, CI/CD, despliegue e integración | Todos |
+| Módulo | Encargado |
+|--------|-----------|
+| **M1** · Captura de medios | Jhon Peña Campos |
+| **M2** · Análisis de voz | Raul Seminario |
+| **M3** · Análisis de lenguaje corporal | Jeix Lopez Castillo |
+| **M4** · Módulo de fusión IA | Raul Seminario |
+| **M5** · Evaluación y feedback | Milene Lopez Cruz |
+| **M6** · Historial de progreso | Israel Ramos Silva |
 
 ---
 
@@ -171,10 +172,10 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | Módulo | Nombre | Tecnología | Estado |
 |--------|--------|------------|--------|
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
-| **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | 🔄 **En desarrollo** |
+| **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | ✅ **Completado** | |
 | **M3** | Análisis de lenguaje corporal | MediaPipe Pose + Hands | ✅ **Completado** |
-| M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
-| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
+| **M4** | Módulo de fusión | Groq API (Llama 3) | ✅ **Completado** | |
+| M5 | Evaluación y feedback | React · Chart.js | 🔄 **En desarrollo** |
 | M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
