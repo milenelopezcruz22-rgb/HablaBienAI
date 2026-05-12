@@ -21,7 +21,7 @@
 [![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
-[![Docker](https://img.shields.io/badge/Deploy-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com/)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
 <br/>
 
@@ -57,7 +57,7 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
-| Muletillas | Postura | Gemini 1.5 Flash |
+| Muletillas | Postura | Groq (Llama 3) |
 | Velocidad de habla | Contacto visual | Análisis integrado |
 | Pausas largas | Brazos cruzados | Puntuación 0 – 100 |
 
@@ -90,16 +90,6 @@ habla-bien-ia/
 │       ├── services/               # M2 · Whisper  M3 · MediaPipe  M4 · Groq
 │       └── tests/                  # Tests unitarios e integración
 │
-├── 📁 docs/                        # Documentación técnica del proyecto
-│   ├── assets/                     # Imágenes para la documentación
-│   └── wireframes/                 # Bocetos de la interfaz
-│
-├── 📁 .github/
-│   ├── workflows/                  # CI/CD con GitHub Actions
-│   └── ISSUE_TEMPLATE/             # Plantillas para bugs y features
-│
-├── 🐳 docker-compose.yml           # Levanta frontend + backend + DB
-├── 📄 .gitignore                   # Archivos ignorados por Git
 └── 📖 README.md                    # Este archivo
 ```
 
@@ -128,8 +118,6 @@ habla-bien-ia/
 ### DevOps
 | Tecnología | Uso |
 |------------|-----|
-| **Docker** | Contenedorización del backend |
-| **GitHub Actions** | CI/CD automatizado |
 | **Railway** | Despliegue del backend en la nube |
 | **Vercel** | Despliegue del frontend |
 
@@ -192,32 +180,7 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 ### Prerrequisitos
 - Node.js 18+
 - Python 3.11+
-- Docker Desktop
 - Git
-
-### 📦 Dependencias del frontend
-
-Antes de correr el proyecto instala todas las dependencias con un solo comando:
-
-```bash
-cd frontend
-npm install
-```
-
-Si por alguna razón faltan paquetes, instálalos manualmente:
-
-```bash
-npm install react-router-dom lucide-react chart.js react-chartjs-2
-```
-
-| Paquete | Uso |
-|---------|-----|
-| `react-router-dom` | Navegación entre páginas (SPA) |
-| `lucide-react` | Íconos de la interfaz |
-| `chart.js` | Motor de gráficas |
-| `react-chartjs-2` | Wrapper de Chart.js para React |
-
-> ⚠️ **Importante:** `main.jsx` solo debe renderizar `<App />`. El `BrowserRouter`, `Navbar` y rutas ya están definidos dentro de `App.jsx`. No agregues `<Navbar />` ni páginas directamente en `main.jsx`.
 
 ### 1. Clonar el repositorio
 ```bash
@@ -235,19 +198,18 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### 3. Levantar el frontend
+### 3. Instalar dependencias del frontend
 ```bash
 cd frontend
 npm install
+```
+
+### 4. Levantar el frontend
+```bash
 npm run dev
 ```
 
-### 4. Con Docker (recomendado)
-```bash
-docker-compose up --build
-```
-
-La app estará disponible en `http://localhost:3000`
+La app estará disponible en `http://localhost:5173`
 La API en `http://localhost:8000/docs`
 
 ---
