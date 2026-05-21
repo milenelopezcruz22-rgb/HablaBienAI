@@ -1,0 +1,9 @@
+export { default as VideoIcon } from "./VideoIcon";
+export { default as ChartLineIcon } from "./ChartLineIcon";
+export { default as HistoryIcon } from "./HistoryIcon";
+export { default as HomeOutlineIcon } from "./HomeOutlineIcon";
+export { default as MicrophoneIcon } from "./MicrophoneIcon";
+export { default as PlayIcon } from "./PlayIcon";
+export { default as ChartHistogramIcon } from "./ChartHistogramIcon";
+export { default as BulbIcon } from "./BulbIcon";
+export { default as TrendingUpIcon } from "./TrendingUpIcon";
