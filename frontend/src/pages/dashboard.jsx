@@ -30,7 +30,6 @@ function Dashboard() {
   return (
     <div className="flex flex-col gap-8 p-6">
 
-      {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         
         <Button
@@ -57,10 +56,8 @@ function Dashboard() {
 
       <div className="flex flex-col gap-8">
 
-        {/* TARJETAS SUPERIORES */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* SCORE */}
           <Card className="flex flex-col items-center justify-center p-8 gap-4">
             <div className="flex items-center gap-2 text-blue-600">
               <Volume2 size={22} />
@@ -77,7 +74,6 @@ function Dashboard() {
             </p>
           </Card>
 
-          {/* PALABRAS */}
           <Card className="flex flex-col justify-center p-6">
             <p className="text-sm text-gray-500 mb-2">
               Total de palabras
@@ -92,7 +88,6 @@ function Dashboard() {
             </p>
           </Card>
 
-          {/* MULETILLAS */}
           <Card className="flex flex-col justify-center p-6">
             <p className="text-sm text-gray-500 mb-2">
               Muletillas detectadas
@@ -109,7 +104,6 @@ function Dashboard() {
 
         </div>
 
-        {/* BLOQUE CORPORAL */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           <Card className="p-6 flex flex-col items-center">
@@ -140,10 +134,8 @@ function Dashboard() {
 
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* MULETILLAS */}
           <Card title="Muletillas Detectadas">
 
             {voz?.muletillas &&
@@ -192,7 +184,6 @@ function Dashboard() {
 
           </Card>
 
-          {/* TRANSCRIPCIÓN */}
           <Card title="Transcripción">
 
             <div className="flex flex-col gap-4">
