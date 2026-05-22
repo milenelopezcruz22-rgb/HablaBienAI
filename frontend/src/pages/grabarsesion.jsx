@@ -1,26 +1,39 @@
+<<<<<<< HEAD
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+=======
+>>>>>>> origin/main
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
 import {
     Mic, Video, Play, CameraOff,
+<<<<<<< HEAD
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
+=======
+    CheckCircle, AlertCircle, Eye, Activity, Lightbulb
+>>>>>>> origin/main
 } from 'lucide-react';
 
 const posturaConfig = {
     excelente: { label: 'Excelente', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', icon: <CheckCircle size={13} /> },
     buena: { label: 'Buena', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: <CheckCircle size={13} /> },
     mejorar: { label: 'Mejorar', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', icon: <AlertCircle size={13} /> },
+<<<<<<< HEAD
     esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: <Activity size={13} /> },
     nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)', icon: <CameraOff size={13} /> },
+=======
+>>>>>>> origin/main
 };
 
 const contactoConfig = {
     estable: { label: 'Estable', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
     intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
     ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
+<<<<<<< HEAD
     esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
     nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)' },
+=======
+>>>>>>> origin/main
 };
 
 const audioConfig = {
@@ -29,6 +42,7 @@ const audioConfig = {
     alto: { label: 'Alto', barColor: '#ef4444' },
 };
 
+<<<<<<< HEAD
 const POSE_CONNECTIONS = [
     [11, 12], [11, 13], [12, 14], [13, 15], [14, 16],
     [11, 23], [12, 24], [23, 24],
@@ -110,6 +124,8 @@ function dibujarFaceMesh(ctx, face, w, h) {
     }
 }
 
+=======
+>>>>>>> origin/main
 const tips = [
     'Mantén tus manos visibles para transmitir confianza y transparencia a tu audiencia.',
     'Haz pausas breves para dar énfasis a tus ideas clave.',
@@ -119,6 +135,7 @@ const tips = [
 ];
 const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
+<<<<<<< HEAD
 
 
 export default function GrabarSesion() {
@@ -220,6 +237,11 @@ export default function GrabarSesion() {
         animRef.current = requestAnimationFrame(dibujar);
         return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
     }, [stream]);
+=======
+export default function GrabarSesion() {
+    const { videoRef, stream, error, startCamera, stopCamera, isRecording, startRecording, stopRecording } = useCamera();
+    const { postura, contactoVisual, audioLevel, audioEstado } = useAnalysis(stream, !!stream);
+>>>>>>> origin/main
 
     const pc = postura ? posturaConfig[postura] : null;
     const cc = contactoVisual ? contactoConfig[contactoVisual] : null;
@@ -235,6 +257,10 @@ export default function GrabarSesion() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8 items-start">
 
+<<<<<<< HEAD
+=======
+                    {/* COLUMNA 1: INSTRUCCIONES */}
+>>>>>>> origin/main
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <h3 className="font-semibold text-slate-900 text-sm mb-4">Instrucciones</h3>
                         <div className="flex flex-col gap-4">
@@ -254,6 +280,10 @@ export default function GrabarSesion() {
                         </div>
                     </div>
 
+<<<<<<< HEAD
+=======
+                    {/* COLUMNA 2: VIDEO Y CONTROLES */}
+>>>>>>> origin/main
                     <div className="flex flex-col items-center">
                         {error && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
@@ -269,12 +299,15 @@ export default function GrabarSesion() {
                                 playsInline
                                 className={`w-full h-full object-cover ${stream ? 'block' : 'hidden'}`}
                             />
+<<<<<<< HEAD
                             {stream && (
                                 <canvas
                                     ref={canvasRef}
                                     className="absolute inset-0 w-full h-full pointer-events-none"
                                 />
                             )}
+=======
+>>>>>>> origin/main
 
                             {!stream && (
                                 <div className="text-center flex flex-col items-center gap-3">
@@ -293,6 +326,7 @@ export default function GrabarSesion() {
                                 </div>
                             )}
 
+<<<<<<< HEAD
                             {stream && framing && !framing.todoVisible && (
                                 <div className="absolute top-4 left-4 bg-amber-500/90 text-white px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm shadow-lg flex items-center gap-1.5">
                                     <AlertCircle size={12} />
@@ -302,6 +336,10 @@ export default function GrabarSesion() {
 
                             {stream && (
                                 <div className="absolute bottom-4 left-4 flex flex-col gap-1.5">
+=======
+                            {stream && (
+                                <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+>>>>>>> origin/main
                                     {pc && (
                                         <div
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
@@ -320,6 +358,7 @@ export default function GrabarSesion() {
                                             <span>Contacto Visual: <strong>{cc.label}</strong></span>
                                         </div>
                                     )}
+<<<<<<< HEAD
                                     {bodyMetrics?.gestoMano && (
                                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/20 text-white border border-white/30">
                                             <Hand size={13} />
@@ -332,6 +371,8 @@ export default function GrabarSesion() {
                                             <span>Brazos cruzados</span>
                                         </div>
                                     )}
+=======
+>>>>>>> origin/main
                                 </div>
                             )}
                         </div>
@@ -374,6 +415,10 @@ export default function GrabarSesion() {
                         )}
                     </div>
 
+<<<<<<< HEAD
+=======
+                    {/* COLUMNA 3: ANÁLISIS Y TIPS */}
+>>>>>>> origin/main
                     <div className="flex flex-col gap-5">
                         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                             <div className="flex items-center gap-2 mb-3 text-slate-700 font-semibold text-sm">
@@ -390,6 +435,10 @@ export default function GrabarSesion() {
                             </h3>
                             <div className="flex flex-col gap-6">
 
+<<<<<<< HEAD
+=======
+                                {/* Postura */}
+>>>>>>> origin/main
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Postura</span>
@@ -403,7 +452,11 @@ export default function GrabarSesion() {
                                     </div>
                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-700" style={{
+<<<<<<< HEAD
                                             width: postura === 'excelente' ? '95%' : postura === 'buena' ? '65%' : postura === 'mejorar' ? '25%' : postura === 'esperando' || postura === 'nodetect' ? '10%' : '0%',
+=======
+                                            width: postura === 'excelente' ? '95%' : postura === 'buena' ? '65%' : postura === 'mejorar' ? '25%' : '0%',
+>>>>>>> origin/main
                                             background: pc?.color ?? '#e2e8f0',
                                         }} />
                                     </div>
@@ -411,12 +464,19 @@ export default function GrabarSesion() {
                                         {postura === 'excelente' && 'Espalda recta y hombros relajados. ¡Perfecto!'}
                                         {postura === 'buena' && 'Postura aceptable, pequeños ajustes pueden mejorarla.'}
                                         {postura === 'mejorar' && 'Intenta erguir la espalda y elevar la cabeza.'}
+<<<<<<< HEAD
                                         {postura === 'esperando' && 'Esperando detección de tu cuerpo por la cámara...'}
                                         {postura === 'nodetect' && 'No se detecta tu cuerpo. Asegúrate de estar frente a la cámara con buena iluminación y tu torso visible.'}
+=======
+>>>>>>> origin/main
                                         {!postura && 'Activa la cámara para detectar tu postura.'}
                                     </p>
                                 </div>
 
+<<<<<<< HEAD
+=======
+                                {/* Audio */}
+>>>>>>> origin/main
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
@@ -441,6 +501,10 @@ export default function GrabarSesion() {
                                     </p>
                                 </div>
 
+<<<<<<< HEAD
+=======
+                                {/* Contacto Visual */}
+>>>>>>> origin/main
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
@@ -456,7 +520,11 @@ export default function GrabarSesion() {
                                     </div>
                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-700" style={{
+<<<<<<< HEAD
                                             width: contactoVisual === 'estable' ? '90%' : contactoVisual === 'intermitente' ? '50%' : contactoVisual === 'ausente' ? '10%' : contactoVisual === 'esperando' || contactoVisual === 'nodetect' ? '10%' : '0%',
+=======
+                                            width: contactoVisual === 'estable' ? '90%' : contactoVisual === 'intermitente' ? '50%' : contactoVisual === 'ausente' ? '10%' : '0%',
+>>>>>>> origin/main
                                             background: cc?.color ?? '#e2e8f0',
                                         }} />
                                     </div>
@@ -464,8 +532,11 @@ export default function GrabarSesion() {
                                         {contactoVisual === 'estable' && 'Excelente. Mantienes la mirada hacia la cámara.'}
                                         {contactoVisual === 'intermitente' && 'Intenta no desviar la mirada con tanta frecuencia.'}
                                         {contactoVisual === 'ausente' && 'Mira directamente al lente de la cámara.'}
+<<<<<<< HEAD
                                         {contactoVisual === 'esperando' && 'Esperando detección de tu mirada por la cámara...'}
                                         {contactoVisual === 'nodetect' && 'No se detecta tu rostro. Asegúrate de estar frente a la cámara.'}
+=======
+>>>>>>> origin/main
                                         {!contactoVisual && 'Activa la cámara para detectar el contacto visual.'}
                                     </p>
                                 </div>
@@ -478,4 +549,8 @@ export default function GrabarSesion() {
             </main>
         </div>
     );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main

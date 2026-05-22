@@ -17,17 +17,24 @@ export const useCamera = () => {
                 audio: true,
             });
             setStream(mediaStream);
+<<<<<<< HEAD
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
                 videoRef.current.play().catch(e => console.warn("Error al reproducir video:", e));
             }
+=======
+            if (videoRef.current) videoRef.current.srcObject = mediaStream;
+>>>>>>> origin/main
             setError(null);
             setVideoBlob(null);
         } catch (err) {
             setError(
                 "No se pudo acceder a la cámara o micrófono. Verifica los permisos.",
             );
+<<<<<<< HEAD
             console.error(err);
+=======
+>>>>>>> origin/main
         }
     }, []);
 
@@ -57,6 +64,7 @@ export const useCamera = () => {
             mr.ondataavailable = (e) => {
                 if (e.data.size > 0) chunksRef.current.push(e.data);
             };
+<<<<<<< HEAD
             mr.onstop = () => {
                 const blob = new Blob(chunksRef.current, {
                     type: "video/webm"
@@ -66,6 +74,10 @@ export const useCamera = () => {
 
                 setVideoBlob(blob);
             };
+=======
+            mr.onstop = () =>
+                setVideoBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+>>>>>>> origin/main
             mr.start();
         } catch (err) {
             console.error("Error al iniciar grabación:", err);
