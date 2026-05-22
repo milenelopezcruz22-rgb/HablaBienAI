@@ -171,8 +171,6 @@ export default function GrabarSesion() {
     }
 };
     
-   
-    
     const {
     videoRef,
     stream,
@@ -237,7 +235,6 @@ export default function GrabarSesion() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8 items-start">
 
-                    {/* COLUMNA 1: INSTRUCCIONES */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <h3 className="font-semibold text-slate-900 text-sm mb-4">Instrucciones</h3>
                         <div className="flex flex-col gap-4">
@@ -257,7 +254,6 @@ export default function GrabarSesion() {
                         </div>
                     </div>
 
-                    {/* COLUMNA 2: VIDEO Y CONTROLES */}
                     <div className="flex flex-col items-center">
                         {error && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
@@ -378,7 +374,6 @@ export default function GrabarSesion() {
                         )}
                     </div>
 
-                    {/* COLUMNA 3: ANÁLISIS Y TIPS */}
                     <div className="flex flex-col gap-5">
                         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                             <div className="flex items-center gap-2 mb-3 text-slate-700 font-semibold text-sm">
@@ -395,7 +390,6 @@ export default function GrabarSesion() {
                             </h3>
                             <div className="flex flex-col gap-6">
 
-                                {/* Postura */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Postura</span>
@@ -423,7 +417,6 @@ export default function GrabarSesion() {
                                     </p>
                                 </div>
 
-                                {/* Audio */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
@@ -448,7 +441,6 @@ export default function GrabarSesion() {
                                     </p>
                                 </div>
 
-                                {/* Contacto Visual */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
