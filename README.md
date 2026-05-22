@@ -21,7 +21,11 @@
 [![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
+<<<<<<< HEAD
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+=======
 [![Docker](https://img.shields.io/badge/Deploy-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com/)
+>>>>>>> origin/main
 
 <br/>
 
@@ -57,9 +61,15 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
+<<<<<<< HEAD
+| Muletillas | Postura | Groq (Llama 3) |
+| Velocidad de habla | Contacto visual | Análisis integrado |
+| Pausas largas | Brazos cruzados | Puntuación 0 – 100 |
+=======
 | Muletillas | Postura | Gemini 1.5 Flash |
 | Velocidad de habla | Movimiento de manos | Análisis integrado |
 | Pausas largas | Contacto visual | Puntuación 0 – 100 |
+>>>>>>> origin/main
 
 | 📊 Dashboard de resultados | 📈 Historial de progreso |
 |---------------------------|-------------------------|
@@ -90,6 +100,8 @@ habla-bien-ia/
 │       ├── services/               # M2 · Whisper  M3 · MediaPipe  M4 · Groq
 │       └── tests/                  # Tests unitarios e integración
 │
+<<<<<<< HEAD
+=======
 ├── 📁 docs/                        # Documentación técnica del proyecto
 │   ├── assets/                     # Imágenes para la documentación
 │   └── wireframes/                 # Bocetos de la interfaz
@@ -100,6 +112,7 @@ habla-bien-ia/
 │
 ├── 🐳 docker-compose.yml           # Levanta frontend + backend + DB
 ├── 📄 .gitignore                   # Archivos ignorados por Git
+>>>>>>> origin/main
 └── 📖 README.md                    # Este archivo
 ```
 
@@ -112,8 +125,12 @@ habla-bien-ia/
 |------------|-----|
 | **React 19** | Interfaz de usuario y gestión de estado |
 | **WebRTC** | Acceso a cámara y micrófono en tiempo real |
+<<<<<<< HEAD
+| **MediaPipe Pose** (vía CDN) | Análisis de postura, contacto visual y gestos en el navegador |
+=======
 | **MediaPipe Pose** | Análisis de postura y cuerpo completo en el navegador |
 | **MediaPipe Hands** | Detección de gestos y posición de manos |
+>>>>>>> origin/main
 | **Chart.js** | Gráficas de puntuación y progreso |
 
 ### Backend
@@ -129,8 +146,11 @@ habla-bien-ia/
 ### DevOps
 | Tecnología | Uso |
 |------------|-----|
+<<<<<<< HEAD
+=======
 | **Docker** | Contenedorización del backend |
 | **GitHub Actions** | CI/CD automatizado |
+>>>>>>> origin/main
 | **Railway** | Despliegue del backend en la nube |
 | **Vercel** | Despliegue del frontend |
 
@@ -172,17 +192,29 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | Módulo | Nombre | Tecnología | Estado |
 |--------|--------|------------|--------|
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
+<<<<<<< HEAD
+| **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | 🔄 **En desarrollo** |
+| **M3** | Análisis de lenguaje corporal | MediaPipe Pose (CDN) | ✅ **Completado** |
+| M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
+| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
+| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+=======
 | **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | ✅ **Completado** | |
 | **M3** | Análisis de lenguaje corporal | MediaPipe Pose + Hands | ✅ **Completado** |
 | **M4** | Módulo de fusión | Groq API (Llama 3) | 🔄 **En desarrollo**  | |
 | M5 | Evaluación y feedback | React · Chart.js | 🔄 **En desarrollo** |
 | M6 | Historial de progreso | PostgreSQL · SQLAlchemy | 🔄 **En desarrollo**  |
+>>>>>>> origin/main
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
 >
 > **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo procesa con **faster-whisper** (transcripción local, sin costos de API). Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia.
 >
+<<<<<<< HEAD
+> **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
+=======
 > **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** (33 landmarks) y **MediaPipe Hands** (21 landmarks por mano). Detecta postura (hombros, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), gestos de manos (abierta, puño, señalando), brazos cruzados, y valida el encuadre (rostro, hombros, brazos, manos visibles). Todo corre en el navegador del cliente.
+>>>>>>> origin/main
 >
 > **M4 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
@@ -193,6 +225,10 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 ### Prerrequisitos
 - Node.js 18+
 - Python 3.11+
+<<<<<<< HEAD
+- Git
+
+=======
 - Docker Desktop
 - Git
 
@@ -220,6 +256,7 @@ npm install react-router-dom lucide-react chart.js react-chartjs-2
 
 > ⚠️ **Importante:** `main.jsx` solo debe renderizar `<App />`. El `BrowserRouter`, `Navbar` y rutas ya están definidos dentro de `App.jsx`. No agregues `<Navbar />` ni páginas directamente en `main.jsx`.
 
+>>>>>>> origin/main
 ### 1. Clonar el repositorio
 ```bash
 git clone [URL-repositorio]
@@ -236,6 +273,20 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+<<<<<<< HEAD
+### 3. Instalar dependencias del frontend
+```bash
+cd frontend
+npm install
+```
+
+### 4. Levantar el frontend
+```bash
+npm run dev
+```
+
+La app estará disponible en `http://localhost:5173`
+=======
 ### 3. Levantar el frontend
 ```bash
 cd frontend
@@ -249,6 +300,7 @@ docker-compose up --build
 ```
 
 La app estará disponible en `http://localhost:3000`
+>>>>>>> origin/main
 La API en `http://localhost:8000/docs`
 
 ---
@@ -269,9 +321,14 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 | Dimensión | Qué mide |
 |-----------|----------|
 | 🎤 Voz | Muletillas/min · Velocidad · Pausas |
+<<<<<<< HEAD
+| 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto · Brazos cruzados |
+| 👀 Contacto visual | % de tiempo mirando a la cámara (ventana móvil ~1s) |
+=======
 | 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto |
 | 👀 Contacto visual | % de tiempo mirando a la cámara |
 | 🙌 Manos | Gestos (abierta/puño/señalando) · Brazos cruzados |
+>>>>>>> origin/main
 | ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq Llama 3) |
 
 ---
