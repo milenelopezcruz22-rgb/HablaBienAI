@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.speech_metrics_service import (
     calcular_score_voz,
     calcular_velocidad_habla,
+    detectar_pausas_largas,
     detectar_muletillas,
 )
 from app.services.transcription_service import transcribir_audio_detallado
@@ -25,6 +26,7 @@ async def analizar_audio(audio: UploadFile = File(...)):
         resultado_transcripcion = transcribir_audio_detallado(audio_bytes)
         transcripcion = resultado_transcripcion["transcripcion"]
         duracion_segundos = resultado_transcripcion["duracion_segundos"]
+        segmentos = resultado_transcripcion["segmentos"]
 
         # Detectar muletillas
         muletillas = detectar_muletillas(transcripcion)
@@ -34,6 +36,7 @@ async def analizar_audio(audio: UploadFile = File(...)):
         palabras = len(transcripcion.split())
 
         velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
+        pausas = detectar_pausas_largas(segmentos)
         score_voz = calcular_score_voz(transcripcion, muletillas)
 
         return {
@@ -44,7 +47,10 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "total_muletillas": total_muletillas,
             "duracion_segundos": velocidad["duracion_segundos"],
             "palabras_por_minuto": velocidad["palabras_por_minuto"],
-            "ritmo_habla": velocidad["ritmo_habla"]
+            "ritmo_habla": velocidad["ritmo_habla"],
+            "pausas_largas": pausas["pausas_largas"],
+            "total_pausas_largas": pausas["total_pausas_largas"],
+            "duracion_pausas_largas": pausas["duracion_pausas_largas"]
         }
 
     except Exception as e:

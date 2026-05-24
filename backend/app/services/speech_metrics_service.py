@@ -116,3 +116,34 @@ def calcular_velocidad_habla(transcripcion: str, duracion_segundos: float) -> di
         "palabras_por_minuto": palabras_por_minuto,
         "ritmo_habla": ritmo
     }
+
+
+def detectar_pausas_largas(segmentos: list, umbral_segundos: float = 2.0) -> dict:
+    """
+    Detecta pausas largas entre segmentos consecutivos de la transcripcion.
+    """
+    pausas = []
+    segmentos_ordenados = sorted(
+        segmentos or [],
+        key=lambda segmento: float(segmento.get("inicio", 0))
+    )
+
+    for anterior, actual in zip(segmentos_ordenados, segmentos_ordenados[1:]):
+        fin_anterior = float(anterior.get("fin", 0))
+        inicio_actual = float(actual.get("inicio", 0))
+        duracion = inicio_actual - fin_anterior
+
+        if duracion >= umbral_segundos:
+            pausas.append({
+                "inicio": round(fin_anterior, 2),
+                "fin": round(inicio_actual, 2),
+                "duracion": round(duracion, 2)
+            })
+
+    duracion_total = sum(pausa["duracion"] for pausa in pausas)
+
+    return {
+        "pausas_largas": pausas,
+        "total_pausas_largas": len(pausas),
+        "duracion_pausas_largas": round(duracion_total, 2)
+    }
