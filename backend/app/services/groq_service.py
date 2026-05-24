@@ -1,14 +1,22 @@
 import json
 import os
 
-from dotenv import load_dotenv
-from groq import Groq
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv():
+        return None
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 
 
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY and Groq else None
 
 
 def _feedback_local(metricas: dict | None = None) -> dict:

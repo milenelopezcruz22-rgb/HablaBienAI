@@ -5,9 +5,13 @@ from threading import Lock
 
 _whisper_model = None
 _whisper_model_lock = Lock()
+WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
 TRANSCRIPCION_LITERAL_PROMPT = (
     "Transcribe literalmente en espanol. Incluye muletillas, repeticiones "
-    "y sonidos de duda como mmm, ehh, eee, este, bueno, o sea."
+    "y sonidos de duda como mmm, mmmm, umm, ummm, ehh, eee, este, bueno, o sea."
+)
+TRANSCRIPCION_HOTWORDS = (
+    "mmm mmmm mmmmm umm ummm ummmm emmm ammm ehh ehhh eee este bueno o sea"
 )
 
 
@@ -28,7 +32,7 @@ def _get_whisper_model():
                 "faster-whisper no esta instalado. Ejecuta: pip install faster-whisper==1.1.0"
             )
 
-        _whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        _whisper_model = WhisperModel(WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
         return _whisper_model
 
 
@@ -40,6 +44,10 @@ def _transcribir_archivo(temp_path: str) -> dict:
         word_timestamps=True,
         initial_prompt=TRANSCRIPCION_LITERAL_PROMPT,
         condition_on_previous_text=False,
+        hotwords=TRANSCRIPCION_HOTWORDS,
+        suppress_blank=False,
+        suppress_tokens=[],
+        no_speech_threshold=0.8,
     )
 
     segmentos = []
