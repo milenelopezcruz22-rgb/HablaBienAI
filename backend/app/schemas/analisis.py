@@ -16,6 +16,9 @@ class AnalisisResponse(BaseModel):
     duracion_pausas_largas: float = 0
     fuente_pausas: str = "segmentos"
     umbral_pausa_segundos: float = 1.5
+    feedback: str = ""
+    recomendaciones: List[str] = Field(default_factory=list)
+    fuente_feedback: str = "local"
 
 class AnalisisCompletoResponse(BaseModel):
     transcripcion: str
@@ -32,5 +35,6 @@ class AnalisisCompletoResponse(BaseModel):
     duracion_pausas_largas: float = 0
     fuente_pausas: str = "segmentos"
     umbral_pausa_segundos: float = 1.5
-    feedback: str
-    recomendaciones: List[str]
+    feedback: str = ""
+    recomendaciones: List[str] = Field(default_factory=list)
+    fuente_feedback: str = "local"

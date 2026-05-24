@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.services.groq_service import analizar_con_groq
 from app.services.speech_metrics_service import (
     calcular_score_voz,
     calcular_velocidad_habla,
@@ -39,6 +40,20 @@ async def analizar_audio(audio: UploadFile = File(...)):
         velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
         pausas = detectar_pausas_largas(segmentos, palabras_transcritas)
         score = calcular_score_voz(transcripcion, muletillas, velocidad, pausas)
+        metricas_voz = {
+            "score_voz": score["score_voz"],
+            "detalle_score_voz": score["detalle_score_voz"],
+            "total_palabras": palabras,
+            "muletillas": muletillas,
+            "total_muletillas": total_muletillas,
+            "duracion_segundos": velocidad["duracion_segundos"],
+            "palabras_por_minuto": velocidad["palabras_por_minuto"],
+            "ritmo_habla": velocidad["ritmo_habla"],
+            "pausas_largas": pausas["pausas_largas"],
+            "total_pausas_largas": pausas["total_pausas_largas"],
+            "duracion_pausas_largas": pausas["duracion_pausas_largas"],
+        }
+        feedback_ia = analizar_con_groq(transcripcion, metricas_voz)
 
         return {
             "transcripcion": transcripcion,
@@ -54,7 +69,10 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "total_pausas_largas": pausas["total_pausas_largas"],
             "duracion_pausas_largas": pausas["duracion_pausas_largas"],
             "fuente_pausas": pausas["fuente_pausas"],
-            "umbral_pausa_segundos": pausas["umbral_pausa_segundos"]
+            "umbral_pausa_segundos": pausas["umbral_pausa_segundos"],
+            "feedback": feedback_ia["feedback"],
+            "recomendaciones": feedback_ia["recomendaciones"],
+            "fuente_feedback": feedback_ia["fuente_feedback"]
         }
 
     except Exception as e:

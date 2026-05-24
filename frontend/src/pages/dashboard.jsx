@@ -3,7 +3,8 @@ import {
   Volume2,
   AlertTriangle,
   ArrowLeft,
-  RotateCcw
+  RotateCcw,
+  Lightbulb
 } from 'lucide-react'
 
 import Card from '../components/Card'
@@ -214,6 +215,42 @@ function Dashboard() {
           </Card>
 
         </div>
+
+        {(voz?.feedback || voz?.recomendaciones?.length > 0) && (
+          <Card title="Feedback IA">
+            <div className="flex flex-col gap-4">
+              {voz?.feedback && (
+                <div className="p-4 bg-blue-50 rounded-md border-l-4 border-blue-500">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {voz.feedback}
+                  </p>
+                  {voz?.fuente_feedback && (
+                    <p className="text-xs text-gray-400 mt-3">
+                      Fuente: {voz.fuente_feedback}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {voz?.recomendaciones?.length > 0 && (
+                <ul className="flex flex-col gap-3">
+                  {voz.recomendaciones.map((recomendacion, index) => (
+                    <li
+                      key={index}
+                      className="flex gap-3 text-sm text-gray-700"
+                    >
+                      <Lightbulb
+                        size={16}
+                        className="text-yellow-500 mt-0.5 flex-shrink-0"
+                      />
+                      <span>{recomendacion}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </Card>
+        )}
 
       </div>
 
