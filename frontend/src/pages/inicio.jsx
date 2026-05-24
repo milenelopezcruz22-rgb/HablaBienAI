@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-import React from "react";
->>>>>>> origin/main
 import { PlayIcon } from "../icons";
 import Cards from "../components/cards";
 import { Link } from "react-router-dom";
