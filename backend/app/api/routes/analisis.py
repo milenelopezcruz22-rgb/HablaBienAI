@@ -37,12 +37,13 @@ async def analizar_audio(audio: UploadFile = File(...)):
 
         velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
         pausas = detectar_pausas_largas(segmentos)
-        score_voz = calcular_score_voz(transcripcion, muletillas)
+        score = calcular_score_voz(transcripcion, muletillas, velocidad, pausas)
 
         return {
             "transcripcion": transcripcion,
             "muletillas": muletillas,
-            "score_voz": score_voz,
+            "score_voz": score["score_voz"],
+            "detalle_score_voz": score["detalle_score_voz"],
             "total_palabras": palabras,
             "total_muletillas": total_muletillas,
             "duracion_segundos": velocidad["duracion_segundos"],

@@ -83,12 +83,86 @@ def detectar_muletillas(transcripcion: str) -> dict:
     return muletillas_count
 
 
-def calcular_score_voz(transcripcion: str, muletillas: dict) -> float:
+PESOS_SCORE_VOZ = {
+    "muletillas": 0.45,
+    "velocidad": 0.35,
+    "pausas": 0.20,
+}
+
+
+def _limitar_score(score: float) -> float:
+    return round(max(0, min(100, score)), 1)
+
+
+def calcular_score_muletillas(transcripcion: str, muletillas: dict) -> float:
     total_muletillas = sum(muletillas.values())
     total_palabras = len(transcripcion.split())
+    muletillas_por_100 = (total_muletillas / max(total_palabras, 1)) * 100
 
-    score = 100 - (total_muletillas / max(total_palabras, 1)) * 100
-    return round(max(0, min(100, score)), 1)
+    return _limitar_score(100 - (muletillas_por_100 * 10))
+
+
+def calcular_score_velocidad(velocidad: dict | None) -> float:
+    palabras_por_minuto = float((velocidad or {}).get("palabras_por_minuto", 0))
+
+    if palabras_por_minuto == 0:
+        return 70.0
+
+    if 110 <= palabras_por_minuto <= 170:
+        return 100.0
+
+    if palabras_por_minuto < 110:
+        distancia = 110 - palabras_por_minuto
+        return _limitar_score(100 - (distancia * 1.1))
+
+    distancia = palabras_por_minuto - 170
+    return _limitar_score(100 - (distancia * 1.2))
+
+
+def calcular_score_pausas(pausas: dict | None) -> float:
+    total_pausas = int((pausas or {}).get("total_pausas_largas", 0))
+    duracion_pausas = float((pausas or {}).get("duracion_pausas_largas", 0))
+    penalizacion = (total_pausas * 12) + (duracion_pausas * 3)
+
+    return _limitar_score(100 - penalizacion)
+
+
+def calcular_score_voz(
+    transcripcion: str,
+    muletillas: dict,
+    velocidad: dict | None = None,
+    pausas: dict | None = None,
+) -> dict:
+    if len(transcripcion.split()) == 0:
+        return {
+            "score_voz": 0.0,
+            "detalle_score_voz": {
+                "muletillas": 0.0,
+                "velocidad": 0.0,
+                "pausas": 0.0,
+                "pesos": PESOS_SCORE_VOZ
+            }
+        }
+
+    score_muletillas = calcular_score_muletillas(transcripcion, muletillas)
+    score_velocidad = calcular_score_velocidad(velocidad)
+    score_pausas = calcular_score_pausas(pausas)
+
+    score = (
+        score_muletillas * PESOS_SCORE_VOZ["muletillas"]
+        + score_velocidad * PESOS_SCORE_VOZ["velocidad"]
+        + score_pausas * PESOS_SCORE_VOZ["pausas"]
+    )
+
+    return {
+        "score_voz": _limitar_score(score),
+        "detalle_score_voz": {
+            "muletillas": score_muletillas,
+            "velocidad": score_velocidad,
+            "pausas": score_pausas,
+            "pesos": PESOS_SCORE_VOZ
+        }
+    }
 
 
 def calcular_velocidad_habla(transcripcion: str, duracion_segundos: float) -> dict:

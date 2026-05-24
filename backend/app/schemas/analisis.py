@@ -5,6 +5,7 @@ class AnalisisResponse(BaseModel):
     transcripcion: str
     muletillas: Dict[str, int]
     score_voz: float
+    detalle_score_voz: Dict = Field(default_factory=dict)
     total_palabras: int
     total_muletillas: int
     duracion_segundos: float = 0
@@ -18,6 +19,7 @@ class AnalisisCompletoResponse(BaseModel):
     transcripcion: str
     muletillas: Dict[str, int]
     score_voz: float
+    detalle_score_voz: Dict = Field(default_factory=dict)
     total_palabras: int
     total_muletillas: int
     duracion_segundos: float = 0
