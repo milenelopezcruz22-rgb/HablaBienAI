@@ -1,6 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.services.speech_metrics_service import calcular_score_voz, detectar_muletillas
-from app.services.transcription_service import transcribir_audio
+from app.services.speech_metrics_service import (
+    calcular_score_voz,
+    calcular_velocidad_habla,
+    detectar_muletillas,
+)
+from app.services.transcription_service import transcribir_audio_detallado
 
 router = APIRouter()
 
@@ -18,7 +22,9 @@ async def analizar_audio(audio: UploadFile = File(...)):
         audio_bytes = await audio.read()
 
         # Transcribir con Faster-Whisper
-        transcripcion = transcribir_audio(audio_bytes)
+        resultado_transcripcion = transcribir_audio_detallado(audio_bytes)
+        transcripcion = resultado_transcripcion["transcripcion"]
+        duracion_segundos = resultado_transcripcion["duracion_segundos"]
 
         # Detectar muletillas
         muletillas = detectar_muletillas(transcripcion)
@@ -27,6 +33,7 @@ async def analizar_audio(audio: UploadFile = File(...)):
         total_muletillas = sum(muletillas.values())
         palabras = len(transcripcion.split())
 
+        velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
         score_voz = calcular_score_voz(transcripcion, muletillas)
 
         return {
@@ -34,7 +41,10 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "muletillas": muletillas,
             "score_voz": score_voz,
             "total_palabras": palabras,
-            "total_muletillas": total_muletillas
+            "total_muletillas": total_muletillas,
+            "duracion_segundos": velocidad["duracion_segundos"],
+            "palabras_por_minuto": velocidad["palabras_por_minuto"],
+            "ritmo_habla": velocidad["ritmo_habla"]
         }
 
     except Exception as e:

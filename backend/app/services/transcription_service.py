@@ -28,20 +28,56 @@ def _get_whisper_model():
         return _whisper_model
 
 
-def transcribir_audio(audio_bytes: bytes) -> str:
+def _transcribir_archivo(temp_path: str) -> dict:
+    model = _get_whisper_model()
+    segments, info = model.transcribe(temp_path, language="es")
+
+    segmentos = []
+    textos = []
+
+    for segment in segments:
+        texto = segment.text.strip()
+        if not texto:
+            continue
+
+        segmentos.append({
+            "inicio": round(float(segment.start), 2),
+            "fin": round(float(segment.end), 2),
+            "texto": texto
+        })
+        textos.append(texto)
+
+    transcripcion = " ".join(textos).strip()
+    duracion = max([segmento["fin"] for segmento in segmentos], default=0)
+
+    if not duracion and getattr(info, "duration", None):
+        duracion = float(info.duration)
+
+    return {
+        "transcripcion": transcripcion,
+        "segmentos": segmentos,
+        "duracion_segundos": round(duracion, 2)
+    }
+
+
+def transcribir_audio_detallado(audio_bytes: bytes) -> dict:
     """
-    Transcribe audio usando Faster-Whisper local.
+    Transcribe audio y devuelve texto, segmentos y duracion estimada.
     """
     with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as f:
         f.write(audio_bytes)
         temp_path = f.name
 
     try:
-        model = _get_whisper_model()
-        segments, _ = model.transcribe(temp_path, language="es")
-        transcripcion = " ".join([segment.text for segment in segments])
-        return transcripcion.strip()
+        return _transcribir_archivo(temp_path)
     except Exception as e:
         raise Exception(f"Error en transcripcion: {str(e)}")
     finally:
         os.unlink(temp_path)
+
+
+def transcribir_audio(audio_bytes: bytes) -> str:
+    """
+    Transcribe audio usando Faster-Whisper local.
+    """
+    return transcribir_audio_detallado(audio_bytes)["transcripcion"]

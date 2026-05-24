@@ -22,8 +22,6 @@
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
 [![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-
 
 <br/>
 
@@ -59,9 +57,6 @@ El estudiante activa su cámara o sube un video. La IA analiza **tres capas simu
 
 | 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
 |--------|-----------|-------------|
-| Muletillas | Postura | Groq (Llama 3) |
-| Velocidad de habla | Contacto visual | Análisis integrado |
-| Pausas largas | Brazos cruzados | Puntuación 0 – 100 |
 | Muletillas | Postura | Groq (Llama 3) |
 | Velocidad de habla | Contacto visual | Análisis integrado |
 | Pausas largas | Brazos cruzados | Puntuación 0 – 100 |
@@ -107,7 +102,6 @@ habla-bien-ia/
 |------------|-----|
 | **React 19** | Interfaz de usuario y gestión de estado |
 | **WebRTC** | Acceso a cámara y micrófono en tiempo real |
-| **MediaPipe Pose** (vía CDN) | Análisis de postura, contacto visual y gestos en el navegador |
 | **MediaPipe Pose** (vía CDN) | Análisis de postura, contacto visual y gestos en el navegador |
 | **Chart.js** | Gráficas de puntuación y progreso |
 
@@ -176,7 +170,6 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 > **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo procesa con **faster-whisper** (transcripción local, sin costos de API). Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia.
 >
 > **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
-> **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
 >
 > **M4 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
@@ -187,8 +180,6 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 ### Prerrequisitos
 - Node.js 18+
 - Python 3.11+
-- Git
-
 - Git
 
 ### 1. Clonar el repositorio
@@ -219,7 +210,6 @@ npm run dev
 ```
 
 La app estará disponible en `http://localhost:5173`
-
 La API en `http://localhost:8000/docs`
 
 ---
@@ -240,8 +230,6 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 | Dimensión | Qué mide |
 |-----------|----------|
 | 🎤 Voz | Muletillas/min · Velocidad · Pausas |
-| 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto · Brazos cruzados |
-| 👀 Contacto visual | % de tiempo mirando a la cámara (ventana móvil ~1s) |
 | 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto · Brazos cruzados |
 | 👀 Contacto visual | % de tiempo mirando a la cámara (ventana móvil ~1s) |
 | ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq Llama 3) |

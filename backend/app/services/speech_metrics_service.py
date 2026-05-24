@@ -89,3 +89,30 @@ def calcular_score_voz(transcripcion: str, muletillas: dict) -> float:
 
     score = 100 - (total_muletillas / max(total_palabras, 1)) * 100
     return round(max(0, min(100, score)), 1)
+
+
+def calcular_velocidad_habla(transcripcion: str, duracion_segundos: float) -> dict:
+    total_palabras = len(transcripcion.split())
+    duracion_segundos = max(float(duracion_segundos or 0), 0)
+
+    if total_palabras == 0 or duracion_segundos == 0:
+        palabras_por_minuto = 0
+    else:
+        palabras_por_minuto = total_palabras / (duracion_segundos / 60)
+
+    palabras_por_minuto = round(palabras_por_minuto, 1)
+
+    if palabras_por_minuto == 0:
+        ritmo = "sin_datos"
+    elif palabras_por_minuto < 110:
+        ritmo = "lento"
+    elif palabras_por_minuto <= 170:
+        ritmo = "adecuado"
+    else:
+        ritmo = "rapido"
+
+    return {
+        "duracion_segundos": round(duracion_segundos, 2),
+        "palabras_por_minuto": palabras_por_minuto,
+        "ritmo_habla": ritmo
+    }
