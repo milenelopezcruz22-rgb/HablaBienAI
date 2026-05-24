@@ -159,7 +159,7 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | Módulo | Nombre | Tecnología | Estado |
 |--------|--------|------------|--------|
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
-| **M2** | Análisis de voz *(base)* | Python · FastAPI · faster-whisper | 🔄 **En desarrollo** |
+| **M2** | Análisis de voz | Python · FastAPI · faster-whisper · Groq | 🔄 **En desarrollo** |
 | **M3** | Análisis de lenguaje corporal | MediaPipe Pose (CDN) | ✅ **Completado** |
 | M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
 | M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
@@ -167,7 +167,7 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
 >
-> **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo procesa con **faster-whisper** (transcripción local, sin costos de API). Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia.
+> **M2:** Endpoint en FastAPI que recibe audio/video y lo procesa con **faster-whisper** para obtener transcripción, duración y marcas de tiempo. Calcula muletillas normalizadas y contextuales ("mmm", "ummm", "ehhh", "este,", "bueno,", "como diría"), velocidad de habla en palabras por minuto, ritmo (`lento`, `adecuado`, `rápido`), pausas largas, score de voz ponderado y feedback/recomendaciones con Groq o fallback local.
 >
 > **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
 >
@@ -217,7 +217,7 @@ La API en `http://localhost:8000/docs`
 ## 📡 Endpoints principales de la API
 
 ```
-POST   /api/v1/analizar          →  Recibe audio/video y devuelve análisis completo
+POST   /api/v1/analizar          →  Recibe audio/video y devuelve transcripción, métricas de voz, score y feedback
 GET    /api/v1/historial/{id}    →  Historial de sesiones de un estudiante
 GET    /api/v1/sesion/{id}       →  Detalle de una sesión específica
 DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
@@ -229,7 +229,7 @@ DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 
 | Dimensión | Qué mide |
 |-----------|----------|
-| 🎤 Voz | Muletillas/min · Velocidad · Pausas |
+| 🎤 Voz | Muletillas normalizadas · Palabras/min · Ritmo · Pausas largas · Score ponderado · Feedback |
 | 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto · Brazos cruzados |
 | 👀 Contacto visual | % de tiempo mirando a la cámara (ventana móvil ~1s) |
 | ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq Llama 3) |
