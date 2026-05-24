@@ -1,42 +1,74 @@
-// src/hooks/useAnalysis.js
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useBodyAnalysis } from "./useBodyAnalysis";
 
-export const useAnalysis = (stream, isActive) => {
-    const [postura, setPostura] = useState(null);
-    const [contactoVisual, setContactoVisual] = useState(null);
+function getPosturaLabel(score) {
+    if (score >= 80) return "excelente";
+    if (score >= 50) return "buena";
+    return "mejorar";
+}
+
+function getContactoLabel(pct) {
+    if (pct >= 70) return "estable";
+    if (pct >= 40) return "intermitente";
+    return "ausente";
+}
+
+export const useAnalysis = (stream, isActive, videoRef) => {
     const [audioLevel, setAudioLevel] = useState(0);
     const [audioEstado, setAudioEstado] = useState(null);
+    const [noDetectTimeout, setNoDetectTimeout] = useState(false);
 
-    const audioContextRef = useRef(null);
+    const ctxRef = useRef(null);
     const analyserRef = useRef(null);
-    const animFrameRef = useRef(null);
-    const posturaIntervalRef = useRef(null);
-    const contactoIntervalRef = useRef(null);
-    const isActiveRef = useRef(isActive);
+    const tickRef = useRef(null);
 
-    // Mantener ref actualizado para usar en callbacks
+    const { metrics, isReady, framing, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useBodyAnalysis(videoRef, stream);
+
     useEffect(() => {
-        isActiveRef.current = isActive;
-    }, [isActive]);
+        if (!isReady || !stream || !isActive) {
+            setNoDetectTimeout(false);
+            return;
+        }
+        if (metrics.frames > 0) {
+            setNoDetectTimeout(false);
+            return;
+        }
+        const t = setTimeout(() => setNoDetectTimeout(true), 8000);
+        return () => clearTimeout(t);
+    }, [isReady, stream, isActive, metrics.frames]);
 
-    // --- Audio Analysis ---
+    const postura = useMemo(() => {
+        if (!stream || !isActive) return null;
+        if (!isReady) return "esperando";
+        if (!metrics.frames) {
+            if (noDetectTimeout) return "nodetect";
+            return "esperando";
+        }
+        return getPosturaLabel(metrics.posturaScore);
+    }, [metrics.posturaScore, metrics.frames, isReady, stream, isActive, noDetectTimeout]);
+
+    const contactoVisual = useMemo(() => {
+        if (!stream || !isActive) return null;
+        if (!isReady) return "esperando";
+        if (!metrics.frames) {
+            if (noDetectTimeout) return "nodetect";
+            return "esperando";
+        }
+        return getContactoLabel(metrics.contactoVisual);
+    }, [metrics.contactoVisual, metrics.frames, isReady, stream, isActive, noDetectTimeout]);
+
     const startAudio = useCallback((mediaStream) => {
         try {
-            if (!mediaStream || !window.AudioContext) {
-                console.warn("AudioContext no disponible o stream inválido");
-                return;
-            }
+            if (!mediaStream || !window.AudioContext) return;
             const hasAudioTrack = mediaStream.getAudioTracks().length > 0;
-            if (!hasAudioTrack) {
-                console.warn("El stream no tiene track de audio");
-                return;
-            }
+            if (!hasAudioTrack) return;
+
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const analyser = ctx.createAnalyser();
             analyser.fftSize = 256;
             const source = ctx.createMediaStreamSource(mediaStream);
             source.connect(analyser);
-            audioContextRef.current = ctx;
+            ctxRef.current = ctx;
             analyserRef.current = analyser;
 
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -50,9 +82,9 @@ export const useAnalysis = (stream, isActive) => {
                     if (level < 10) setAudioEstado("bajo");
                     else if (level > 75) setAudioEstado("alto");
                     else setAudioEstado("optimo");
-                    animFrameRef.current = requestAnimationFrame(tick);
-                } catch (innerErr) {
-                    console.warn("Error en análisis de audio:", innerErr);
+                    tickRef.current = requestAnimationFrame(tick);
+                } catch (e) {
+                    console.warn("Audio error:", e);
                 }
             };
             tick();
@@ -62,67 +94,24 @@ export const useAnalysis = (stream, isActive) => {
     }, []);
 
     const stopAudio = useCallback(() => {
-        if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-        if (audioContextRef.current) {
-            audioContextRef.current.close();
-            audioContextRef.current = null;
+        if (tickRef.current) cancelAnimationFrame(tickRef.current);
+        if (ctxRef.current) {
+            ctxRef.current.close();
+            ctxRef.current = null;
         }
-        setAudioLevel(0);
-        setAudioEstado(null);
+        tickRef.current = null;
     }, []);
 
-    // Cleanup en desmontaje
-    useEffect(() => {
-        return () => {
-            stopAudio();
-            clearInterval(posturaIntervalRef.current);
-            clearInterval(contactoIntervalRef.current);
-        };
-    }, [stopAudio]);
-
-    // Control de simulación basado en isActive
-    useEffect(() => {
-        if (!isActive) {
-            setPostura(null);
-            setContactoVisual(null);
-            clearInterval(posturaIntervalRef.current);
-            clearInterval(contactoIntervalRef.current);
-            return;
-        }
-
-        // Iniciar simulación
-        setPostura("buena");
-        setContactoVisual("estable");
-
-        posturaIntervalRef.current = setInterval(() => {
-            const weights = [0.6, 0.3, 0.1];
-            const r = Math.random();
-            if (r < weights[0]) setPostura("excelente");
-            else if (r < weights[0] + weights[1]) setPostura("buena");
-            else setPostura("mejorar");
-        }, 3000);
-
-        contactoIntervalRef.current = setInterval(() => {
-            const r = Math.random();
-            if (r < 0.65) setContactoVisual("estable");
-            else if (r < 0.9) setContactoVisual("intermitente");
-            else setContactoVisual("ausente");
-        }, 2500);
-
-        return () => {
-            clearInterval(posturaIntervalRef.current);
-            clearInterval(contactoIntervalRef.current);
-        };
-    }, [isActive]);
-
-    // Control de audio basado en stream
     useEffect(() => {
         if (stream && isActive) {
             startAudio(stream);
-        } else {
-            stopAudio();
         }
+        return () => {
+            stopAudio();
+            setAudioLevel(0);
+            setAudioEstado(null);
+        };
     }, [stream, isActive, startAudio, stopAudio]);
 
-    return { postura, contactoVisual, audioLevel, audioEstado };
+    return { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics: metrics, latestPoseRef, latestFaceRef, faceMeshReadyRef };
 };

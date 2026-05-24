@@ -1,22 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
-import { analizarAudio } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
-    CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Loader2
+    CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
 } from 'lucide-react';
 
 const posturaConfig = {
     excelente: { label: 'Excelente', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', icon: <CheckCircle size={13} /> },
     buena: { label: 'Buena', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: <CheckCircle size={13} /> },
     mejorar: { label: 'Mejorar', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', icon: <AlertCircle size={13} /> },
+    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: <Activity size={13} /> },
+    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)', icon: <CameraOff size={13} /> },
 };
 
 const contactoConfig = {
     estable: { label: 'Estable', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
     intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
     ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
+    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
+    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)' },
 };
 
 const audioConfig = {
@@ -24,6 +28,87 @@ const audioConfig = {
     bajo: { label: 'Bajo', barColor: '#f59e0b' },
     alto: { label: 'Alto', barColor: '#ef4444' },
 };
+
+const POSE_CONNECTIONS = [
+    [11, 12], [11, 13], [12, 14], [13, 15], [14, 16],
+    [11, 23], [12, 24], [23, 24],
+    [0, 11], [0, 12], [7, 11], [8, 12],
+    [0, 1], [0, 2], [0, 4], [0, 5],
+    [1, 2], [1, 3], [2, 3], [3, 7],
+    [4, 5], [4, 6], [5, 6], [6, 8],
+    [9, 10],
+];
+
+function dibujarEsqueleto(ctx, pts, w, h) {
+    if (!pts) return;
+    ctx.strokeStyle = 'rgba(0, 200, 255, 0.6)';
+    ctx.lineWidth = 2;
+    for (const [i, j] of POSE_CONNECTIONS) {
+        const a = pts[i], b = pts[j];
+        if (a && b && a.visibility > 0.3 && b.visibility > 0.3) {
+            ctx.beginPath();
+            ctx.moveTo(a.x * w, a.y * h);
+            ctx.lineTo(b.x * w, b.y * h);
+            ctx.stroke();
+        }
+    }
+    ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+    for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        if (p && p.visibility > 0.3) {
+            ctx.beginPath();
+            ctx.arc(p.x * w, p.y * h, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+const FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10];
+const LEFT_EYE = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
+const RIGHT_EYE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398];
+
+function dibujarFaceMesh(ctx, face, w, h) {
+    if (!face || face.length < 468) return;
+    ctx.strokeStyle = 'rgba(255, 180, 50, 0.5)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < FACE_OVAL.length - 1; i++) {
+        const a = face[FACE_OVAL[i]], b = face[FACE_OVAL[i + 1]];
+        if (a && b) {
+            ctx.beginPath();
+            ctx.moveTo(a.x * w, a.y * h);
+            ctx.lineTo(b.x * w, b.y * h);
+            ctx.stroke();
+        }
+    }
+    ctx.strokeStyle = 'rgba(100, 220, 100, 0.6)';
+    ctx.lineWidth = 1.5;
+    for (const eye of [LEFT_EYE, RIGHT_EYE]) {
+        for (let i = 0; i < eye.length - 1; i++) {
+            const a = face[eye[i]], b = face[eye[i + 1]];
+            if (a && b) {
+                ctx.beginPath();
+                ctx.moveTo(a.x * w, a.y * h);
+                ctx.lineTo(b.x * w, b.y * h);
+                ctx.stroke();
+            }
+        }
+    }
+    if (face.length >= 474) {
+        const li = face[468], ri = face[473];
+        if (li && li.x > 0) {
+            ctx.beginPath();
+            ctx.arc(li.x * w, li.y * h, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff88';
+            ctx.fill();
+        }
+        if (ri && ri.x > 0) {
+            ctx.beginPath();
+            ctx.arc(ri.x * w, ri.y * h, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff88';
+            ctx.fill();
+        }
+    }
+}
 
 const tips = [
     'Mantén tus manos visibles para transmitir confianza y transparencia a tu audiencia.',
@@ -34,33 +119,109 @@ const tips = [
 ];
 const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
+
+
 export default function GrabarSesion() {
-    const { videoRef, stream, error, startCamera, stopCamera, isRecording, startRecording, stopRecording, videoBlob } = useCamera();
-    const { postura, contactoVisual, audioLevel, audioEstado } = useAnalysis(stream, !!stream);
+    const navigate = useNavigate();
 
-    const [analisis, setAnalisis] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [errorAnalisis, setErrorAnalisis] = useState(null);
+    const [analysisResult, setAnalysisResult] = useState(null);
 
-    const analizarAudioBlob = useCallback(async (blob) => {
-        setLoading(true);
-        setErrorAnalisis(null);
-        try {
-            const resultado = await analizarAudio(blob);
-            setAnalisis(resultado);
-        } catch (err) {
-            setErrorAnalisis(err.message);
-        } finally {
-            setLoading(false);
+    const enviarAnalisis = async (blob) => {
+    try {
+        const formData = new FormData();
+
+        formData.append(
+            "audio",
+            blob,
+            "grabacion.webm"
+        );
+
+        const response = await fetch(
+            "http://localhost:8000/api/v1/analizar",
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Error al analizar el video");
         }
-    }, []);
 
-    // Analizar audio cuando hay un video grabado
+        const data = await response.json();
+
+        console.log("RESULTADO IA:", data);
+        console.log("BODY METRICS:", bodyMetrics);
+
+        const resultadoCompleto = {
+            voz: data,
+            corporal: bodyMetrics
+        };
+
+        localStorage.setItem(
+            "analysisResult",
+            JSON.stringify(resultadoCompleto)
+        );
+
+        // navegar al dashboard
+        navigate("/dashboard");
+
+    } catch (error) {
+        console.error("Error enviando análisis:", error);
+    }
+};
+    
+   
+    
+    const {
+    videoRef,
+    stream,
+    error,
+    startCamera,
+    stopCamera,
+    isRecording,
+    videoBlob,
+    startRecording,
+    stopRecording
+} = useCamera();
+    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
+    const canvasRef = useRef(null);
+
     useEffect(() => {
-        if (videoBlob && !isRecording) {
-            analizarAudioBlob(videoBlob);
-        }
-    }, [videoBlob, isRecording, analizarAudioBlob]);
+    if (videoBlob) {
+        enviarAnalisis(videoBlob);
+    }
+    }, [videoBlob]);
+
+    const animRef = useRef(null);
+    const cvRef = useRef(contactoVisual);
+    useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || !stream) return;
+        const dibujar = () => {
+            const video = videoRef.current;
+            if (!video || !canvas) { animRef.current = requestAnimationFrame(dibujar); return; }
+            const w = canvas.width = video.clientWidth;
+            const h = canvas.height = video.clientHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, w, h);
+            if (latestPoseRef.current) {
+                dibujarEsqueleto(ctx, latestPoseRef.current, w, h);
+            }
+            if (faceMeshReadyRef.current && latestFaceRef.current) {
+                dibujarFaceMesh(ctx, latestFaceRef.current, w, h);
+            }
+            const modo = faceMeshReadyRef.current ? 'FaceMesh' : 'Cabeza';
+            ctx.fillStyle = faceMeshReadyRef.current ? 'rgba(0,255,100,0.8)' : 'rgba(255,200,0,0.8)';
+            ctx.font = 'bold 13px monospace';
+            ctx.fillText(`Modo: ${modo} | Contacto: ${cvRef.current || 'N/A'}`, 10, 20);
+            animRef.current = requestAnimationFrame(dibujar);
+        };
+        animRef.current = requestAnimationFrame(dibujar);
+        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+    }, [stream]);
 
     const pc = postura ? posturaConfig[postura] : null;
     const cc = contactoVisual ? contactoConfig[contactoVisual] : null;
@@ -112,6 +273,12 @@ export default function GrabarSesion() {
                                 playsInline
                                 className={`w-full h-full object-cover ${stream ? 'block' : 'hidden'}`}
                             />
+                            {stream && (
+                                <canvas
+                                    ref={canvasRef}
+                                    className="absolute inset-0 w-full h-full pointer-events-none"
+                                />
+                            )}
 
                             {!stream && (
                                 <div className="text-center flex flex-col items-center gap-3">
@@ -130,8 +297,15 @@ export default function GrabarSesion() {
                                 </div>
                             )}
 
+                            {stream && framing && !framing.todoVisible && (
+                                <div className="absolute top-4 left-4 bg-amber-500/90 text-white px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm shadow-lg flex items-center gap-1.5">
+                                    <AlertCircle size={12} />
+                                    <span>Encuadre: falta {framing.faltantes.join(', ')}</span>
+                                </div>
+                            )}
+
                             {stream && (
-                                <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+                                <div className="absolute bottom-4 left-4 flex flex-col gap-1.5">
                                     {pc && (
                                         <div
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
@@ -148,6 +322,18 @@ export default function GrabarSesion() {
                                         >
                                             <Eye size={13} />
                                             <span>Contacto Visual: <strong>{cc.label}</strong></span>
+                                        </div>
+                                    )}
+                                    {bodyMetrics?.gestoMano && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/20 text-white border border-white/30">
+                                            <Hand size={13} />
+                                            <span>Mano: <strong>{bodyMetrics.gestoMano === 'abierta' ? 'Abierta' : bodyMetrics.gestoMano === 'punio' ? 'Puño' : bodyMetrics.gestoMano === 'senyalando' ? 'Señalando' : 'Neutra'}</strong></span>
+                                        </div>
+                                    )}
+                                    {bodyMetrics?.brazosCruzados && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-red-500/30 text-white border border-red-300/30">
+                                            <AlertCircle size={13} />
+                                            <span>Brazos cruzados</span>
                                         </div>
                                     )}
                                 </div>
@@ -223,7 +409,7 @@ export default function GrabarSesion() {
                                     </div>
                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-700" style={{
-                                            width: postura === 'excelente' ? '95%' : postura === 'buena' ? '65%' : postura === 'mejorar' ? '25%' : '0%',
+                                            width: postura === 'excelente' ? '95%' : postura === 'buena' ? '65%' : postura === 'mejorar' ? '25%' : postura === 'esperando' || postura === 'nodetect' ? '10%' : '0%',
                                             background: pc?.color ?? '#e2e8f0',
                                         }} />
                                     </div>
@@ -231,6 +417,8 @@ export default function GrabarSesion() {
                                         {postura === 'excelente' && 'Espalda recta y hombros relajados. ¡Perfecto!'}
                                         {postura === 'buena' && 'Postura aceptable, pequeños ajustes pueden mejorarla.'}
                                         {postura === 'mejorar' && 'Intenta erguir la espalda y elevar la cabeza.'}
+                                        {postura === 'esperando' && 'Esperando detección de tu cuerpo por la cámara...'}
+                                        {postura === 'nodetect' && 'No se detecta tu cuerpo. Asegúrate de estar frente a la cámara con buena iluminación y tu torso visible.'}
                                         {!postura && 'Activa la cámara para detectar tu postura.'}
                                     </p>
                                 </div>
@@ -276,7 +464,7 @@ export default function GrabarSesion() {
                                     </div>
                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-700" style={{
-                                            width: contactoVisual === 'estable' ? '90%' : contactoVisual === 'intermitente' ? '50%' : contactoVisual === 'ausente' ? '10%' : '0%',
+                                            width: contactoVisual === 'estable' ? '90%' : contactoVisual === 'intermitente' ? '50%' : contactoVisual === 'ausente' ? '10%' : contactoVisual === 'esperando' || contactoVisual === 'nodetect' ? '10%' : '0%',
                                             background: cc?.color ?? '#e2e8f0',
                                         }} />
                                     </div>
@@ -284,117 +472,14 @@ export default function GrabarSesion() {
                                         {contactoVisual === 'estable' && 'Excelente. Mantienes la mirada hacia la cámara.'}
                                         {contactoVisual === 'intermitente' && 'Intenta no desviar la mirada con tanta frecuencia.'}
                                         {contactoVisual === 'ausente' && 'Mira directamente al lente de la cámara.'}
+                                        {contactoVisual === 'esperando' && 'Esperando detección de tu mirada por la cámara...'}
+                                        {contactoVisual === 'nodetect' && 'No se detecta tu rostro. Asegúrate de estar frente a la cámara.'}
                                         {!contactoVisual && 'Activa la cámara para detectar el contacto visual.'}
                                     </p>
                                 </div>
 
                             </div>
                         </div>
-
-                        {/* RESULTADOS DEL ANÁLISIS DE VOZ */}
-                        {loading && (
-                            <div className="bg-white rounded-2xl border border-blue-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 text-blue-600">
-                                    <Loader2 className="animate-spin" size={20} />
-                                    <span className="font-semibold text-sm">Analizando tu voz...</span>
-                                </div>
-                                <p className="text-slate-500 text-sm mt-2">Procesando transcripción y detectando muletillas</p>
-                            </div>
-                        )}
-
-                        {errorAnalisis && (
-                            <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
-                                <div className="flex items-center gap-2 text-red-600">
-                                    <AlertCircle size={18} />
-                                    <span className="font-semibold text-sm">Error en el análisis</span>
-                                </div>
-                                <p className="text-red-500 text-sm mt-1">{errorAnalisis}</p>
-                            </div>
-                        )}
-
-                        {analisis && !loading && (
-                            <div className="bg-white rounded-2xl border border-green-200 p-5 shadow-sm">
-                                <h3 className="font-semibold text-slate-900 text-sm mb-4 flex items-center gap-2">
-                                    <CheckCircle size={15} className="text-green-500" />
-                                    Resultados del Análisis
-                                </h3>
-
-                                {/* Puntuación de voz */}
-                                <div className="mb-5">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Calidad de Voz</span>
-                                        <span
-                                            className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                            style={{
-                                                color: analisis.score_voz >= 70 ? '#22c55e' : analisis.score_voz >= 40 ? '#f59e0b' : '#ef4444',
-                                                background: analisis.score_voz >= 70 ? 'rgba(34,197,94,0.15)' : analisis.score_voz >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)'
-                                            }}
-                                        >
-                                            {analisis.score_voz}/100
-                                        </span>
-                                    </div>
-                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-700"
-                                            style={{
-                                                width: `${analisis.score_voz}%`,
-                                                background: analisis.score_voz >= 70 ? '#22c55e' : analisis.score_voz >= 40 ? '#f59e0b' : '#ef4444'
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Estadísticas */}
-                                <div className="grid grid-cols-2 gap-3 mb-4">
-                                    <div className="bg-slate-50 rounded-xl p-3">
-                                        <p className="text-xs text-slate-500 uppercase tracking-wide">Palabras</p>
-                                        <p className="text-2xl font-bold text-slate-800">{analisis.total_palabras}</p>
-                                    </div>
-                                    <div className="bg-slate-50 rounded-xl p-3">
-                                        <p className="text-xs text-slate-500 uppercase tracking-wide">Muletillas</p>
-                                        <p className={`text-2xl font-bold ${analisis.total_muletillas > 5 ? 'text-red-500' : 'text-green-500'}`}>
-                                            {analisis.total_muletillas}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Transcripción */}
-                                <div className="mb-4">
-                                    <h4 className="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                                        <Mic size={12} /> Transcripción
-                                    </h4>
-                                    <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg leading-relaxed max-h-32 overflow-y-auto">
-                                        {analisis.transcripcion}
-                                    </p>
-                                </div>
-
-                                {/* Muletillas detectadas */}
-                                {Object.keys(analisis.muletillas).length > 0 ? (
-                                    <div>
-                                        <h4 className="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                                            <AlertCircle size={12} className="text-amber-500" /> Muletillas detectadas
-                                        </h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {Object.entries(analisis.muletillas).map(([muletilla, count]) => (
-                                                <span
-                                                    key={muletilla}
-                                                    className="px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-md border border-amber-200"
-                                                >
-                                                    "{muletilla}" ×{count}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <p className="text-xs text-green-700 flex items-center gap-1">
-                                            <CheckCircle size={12} />
-                                            ¡Excelente! No se detectaron muletillas.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
 
                 </div>

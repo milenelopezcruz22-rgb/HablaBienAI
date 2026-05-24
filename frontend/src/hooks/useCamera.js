@@ -17,7 +17,10 @@ export const useCamera = () => {
                 audio: true,
             });
             setStream(mediaStream);
-            if (videoRef.current) videoRef.current.srcObject = mediaStream;
+            if (videoRef.current) {
+                videoRef.current.srcObject = mediaStream;
+                videoRef.current.play().catch(e => console.warn("Error al reproducir video:", e));
+            }
             setError(null);
             setVideoBlob(null);
         } catch (err) {
@@ -54,8 +57,15 @@ export const useCamera = () => {
             mr.ondataavailable = (e) => {
                 if (e.data.size > 0) chunksRef.current.push(e.data);
             };
-            mr.onstop = () =>
-                setVideoBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+            mr.onstop = () => {
+                const blob = new Blob(chunksRef.current, {
+                    type: "video/webm"
+                });
+
+                console.log("VIDEO GRABADO:", blob);
+
+                setVideoBlob(blob);
+            };
             mr.start();
         } catch (err) {
             console.error("Error al iniciar grabación:", err);

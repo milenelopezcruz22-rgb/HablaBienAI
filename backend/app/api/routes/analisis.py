@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.services.groq_service import transcribir_audio, detectar_muletillas
+from app.services.speech_metrics_service import calcular_score_voz, detectar_muletillas
+from app.services.transcription_service import transcribir_audio
 
 router = APIRouter()
 
@@ -11,30 +12,38 @@ async def analizar_audio(audio: UploadFile = File(...)):
     - Muletillas detectadas con frecuencia
     - Puntuación de voz (0-100)
     """
+
     try:
-        # Leer el archivo de audio
+        # Leer el archivo
         audio_bytes = await audio.read()
 
-        # Transcribir con Groq
+        # Transcribir con Faster-Whisper
         transcripcion = transcribir_audio(audio_bytes)
 
         # Detectar muletillas
         muletillas = detectar_muletillas(transcripcion)
 
-        # Calcular puntuación de voz basada en muletillas
+        # Score
         total_muletillas = sum(muletillas.values())
         palabras = len(transcripcion.split())
 
-        # Score: 100 - (muletillas por cada 100 palabras * 10)
-        score_voz = max(0, min(100, 100 - (total_muletillas / max(palabras, 1)) * 100))
+        score_voz = calcular_score_voz(transcripcion, muletillas)
 
         return {
             "transcripcion": transcripcion,
             "muletillas": muletillas,
-            "score_voz": round(score_voz, 1),
+            "score_voz": score_voz,
             "total_palabras": palabras,
             "total_muletillas": total_muletillas
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al analizar el audio: {str(e)}")
+        print("ERROR COMPLETO:", e)
+
+        import traceback
+        traceback.print_exc()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al analizar el audio: {str(e)}"
+        )
