@@ -5,6 +5,10 @@ from threading import Lock
 
 _whisper_model = None
 _whisper_model_lock = Lock()
+TRANSCRIPCION_LITERAL_PROMPT = (
+    "Transcribe literalmente en espanol. Incluye muletillas, repeticiones "
+    "y sonidos de duda como mmm, ehh, eee, este, bueno, o sea."
+)
 
 
 def _get_whisper_model():
@@ -30,9 +34,16 @@ def _get_whisper_model():
 
 def _transcribir_archivo(temp_path: str) -> dict:
     model = _get_whisper_model()
-    segments, info = model.transcribe(temp_path, language="es")
+    segments, info = model.transcribe(
+        temp_path,
+        language="es",
+        word_timestamps=True,
+        initial_prompt=TRANSCRIPCION_LITERAL_PROMPT,
+        condition_on_previous_text=False,
+    )
 
     segmentos = []
+    palabras = []
     textos = []
 
     for segment in segments:
@@ -47,6 +58,17 @@ def _transcribir_archivo(temp_path: str) -> dict:
         })
         textos.append(texto)
 
+        for word in getattr(segment, "words", None) or []:
+            palabra = word.word.strip()
+            if not palabra:
+                continue
+
+            palabras.append({
+                "inicio": round(float(word.start), 2),
+                "fin": round(float(word.end), 2),
+                "texto": palabra
+            })
+
     transcripcion = " ".join(textos).strip()
     duracion = max([segmento["fin"] for segmento in segmentos], default=0)
 
@@ -56,6 +78,7 @@ def _transcribir_archivo(temp_path: str) -> dict:
     return {
         "transcripcion": transcripcion,
         "segmentos": segmentos,
+        "palabras": palabras,
         "duracion_segundos": round(duracion, 2)
     }
 

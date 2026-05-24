@@ -3,26 +3,23 @@ import unicodedata
 
 
 MULETILLAS = [
-    "ehhh", "eee", "mmmm", "mmm", "este", "esta", "esto",
+    "este", "esta", "esto",
     "bueno", "o sea", "en plan", "tipo", "como", "verdad",
-    "vale", "entonces", "asi que", "por ejemplo", "digo yo",
+    "vale", "entonces", "asi que", "por ejemplo", "digo yo", "como diria",
     "sabes", "entiendes", "mas o menos", "al final", "literalmente",
     "basicamente", "obviamente", "claramente", "de hecho", "en realidad"
 ]
 
 UMBRAL_MULETILLAS = {
-    "ehhh": 1,
-    "eee": 1,
-    "mmmm": 1,
-    "mmm": 1,
     "este": 2,
-    "esta": 2,
-    "esto": 2,
+    "esta": 3,
+    "esto": 3,
     "bueno": 2,
     "o sea": 2,
     "en plan": 2,
     "tipo": 2,
     "como": 3,
+    "como diria": 1,
     "verdad": 2,
     "vale": 2,
     "entonces": 2,
@@ -41,6 +38,18 @@ UMBRAL_MULETILLAS = {
     "en realidad": 2,
 }
 
+VOCALIZACIONES_PATRONES = [
+    ("mmm", re.compile(r"(?<!\w)(?:m{3,}|e+m{2,}|a+m{2,}|u+m{2,})(?!\w)")),
+    ("eee", re.compile(r"(?<!\w)e{3,}(?!\w)")),
+    ("ehhh", re.compile(r"(?<!\w)e+h{1,}(?!\w)")),
+]
+
+MULETILLAS_CONTEXTUALES_PATRONES = [
+    ("este", re.compile(r"(?<!\w)este\s*(?:[,;:]|\.{2,})(?!\w)")),
+    ("bueno", re.compile(r"(?<!\w)bueno\s*(?:[,;:]|\.{2,})(?!\w)")),
+    ("como diria", re.compile(r"(?<!\w)como\s+diria(?!\w)")),
+]
+
 
 def normalizar_texto(texto: str) -> str:
     """
@@ -53,6 +62,19 @@ def normalizar_texto(texto: str) -> str:
     texto = "".join(char for char in texto if unicodedata.category(char) != "Mn")
     texto = re.sub(r"[^a-z0-9]+", " ", texto)
     return re.sub(r"\s+", " ", texto).strip()
+
+
+def normalizar_texto_mantener_pausas(texto: str) -> str:
+    """
+    Normaliza texto conservando signos de pausa utiles para detectar incisos.
+    """
+    texto = texto or ""
+    texto = texto.lower()
+    texto = unicodedata.normalize("NFD", texto)
+    texto = "".join(char for char in texto if unicodedata.category(char) != "Mn")
+    texto = re.sub(r"[^a-z0-9,;:.]+", " ", texto)
+    texto = re.sub(r"\s+", " ", texto)
+    return texto.strip()
 
 
 def _crear_patron_muletilla(muletilla: str) -> re.Pattern:
@@ -74,11 +96,22 @@ def detectar_muletillas(transcripcion: str) -> dict:
     transcripcion_normalizada = normalizar_texto(transcripcion)
     muletillas_count = {}
 
+    for etiqueta, patron in VOCALIZACIONES_PATRONES:
+        count = len(patron.findall(transcripcion_normalizada))
+        if count > 0:
+            muletillas_count[etiqueta] = count
+
+    transcripcion_sin_tildes = normalizar_texto_mantener_pausas(transcripcion)
+    for etiqueta, patron in MULETILLAS_CONTEXTUALES_PATRONES:
+        count = len(patron.findall(transcripcion_sin_tildes))
+        if count > 0:
+            muletillas_count[etiqueta] = max(muletillas_count.get(etiqueta, 0), count)
+
     for muletilla, patron in MULETILLAS_PATRONES:
         count = len(patron.findall(transcripcion_normalizada))
         min_repeticiones = UMBRAL_MULETILLAS.get(muletilla, 2)
         if count >= min_repeticiones:
-            muletillas_count[muletilla] = count
+            muletillas_count[muletilla] = max(muletillas_count.get(muletilla, 0), count)
 
     return muletillas_count
 
@@ -192,17 +225,14 @@ def calcular_velocidad_habla(transcripcion: str, duracion_segundos: float) -> di
     }
 
 
-def detectar_pausas_largas(segmentos: list, umbral_segundos: float = 2.0) -> dict:
-    """
-    Detecta pausas largas entre segmentos consecutivos de la transcripcion.
-    """
+def _detectar_pausas_entre_items(items: list, umbral_segundos: float) -> list:
     pausas = []
-    segmentos_ordenados = sorted(
-        segmentos or [],
-        key=lambda segmento: float(segmento.get("inicio", 0))
+    items_ordenados = sorted(
+        items or [],
+        key=lambda item: float(item.get("inicio", 0))
     )
 
-    for anterior, actual in zip(segmentos_ordenados, segmentos_ordenados[1:]):
+    for anterior, actual in zip(items_ordenados, items_ordenados[1:]):
         fin_anterior = float(anterior.get("fin", 0))
         inicio_actual = float(actual.get("inicio", 0))
         duracion = inicio_actual - fin_anterior
@@ -214,10 +244,30 @@ def detectar_pausas_largas(segmentos: list, umbral_segundos: float = 2.0) -> dic
                 "duracion": round(duracion, 2)
             })
 
+    return pausas
+
+
+def detectar_pausas_largas(
+    segmentos: list,
+    palabras: list | None = None,
+    umbral_segundos: float = 1.5,
+) -> dict:
+    """
+    Detecta pausas largas entre palabras. Si no hay timestamps de palabras,
+    usa los segmentos como respaldo.
+    """
+    fuente = "palabras" if palabras else "segmentos"
+    pausas = _detectar_pausas_entre_items(
+        palabras if palabras else segmentos,
+        umbral_segundos
+    )
+
     duracion_total = sum(pausa["duracion"] for pausa in pausas)
 
     return {
         "pausas_largas": pausas,
         "total_pausas_largas": len(pausas),
-        "duracion_pausas_largas": round(duracion_total, 2)
+        "duracion_pausas_largas": round(duracion_total, 2),
+        "fuente_pausas": fuente,
+        "umbral_pausa_segundos": umbral_segundos
     }

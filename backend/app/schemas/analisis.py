@@ -14,6 +14,8 @@ class AnalisisResponse(BaseModel):
     pausas_largas: List[Dict[str, float]] = Field(default_factory=list)
     total_pausas_largas: int = 0
     duracion_pausas_largas: float = 0
+    fuente_pausas: str = "segmentos"
+    umbral_pausa_segundos: float = 1.5
 
 class AnalisisCompletoResponse(BaseModel):
     transcripcion: str
@@ -28,5 +30,7 @@ class AnalisisCompletoResponse(BaseModel):
     pausas_largas: List[Dict[str, float]] = Field(default_factory=list)
     total_pausas_largas: int = 0
     duracion_pausas_largas: float = 0
+    fuente_pausas: str = "segmentos"
+    umbral_pausa_segundos: float = 1.5
     feedback: str
     recomendaciones: List[str]

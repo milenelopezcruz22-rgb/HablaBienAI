@@ -27,6 +27,7 @@ async def analizar_audio(audio: UploadFile = File(...)):
         transcripcion = resultado_transcripcion["transcripcion"]
         duracion_segundos = resultado_transcripcion["duracion_segundos"]
         segmentos = resultado_transcripcion["segmentos"]
+        palabras_transcritas = resultado_transcripcion["palabras"]
 
         # Detectar muletillas
         muletillas = detectar_muletillas(transcripcion)
@@ -36,7 +37,7 @@ async def analizar_audio(audio: UploadFile = File(...)):
         palabras = len(transcripcion.split())
 
         velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
-        pausas = detectar_pausas_largas(segmentos)
+        pausas = detectar_pausas_largas(segmentos, palabras_transcritas)
         score = calcular_score_voz(transcripcion, muletillas, velocidad, pausas)
 
         return {
@@ -51,7 +52,9 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "ritmo_habla": velocidad["ritmo_habla"],
             "pausas_largas": pausas["pausas_largas"],
             "total_pausas_largas": pausas["total_pausas_largas"],
-            "duracion_pausas_largas": pausas["duracion_pausas_largas"]
+            "duracion_pausas_largas": pausas["duracion_pausas_largas"],
+            "fuente_pausas": pausas["fuente_pausas"],
+            "umbral_pausa_segundos": pausas["umbral_pausa_segundos"]
         }
 
     except Exception as e:
