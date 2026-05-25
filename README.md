@@ -20,6 +20,7 @@
 [![React](https://img.shields.io/badge/Frontend-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Supabase](https://img.shields.io/badge/DB-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
 [![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
@@ -95,6 +96,88 @@ habla-bien-ia/
 
 ---
 
+## 🗄️ Base de Datos — Supabase (M6 · Historial)
+
+El módulo de historial usa **Supabase** (PostgreSQL) como base de datos en la nube para almacenar y consultar todas las sesiones de práctica.
+
+### Configuración
+
+1. Crear proyecto en [supabase.com](https://supabase.com)
+2. Crear el archivo `frontend/.env` con las credenciales:
+
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key
+```
+
+3. Ejecutar el siguiente SQL en el **Editor SQL** de Supabase para crear la tabla:
+
+```sql
+alter table sesiones
+add column if not exists titulo text,
+add column if not exists puntaje integer,
+add column if not exists mes text,
+add column if not exists dia integer,
+add column if not exists hora text,
+add column if not exists duracion text,
+add column if not exists nivel text,
+add column if not exists destacado boolean default false;
+```
+
+4. Desactivar RLS para desarrollo:
+
+```sql
+alter table sesiones disable row level security;
+```
+
+### Estructura de la tabla `sesiones`
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | uuid | Identificador único (auto) |
+| `titulo` | text | Nombre de la sesión |
+| `puntaje` | integer | Puntuación del 0 al 100 |
+| `mes` | text | Mes en mayúsculas (ej: `OCT`) |
+| `dia` | integer | Día del mes |
+| `hora` | text | Hora de inicio (ej: `14:30 PM`) |
+| `duracion` | text | Duración (ej: `5 min 12 seg`) |
+| `nivel` | text | `SOBRESALIENTE`, `BUENO`, o `EN PROGRESO` |
+| `destacado` | boolean | Si la sesión es destacada |
+| `created_at` | timestamp | Fecha de creación (auto) |
+
+### Integración desde otros módulos
+
+Para que una sesión aparezca en el historial, los módulos de grabación/análisis deben llamar a `guardarSesion()` al finalizar:
+
+```js
+import { guardarSesion } from "../services/supabase";
+
+const ahora = new Date();
+
+await guardarSesion({
+  titulo: "Nombre de la sesión",
+  puntaje: 88,
+  mes: ahora.toLocaleString("es", { month: "short" }).toUpperCase(), // "OCT"
+  dia: ahora.getDate(),                                               // 24
+  hora: ahora.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" }),
+  duracion: "5 min 12 seg",
+  nivel: "SOBRESALIENTE", // SOBRESALIENTE | BUENO | EN PROGRESO
+  destacado: false
+});
+```
+
+### Funciones disponibles en `supabase.js`
+
+```js
+// Guardar una nueva sesión
+guardarSesion(sesion) → inserta en la tabla sesiones
+
+// Obtener todas las sesiones ordenadas por fecha
+obtenerSesiones() → retorna array de sesiones ([] si no hay datos)
+```
+
+---
+
 ## 🤖 Stack tecnológico
 
 ### Frontend
@@ -104,6 +187,7 @@ habla-bien-ia/
 | **WebRTC** | Acceso a cámara y micrófono en tiempo real |
 | **MediaPipe Pose** (vía CDN) | Análisis de postura, contacto visual y gestos en el navegador |
 | **Chart.js** | Gráficas de puntuación y progreso |
+| **Supabase JS** | Cliente para base de datos en la nube |
 
 ### Backend
 | Tecnología | Uso |
@@ -113,7 +197,7 @@ habla-bien-ia/
 | **faster-whisper** | Transcripción de audio local (sin costos de API) |
 | **Groq API (Llama 3)** | Análisis avanzado del discurso y feedback |
 | **SQLAlchemy** | ORM para la base de datos |
-| **PostgreSQL** | Almacenamiento del historial de sesiones |
+| **PostgreSQL / Supabase** | Almacenamiento del historial de sesiones |
 
 ### DevOps
 | Tecnología | Uso |
@@ -161,9 +245,9 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 | **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
 | **M2** | Análisis de voz | Python · FastAPI · faster-whisper · Groq | 🔄 **En desarrollo** |
 | **M3** | Análisis de lenguaje corporal | MediaPipe Pose (CDN) | ✅ **Completado** |
-| M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
-| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
-| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+| **M4** | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
+| **M5** | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
+| **M6** | Historial de progreso | React · Supabase · PostgreSQL | ✅ **Completado** |
 
 > **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
 >
@@ -171,7 +255,9 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 >
 > **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
 >
-> **M4 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
+> **M6:** Historial de sesiones conectado a **Supabase** (PostgreSQL). Muestra todas las sesiones guardadas con puntaje, nivel, duración y fecha. Incluye búsqueda en tiempo real y estilos por nivel (SOBRESALIENTE / BUENO / EN PROGRESO). Las sesiones se guardan desde cualquier módulo llamando a `guardarSesion()`.
+>
+> **M4 y M5:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 
 ---
 
@@ -181,6 +267,7 @@ Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Si
 - Node.js 18+
 - Python 3.11+
 - Git
+- Cuenta en [Supabase](https://supabase.com) (para el historial)
 
 ### 1. Clonar el repositorio
 ```bash
@@ -189,7 +276,14 @@ cd habla-bien-ia
 code .
 ```
 
-### 2. Levantar el backend
+### 2. Configurar variables de entorno
+```bash
+# Crear frontend/.env con:
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key
+```
+
+### 3. Levantar el backend
 ```bash
 cd backend
 python -m venv venv
@@ -198,13 +292,13 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### 3. Instalar dependencias del frontend
+### 4. Instalar dependencias del frontend
 ```bash
 cd frontend
 npm install
 ```
 
-### 4. Levantar el frontend
+### 5. Levantar el frontend
 ```bash
 npm run dev
 ```
