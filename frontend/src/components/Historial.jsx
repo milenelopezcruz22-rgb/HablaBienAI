@@ -1,9 +1,16 @@
-import { useState } from "react";
-import { sesionesData, nivelEstilos } from "../constants";
+import { useState, useEffect } from "react";
+import { obtenerSesiones } from "../services/supabase";
+import { nivelEstilos } from "../constants";
 
 export default function Historial({ busqueda }) {
-  const sesionesFiltradas = sesionesData.filter((s) =>
-    s.titulo.toLowerCase().includes(busqueda.toLowerCase())
+  const [sesiones, setSesiones] = useState([]);
+
+  useEffect(() => {
+    obtenerSesiones().then(setSesiones);
+  }, []);
+
+  const sesionesFiltradas = sesiones.filter((s) =>
+    s.titulo?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -15,20 +22,10 @@ export default function Historial({ busqueda }) {
         >
           {/* Fecha */}
           <div className="flex flex-col items-center min-w-12">
-            <span
-              className={`text-xs font-semibold tracking-widest uppercase ${
-                sesion.destacado
-                  ? "bg-indigo-100 text-indigo-500 px-2 py-0.5 rounded"
-                  : "text-gray-400"
-              }`}
-            >
+            <span className={`text-xs font-semibold tracking-widest uppercase ${sesion.destacado ? "bg-indigo-100 text-indigo-500 px-2 py-0.5 rounded" : "text-gray-400"}`}>
               {sesion.mes}
             </span>
-            <span
-              className={`text-2xl font-extrabold leading-tight ${
-                sesion.destacado ? "text-indigo-500" : "text-gray-900"
-              }`}
-            >
+            <span className={`text-2xl font-extrabold leading-tight ${sesion.destacado ? "text-indigo-500" : "text-gray-900"}`}>
               {sesion.dia}
             </span>
           </div>
@@ -45,11 +42,7 @@ export default function Historial({ busqueda }) {
           {/* Puntaje */}
           <div className="flex flex-col items-end min-w-24">
             <div className="flex items-baseline gap-0.5">
-              <span
-                className={`text-3xl font-extrabold ${
-                  sesion.destacado ? "text-indigo-500" : "text-gray-900"
-                }`}
-              >
+              <span className={`text-3xl font-extrabold ${sesion.destacado ? "text-indigo-500" : "text-gray-900"}`}>
                 {sesion.puntaje}
               </span>
               <span className="text-sm text-gray-400">/100</span>
