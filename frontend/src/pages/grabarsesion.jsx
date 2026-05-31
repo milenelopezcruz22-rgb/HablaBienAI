@@ -30,6 +30,8 @@ const audioConfig = {
 
 const POSE_CONNECTIONS = [
     [11, 12], [11, 13], [12, 14], [13, 15], [14, 16],
+    [15, 17], [15, 19], [15, 21], [17, 19],
+    [16, 18], [16, 20], [16, 22], [18, 20],
     [11, 23], [12, 24], [23, 24],
     [0, 11], [0, 12], [7, 11], [8, 12],
     [0, 1], [0, 2], [0, 4], [0, 5],
@@ -37,6 +39,35 @@ const POSE_CONNECTIONS = [
     [4, 5], [4, 6], [5, 6], [6, 8],
     [9, 10],
 ];
+
+const POSE_DRAW_SMOOTHING = 0.72;
+const POSE_PREDICTION_FACTOR = 0.35;
+
+function suavizarLandmarks(actuales, objetivo, anteriores, factor = POSE_DRAW_SMOOTHING) {
+    if (!objetivo) return null;
+    if (!actuales || actuales.length !== objetivo.length) {
+        return objetivo.map((p) => ({ ...p }));
+    }
+
+    return objetivo.map((p, i) => {
+        const anterior = actuales[i];
+        if (!p || !anterior) return p ? { ...p } : anterior;
+
+        const previousTarget = anteriores?.[i];
+        const velocityX = previousTarget ? p.x - previousTarget.x : 0;
+        const velocityY = previousTarget ? p.y - previousTarget.y : 0;
+        const predictedX = p.x + velocityX * POSE_PREDICTION_FACTOR;
+        const predictedY = p.y + velocityY * POSE_PREDICTION_FACTOR;
+
+        return {
+            ...p,
+            x: anterior.x + (predictedX - anterior.x) * factor,
+            y: anterior.y + (predictedY - anterior.y) * factor,
+            z: anterior.z + ((p.z ?? 0) - (anterior.z ?? 0)) * factor,
+            visibility: anterior.visibility + ((p.visibility ?? 1) - (anterior.visibility ?? 1)) * factor,
+        };
+    });
+}
 
 function dibujarEsqueleto(ctx, pts, w, h) {
     if (!pts) return;
@@ -123,6 +154,8 @@ export default function GrabarSesion() {
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
     const animRef = useRef(null);
+    const smoothPoseRef = useRef(null);
+    const previousTargetPoseRef = useRef(null);
     const cvRef = useRef(contactoVisual);
     useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
 
@@ -132,12 +165,22 @@ export default function GrabarSesion() {
         const dibujar = () => {
             const video = videoRef.current;
             if (!video || !canvas) { animRef.current = requestAnimationFrame(dibujar); return; }
-            const w = canvas.width = video.clientWidth;
-            const h = canvas.height = video.clientHeight;
+            const w = video.clientWidth;
+            const h = video.clientHeight;
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w;
+                canvas.height = h;
+            }
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, w, h);
             if (latestPoseRef.current) {
-                dibujarEsqueleto(ctx, latestPoseRef.current, w, h);
+                smoothPoseRef.current = suavizarLandmarks(
+                    smoothPoseRef.current,
+                    latestPoseRef.current,
+                    previousTargetPoseRef.current
+                );
+                previousTargetPoseRef.current = latestPoseRef.current;
+                dibujarEsqueleto(ctx, smoothPoseRef.current, w, h);
             }
             if (faceMeshReadyRef.current && latestFaceRef.current) {
                 dibujarFaceMesh(ctx, latestFaceRef.current, w, h);
@@ -149,7 +192,11 @@ export default function GrabarSesion() {
             animRef.current = requestAnimationFrame(dibujar);
         };
         animRef.current = requestAnimationFrame(dibujar);
-        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+        return () => {
+            if (animRef.current) cancelAnimationFrame(animRef.current);
+            smoothPoseRef.current = null;
+            previousTargetPoseRef.current = null;
+        };
     }, [stream]);
 
     const pc = postura ? posturaConfig[postura] : null;
@@ -263,6 +310,12 @@ export default function GrabarSesion() {
                                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-red-500/30 text-white border border-red-300/30">
                                             <AlertCircle size={13} />
                                             <span>Brazos cruzados</span>
+                                        </div>
+                                    )}
+                                    {bodyMetrics?.estadoBrazos && bodyMetrics.estadoBrazos !== 'sin_datos' && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-slate-900/55 text-white border border-white/20">
+                                            <Hand size={13} />
+                                            <span>Brazos: <strong>{bodyMetrics.estadoBrazos.replace('_', ' ')}</strong></span>
                                         </div>
                                     )}
                                 </div>
