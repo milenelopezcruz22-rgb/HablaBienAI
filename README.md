@@ -17,21 +17,23 @@
 
 <br/>
 
-[![React](https://img.shields.io/badge/Frontend-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![React](https://img.shields.io/badge/Frontend-React_19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
-[![Docker](https://img.shields.io/badge/Deploy-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com/)
+[![MediaPipe](https://img.shields.io/badge/IA-MediaPipe_Pose-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/edge/mediapipe)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
 
 <br/>
+
+> 💡 **Inicio rápido:** `cd frontend && npm install && npm run dev`
 
 > *¿Tienes el conocimiento pero te traiciona el nerviosismo al hablar?*
-> **Habla Bien IA** analiza tu voz, postura y lenguaje corporal en tiempo real
-> y te da feedback personalizado para que domines cada sustentación.
+> **Habla Bien IA** analiza tu voz y lenguaje corporal para ofrecerte
+> retroalimentación útil en cada sesión de práctica.
 
 <br/>
 
-[Ver Demo](#) · [Reportar Bug](../../issues) · [Solicitar Feature](../../issues)
+[Reportar Bug](../../issues) · [Solicitar Feature](../../issues)
 
 <br/>
 
@@ -42,67 +44,68 @@
 ## 📌 El problema que resolvemos
 
 | Problema | Impacto |
-|----------|---------|
-| 🎯 **Brecha de empleabilidad** | Egresados talentosos pierden oportunidades por no saber comunicarse |
-| 😰 **Pánico escénico** | El miedo a hablar en público bloquea el desempeño en sustentaciones de grado |
-| 📋 **Falta de feedback individual** | Un profesor no puede corregir a 40 alumnos uno por uno |
+|---|---|
+| 🎯 **Brecha de empleabilidad** | Egresados talentosos pierden oportunidades por no comunicar sus ideas con claridad |
+| 😰 **Pánico escénico** | El miedo a hablar en público afecta exposiciones y sustentaciones |
+| 📋 **Falta de feedback individual** | Un docente no siempre puede corregir detalladamente a cada estudiante |
 
 ---
 
 ## ✨ ¿Cómo funciona?
 
-El estudiante activa su cámara o sube un video. La IA analiza **tres capas simultáneas**:
+El estudiante activa la cámara y realiza una exposición. La aplicación combina el análisis de voz con métricas corporales acumuladas durante toda la sesión.
 
-| 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
-|--------|-----------|-------------|
-| Muletillas | Postura | Gemini 1.5 Flash |
-| Velocidad de habla | Movimiento de manos | Análisis integrado |
-| Pausas largas | Contacto visual | Puntuación 0 – 100 |
+| 🎤 Voz | 🧍 Cuerpo | 📊 Resultados |
+|---|---|---|
+| Transcripción local | Postura y hombros | Puntaje de voz |
+| Muletillas | Torso y estabilidad | Métricas corporales |
+| Velocidad de habla | Brazos y manos visibles | Recomendaciones |
+| Pausas largas | Contacto visual aproximado | Eventos relevantes |
 
-| 📊 Dashboard de resultados | 📈 Historial de progreso |
-|---------------------------|-------------------------|
-| Radar chart con 5 dimensiones | Evolución sesión por sesión |
-| Línea de tiempo de errores | Comparativa mes a mes |
+```text
+Cámara y micrófono
+        ↓
+Grabación .webm
+        ↓
+┌────────────────────┬────────────────────────┐
+│ Backend            │ Navegador              │
+│ Voz + Whisper      │ Cuerpo + MediaPipe     │
+└────────────────────┴────────────────────────┘
+        ↓
+Dashboard de resultados
+```
 
 ---
 
 ## 🏗️ Arquitectura del proyecto
 
-```
-habla-bien-ia/
+```text
+HablaBienAI/
 │
-├── 📁 frontend/                    # React 18 · Interfaz de usuario
+├── 📁 frontend/                         # React 19 · Vite · Tailwind CSS
 │   └── src/
-│       ├── components/
-│       │   ├── Camera/             # M1 · Captura de video y audio (WebRTC)
-│       │   ├── Dashboard/          # M5 · Resultados y puntuación
-│       │   ├── Feedback/           # M5 · Recomendaciones de la IA
-│       │   └── History/            # M6 · Historial de sesiones
-│       ├── pages/                  # Vistas principales de la app
-│       ├── hooks/                  # Custom hooks (useCamera, useMediaPipe)
-│       ├── services/               # Llamadas a la API del backend
-│       └── assets/                 # Imágenes, íconos, fuentes
+│       ├── components/                  # Componentes visuales reutilizables
+│       ├── pages/                       # Inicio · Grabación · Dashboard · Historial
+│       ├── hooks/
+│       │   ├── useCamera.js             # Cámara, micrófono y grabación
+│       │   ├── useAnalysis.js           # Integración de módulos
+│       │   ├── useBodyAnalysis.js       # Análisis corporal con MediaPipe Pose
+│       │   ├── useFaceAnalysis.js       # Base opcional para FaceMesh
+│       │   └── useHandAnalysis.js       # Base opcional para MediaPipe Hands
+│       └── services/
+│           └── api.js                   # Cliente HTTP del backend
 │
-├── 📁 backend/                     # Python 3.11 · FastAPI · Motor de IA
-│   └── app/
-│       ├── api/routes/             # Endpoints REST de la aplicación
-│       ├── core/                   # Configuración, settings, conexión DB
-│       ├── models/                 # Modelos de base de datos (SQLAlchemy)
-│       ├── schemas/                # Esquemas Pydantic (validación de datos)
-│       ├── services/               # M2 · Whisper  M3 · MediaPipe  M4 · Gemini
-│       └── tests/                  # Tests unitarios e integración
+├── 📁 backend/                          # Python 3.11 · FastAPI
+│   ├── app/
+│   │   ├── api/routes/                  # Endpoint REST
+│   │   ├── schemas/                     # Esquemas Pydantic
+│   │   └── services/
+│   │       ├── transcription_service.py # faster-whisper
+│   │       ├── speech_metrics_service.py
+│   │       └── groq_service.py          # Feedback IA o fallback local
+│   └── tests/                           # Pruebas automatizadas
 │
-├── 📁 docs/                        # Documentación técnica del proyecto
-│   ├── assets/                     # Imágenes para la documentación
-│   └── wireframes/                 # Bocetos de la interfaz
-│
-├── 📁 .github/
-│   ├── workflows/                  # CI/CD con GitHub Actions
-│   └── ISSUE_TEMPLATE/             # Plantillas para bugs y features
-│
-├── 🐳 docker-compose.yml           # Levanta frontend + backend + DB
-├── 📄 .gitignore                   # Archivos ignorados por Git
-└── 📖 README.md                    # Este archivo
+└── 📖 README.md
 ```
 
 ---
@@ -110,185 +113,257 @@ habla-bien-ia/
 ## 🤖 Stack tecnológico
 
 ### Frontend
+
 | Tecnología | Uso |
-|------------|-----|
-| **React 18** | Interfaz de usuario y gestión de estado |
-| **WebRTC** | Acceso a cámara y micrófono en tiempo real |
-| **MediaPipe Pose** | Análisis de postura directamente en el navegador |
-| **Chart.js** | Gráficas de puntuación y progreso |
+|---|---|
+| **React 19** | Interfaz de usuario y gestión de estado |
+| **Vite** | Desarrollo local y build de producción |
+| **Tailwind CSS** | Estilos de la interfaz |
+| **WebRTC · MediaRecorder** | Cámara, micrófono y grabación `.webm` |
+| **MediaPipe Pose** vía CDN | Detección de 33 landmarks corporales |
+| **Chart.js** | Soporte para visualizaciones |
 
 ### Backend
-| Tecnología | Uso |
-|------------|-----|
-| **Python 3.11** | Lenguaje principal del servidor |
-| **FastAPI** | Framework REST de alto rendimiento |
-| **Whisper API (OpenAI)** | Transcripción de audio y detección de muletillas |
-| **Gemini 1.5 Flash** | Análisis multimodal e IA de feedback |
-| **SQLAlchemy** | ORM para la base de datos |
-| **PostgreSQL** | Almacenamiento del historial de sesiones |
 
-### DevOps
 | Tecnología | Uso |
-|------------|-----|
-| **Docker** | Contenedorización del backend |
-| **GitHub Actions** | CI/CD automatizado |
-| **Railway** | Despliegue del backend en la nube |
-| **Vercel** | Despliegue del frontend |
+|---|---|
+| **Python 3.11+** | Lenguaje principal del servidor |
+| **FastAPI** | API REST |
+| **faster-whisper** | Transcripción local de audio |
+| **Groq API** | Feedback de oratoria cuando existe una API key |
+| **pytest** | Pruebas automatizadas |
 
 ---
 
-## 👥 Equipo de desarrollo
+## 🧍 M3 · Análisis de lenguaje corporal
 
-| Rol | Responsabilidad | Módulos |
-|-----|----------------|---------|
-| 🖥️ **Frontend Dev 1** | Captura de medios y análisis corporal | M1 · M3 |
-| 🎨 **Frontend Dev 2** | Dashboard, feedback e historial | M5 · M6 (vista) |
-| 🐍 **Backend Dev 1** | Análisis de voz y transcripción | M2 |
-| 🤖 **Backend Dev 2** | Fusión IA e historial | M4 · M6 (API) |
-| ⚙️ **DevOps / Líder** | Git, CI/CD, despliegue e integración | Todos |
+El análisis corporal se ejecuta directamente en el navegador con **MediaPipe Pose**. No requiere enviar el video a un servicio externo para evaluar la postura.
+
+### Métricas implementadas
+
+| Dimensión | ¿Qué mide? |
+|---|---|
+| **Encuadre** | Visibilidad del rostro, hombros y torso |
+| **Postura** | Alineación de hombros, posible encorvamiento y pecho abierto aproximado |
+| **Torso** | Orientación frontal o lateral, inclinación y estabilidad |
+| **Brazos** | Estados neutros, abiertos, elevados, cruzados o parcialmente visibles |
+| **Manos** | Visibilidad y actividad gestual aproximada mediante movimiento de muñecas |
+| **Contacto visual** | Aproximación basada en la posición de nariz y ojos |
+| **Sesión completa** | Porcentajes acumulados, eventos sostenidos y recomendaciones |
+
+### Rendimiento visual
+
+La visualización del esqueleto utiliza interpolación y una predicción breve de movimiento. El dibujo del canvas y el procesamiento de MediaPipe trabajan con ritmos separados para mantener una respuesta fluida.
+
+### Arquitectura modular
+
+| Hook | Estado | Propósito |
+|---|---|---|
+| `useBodyAnalysis.js` | ✅ Activo | Postura, torso, brazos, estabilidad y métricas acumuladas |
+| `useFaceAnalysis.js` | 🧩 Preparado | Base para integrar FaceMesh posteriormente |
+| `useHandAnalysis.js` | 🧩 Preparado | Base para integrar MediaPipe Hands posteriormente |
+| `useAnalysis.js` | ✅ Activo | Une audio y módulos corporales para la interfaz |
+
+> FaceMesh y MediaPipe Hands están preparados como módulos opcionales, pero todavía no cargan modelos adicionales. Se mantienen desactivados para evitar una carga innecesaria en equipos modestos.
 
 ---
 
-## 🗺️ Roadmap del proyecto
+## 🎤 M2 · Análisis de voz
 
-```
-Semana 1-6   ██████░░░░░░░░░░░░  APF1 · Repositorio + M1 + M2 base
-Semana 7-11  ░░░░░░██████░░░░░░  APF2 · CI/CD + M2 completo + M3 + M4 inicio
-Semana 12-15 ░░░░░░░░░░░░████░░  APF3 · Despliegue + M4 completo + M5
-Semana 16-18 ░░░░░░░░░░░░░░████  FINAL · Sistema completo + M6
+El backend recibe audio o video y devuelve:
+
+- Transcripción local con `faster-whisper`.
+- Total de palabras y duración.
+- Muletillas normalizadas y contextuales.
+- Palabras por minuto.
+- Ritmo: `lento`, `adecuado` o `rapido`.
+- Pausas largas y duración acumulada.
+- Puntaje ponderado de voz.
+- Feedback con Groq API o recomendaciones locales como respaldo.
+
+---
+
+## 📈 Historial de progreso
+
+La vista de historial existe, pero actualmente utiliza datos de demostración definidos en:
+
+```text
+frontend/src/constants.js
 ```
 
-| Entrega | Semana | Peso | Estado |
-|---------|--------|------|--------|
-| APF1 | 6 | 20% | 🔄 En progreso |
-| APF2 | 11 | 20% | ⏳ Pendiente |
-| APF3 | 15 | 20% | ⏳ Pendiente |
-| Proyecto Final | 18 | 40% | ⏳ Pendiente |
+> ⚠️ **Pendiente:** el historial todavía no está conectado a una base de datos. Supabase o PostgreSQL no forman parte de la implementación actual.
 
 ---
 
 ## 📦 Estado de los módulos
 
-| Módulo | Nombre | Tecnología | Estado |
-|--------|--------|------------|--------|
-| **M1** | Captura de medios | React · WebRTC | 🔄 **En desarrollo** |
-| **M2** | Análisis de voz *(base)* | Python · FastAPI · Whisper API | 🔄 **Introductorio** |
-| M3 | Análisis de lenguaje corporal | MediaPipe Pose | ⏳ Pendiente — APF2 |
-| M4 | Módulo de fusión | Gemini 1.5 Flash | ⏳ Pendiente — APF2/3 |
-| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
-| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+| Módulo | Nombre | Estado |
+|---|---|---|
+| **M1** | Captura de medios | ✅ Implementado |
+| **M2** | Análisis de voz | ✅ Implementado · sujeto a pruebas con audios reales |
+| **M3** | Análisis de lenguaje corporal | ✅ Implementado con MediaPipe Pose |
+| **M4** | Fusión de resultados | 🔄 Parcial · dashboard con voz y cuerpo |
+| **M5** | Evaluación y feedback | 🔄 Parcial · dashboard y recomendaciones |
+| **M6** | Historial persistente | ⏳ Pendiente · datos de demostración |
 
-> **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo o subir un video. Al finalizar, extrae el audio y lo prepara para enviarlo al backend.
->
-> **M2 (base):** Endpoint básico en FastAPI que recibe el archivo de audio y lo envía a Whisper para obtener la transcripción. Detecta muletillas comunes ("ehhh", "o sea", "bueno", "este") y devuelve su frecuencia. Las métricas avanzadas (velocidad, pausas, tono) se completarán en la Unidad 2.
->
-> **M3 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
+---
+
+## 👥 Equipo de desarrollo
+
+| Módulo | Encargado |
+|---|---|
+| **M1** · Captura de medios | Jhon Peña Campos |
+| **M2** · Análisis de voz | Raul Seminario |
+| **M3** · Análisis de lenguaje corporal | Jeix Lopez Castillo |
+| **M4** · Módulo de fusión IA | Raul Seminario |
+| **M5** · Evaluación y feedback | Milene Lopez Cruz |
+| **M6** · Historial de progreso | Israel Ramos Silva |
 
 ---
 
 ## 🚀 Instalación y uso local
 
 ### Prerrequisitos
+
 - Node.js 18+
 - Python 3.11+
-- Docker Desktop
 - Git
 
 ### 1. Clonar el repositorio
+
 ```bash
-git clone [URL-repositorio]
-cd habla-bien-ia
-code .
+git clone https://github.com/milenelopezcruz22-rgb/HablaBienAI.git
+cd HablaBienAI
 ```
 
-### 2. Levantar el backend
+### 2. Configurar variables de entorno
+
+Copia `.env.example` como `.env` en la raíz y completa las variables necesarias:
+
+```env
+GROQ_API_KEY=tu_clave_de_groq
+BACKEND_PORT=8000
+VITE_API_URL=http://localhost:8000
+```
+
+`GROQ_API_KEY` es opcional. Si no existe, el backend utiliza recomendaciones locales.
+
+### 3. Levantar el backend
+
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+```
+
+En Windows:
+
+```powershell
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### 3. Levantar el frontend
+En Linux o macOS:
+
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### 4. Levantar el frontend
+
+Desde otra terminal:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### 4. Con Docker (recomendado)
+| Servicio | URL |
+|---|---|
+| Aplicación web | `http://localhost:5173` |
+| Documentación API | `http://localhost:8000/docs` |
+| Estado del backend | `http://localhost:8000/health` |
+
+---
+
+## 📡 Endpoints disponibles
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/v1/analizar` | Recibe audio o video y devuelve métricas de voz, puntaje y feedback |
+| `GET` | `/health` | Comprueba si la API está activa |
+
+---
+
+## 🧪 Pruebas y build
+
+Backend:
+
 ```bash
-docker-compose up --build
+cd backend
+pytest
 ```
 
-La app estará disponible en `http://localhost:5173`
-La API en `http://localhost:8000/docs`
+Frontend:
 
----
-
-## 📡 Endpoints principales de la API
-
-```
-POST   /api/v1/analizar          →  Recibe audio/video y devuelve análisis completo
-GET    /api/v1/historial/{id}    →  Historial de sesiones de un estudiante
-GET    /api/v1/sesion/{id}       →  Detalle de una sesión específica
-DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
+```bash
+cd frontend
+npm run build
 ```
 
 ---
 
-## 📊 Métricas que analiza la IA
+## 🗺️ Roadmap técnico
 
-| Dimensión | Qué mide |
-|-----------|----------|
-| 🎤 Voz | Muletillas/min · Velocidad · Pausas |
-| 🧍 Postura | Alineación de hombros · Encorvamiento |
-| 👀 Contacto visual | % de tiempo mirando a la cámara |
-| 🙌 Manos | Movimiento excesivo por nerviosismo |
-| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Gemini) |
+| Prioridad | Pendiente |
+|---|---|
+| Alta | Conectar el historial a una base de datos |
+| Alta | Configurar CORS para producción |
+| Media | Utilizar `VITE_API_URL` en la pantalla de grabación |
+| Media | Probar y calibrar umbrales corporales con distintas personas y cámaras |
+| Media | Añadir autenticación si se almacenan sesiones por estudiante |
+| Opcional | Integrar FaceMesh y MediaPipe Hands si el rendimiento lo permite |
 
 ---
 
 ## 🤝 Convenciones del equipo
 
 ### Ramas
-```
-main          →  Código estable y probado
-develop       →  Rama de integración del equipo
-feature/xxx   →  Nueva funcionalidad (ej: feature/camara-webrtc)
-fix/xxx       →  Corrección de bugs (ej: fix/audio-encoding)
+
+```text
+main          → Código estable
+develop       → Rama de integración
+feature/xxx   → Nueva funcionalidad
+fix/xxx       → Corrección de errores
 ```
 
-### Commits (Conventional Commits)
-```
-feat:     nueva funcionalidad
-fix:      corrección de bug
-docs:     cambios en documentación
-style:    formato, sin cambio de lógica
-refactor: refactorización de código
-test:     agregar o modificar tests
-chore:    tareas de mantenimiento
-```
+### Commits
 
-### Ejemplo
-```bash
-git commit -m "feat(m1): implementar captura de video con WebRTC"
-git commit -m "fix(m2): corregir encoding de audio para Whisper"
+```text
+feat:      nueva funcionalidad
+fix:       corrección de errores
+docs:      documentación
+style:     formato sin cambios de lógica
+refactor:  refactorización
+test:      pruebas
+chore:     mantenimiento
 ```
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto fue desarrollado como parte del curso **Herramientas de Desarrollo** — UTP · 2026.
+Proyecto desarrollado como parte del curso **Herramientas de Desarrollo** · UTP · 2026.
 
 ---
 
 <div align="center">
 
-**Habla Bien · IA** — Porque el talento merece ser escuchado. 🎤
+**Habla Bien · IA** · Porque el talento merece ser escuchado. 🎤
 
-*Ingeniería de Sistemas e Informatica · UTP · Piura, Perú*
+*Ingeniería de Sistemas e Informática · UTP · Piura, Perú*
 
 </div>
