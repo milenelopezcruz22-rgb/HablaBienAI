@@ -57,8 +57,15 @@ export const useCamera = () => {
             mr.ondataavailable = (e) => {
                 if (e.data.size > 0) chunksRef.current.push(e.data);
             };
-            mr.onstop = () =>
-                setVideoBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+            mr.onstop = () => {
+                const blob = new Blob(chunksRef.current, {
+                    type: "video/webm"
+                });
+
+                console.log("VIDEO GRABADO:", blob);
+
+                setVideoBlob(blob);
+            };
             mr.start();
         } catch (err) {
             console.error("Error al iniciar grabación:", err);
