@@ -1,174 +1,227 @@
-# Habla Bien IA
+<div align="center">
 
-Entrenador personal de oratoria con inteligencia artificial.
+<br/>
 
-Habla Bien IA permite grabar una exposición desde el navegador, analizar la voz y evaluar aspectos básicos del lenguaje corporal en tiempo real. Al finalizar, muestra un dashboard con métricas y recomendaciones para mejorar la presentación.
+<pre>
+██╗  ██╗ █████╗ ██████╗ ██╗      █████╗     ██████╗ ██╗███████╗███╗   ██╗
+██║  ██║██╔══██╗██╔══██╗██║     ██╔══██╗    ██╔══██╗██║██╔════╝████╗  ██║
+███████║███████║██████╔╝██║     ███████║    ██████╔╝██║█████╗  ██╔██╗ ██║
+██╔══██║██╔══██║██╔══██╗██║     ██╔══██║    ██╔══██╗██║██╔══╝  ██║╚██╗██║
+██║  ██║██║  ██║██████╔╝███████╗██║  ██║    ██████╔╝██║███████╗██║ ╚████║
+╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═══╝
+</pre>
 
-## Estado actual
+# 🎤 Habla Bien · IA
 
-El proyecto se encuentra en desarrollo. Actualmente están implementados:
+### Entrenador Personal de Oratoria con Inteligencia Artificial
 
-- Captura de cámara y micrófono desde el navegador.
-- Grabación de sesiones en formato `.webm`.
-- Transcripción local con `faster-whisper`.
-- Detección de muletillas, velocidad de habla y pausas largas.
-- Puntaje ponderado de voz.
-- Feedback con Groq API o recomendaciones locales como respaldo.
-- Análisis corporal en tiempo real con MediaPipe Pose.
-- Dashboard con resultados de voz y métricas corporales.
-- Historial visual con datos de demostración.
+<br/>
 
-> Importante: el historial todavía no está conectado a una base de datos. La integración con Supabase o PostgreSQL no se encuentra implementada en el código actual.
+[![React](https://img.shields.io/badge/Frontend-React_19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![MediaPipe](https://img.shields.io/badge/IA-MediaPipe_Pose-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/edge/mediapipe)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
 
-## ¿Cómo funciona?
+<br/>
 
-1. El estudiante activa la cámara y el micrófono.
-2. MediaPipe Pose analiza el cuerpo en tiempo real desde el navegador.
-3. El estudiante inicia y detiene la grabación de su exposición.
-4. El frontend envía el archivo `.webm` al backend.
-5. El backend transcribe el audio y calcula las métricas de voz.
-6. El dashboard combina los resultados de voz con las métricas corporales acumuladas durante la sesión.
+> 💡 **Inicio rápido:** `cd frontend && npm install && npm run dev`
 
-## Arquitectura
+> *¿Tienes el conocimiento pero te traiciona el nerviosismo al hablar?*
+> **Habla Bien IA** analiza tu voz y lenguaje corporal para ofrecerte
+> retroalimentación útil en cada sesión de práctica.
+
+<br/>
+
+[Reportar Bug](../../issues) · [Solicitar Feature](../../issues)
+
+<br/>
+
+</div>
+
+---
+
+## 📌 El problema que resolvemos
+
+| Problema | Impacto |
+|---|---|
+| 🎯 **Brecha de empleabilidad** | Egresados talentosos pierden oportunidades por no comunicar sus ideas con claridad |
+| 😰 **Pánico escénico** | El miedo a hablar en público afecta exposiciones y sustentaciones |
+| 📋 **Falta de feedback individual** | Un docente no siempre puede corregir detalladamente a cada estudiante |
+
+---
+
+## ✨ ¿Cómo funciona?
+
+El estudiante activa la cámara y realiza una exposición. La aplicación combina el análisis de voz con métricas corporales acumuladas durante toda la sesión.
+
+| 🎤 Voz | 🧍 Cuerpo | 📊 Resultados |
+|---|---|---|
+| Transcripción local | Postura y hombros | Puntaje de voz |
+| Muletillas | Torso y estabilidad | Métricas corporales |
+| Velocidad de habla | Brazos y manos visibles | Recomendaciones |
+| Pausas largas | Contacto visual aproximado | Eventos relevantes |
+
+```text
+Cámara y micrófono
+        ↓
+Grabación .webm
+        ↓
+┌────────────────────┬────────────────────────┐
+│ Backend            │ Navegador              │
+│ Voz + Whisper      │ Cuerpo + MediaPipe     │
+└────────────────────┴────────────────────────┘
+        ↓
+Dashboard de resultados
+```
+
+---
+
+## 🏗️ Arquitectura del proyecto
 
 ```text
 HablaBienAI/
-├── frontend/                         # React 19 + Vite
+│
+├── 📁 frontend/                         # React 19 · Vite · Tailwind CSS
 │   └── src/
-│       ├── components/               # Componentes visuales reutilizables
-│       ├── pages/                    # Inicio, grabación, dashboard e historial
+│       ├── components/                  # Componentes visuales reutilizables
+│       ├── pages/                       # Inicio · Grabación · Dashboard · Historial
 │       ├── hooks/
-│       │   ├── useCamera.js          # Cámara, micrófono y grabación WebRTC
-│       │   ├── useAnalysis.js        # Integración de audio, cuerpo, rostro y manos
-│       │   ├── useBodyAnalysis.js    # Análisis corporal con MediaPipe Pose
-│       │   ├── useFaceAnalysis.js    # Base opcional para FaceMesh
-│       │   └── useHandAnalysis.js    # Base opcional para MediaPipe Hands
+│       │   ├── useCamera.js             # Cámara, micrófono y grabación
+│       │   ├── useAnalysis.js           # Integración de módulos
+│       │   ├── useBodyAnalysis.js       # Análisis corporal con MediaPipe Pose
+│       │   ├── useFaceAnalysis.js       # Base opcional para FaceMesh
+│       │   └── useHandAnalysis.js       # Base opcional para MediaPipe Hands
 │       └── services/
-│           └── api.js                # Cliente para el endpoint de análisis
-├── backend/
+│           └── api.js                   # Cliente HTTP del backend
+│
+├── 📁 backend/                          # Python 3.11 · FastAPI
 │   ├── app/
-│   │   ├── api/routes/               # Endpoint REST
-│   │   ├── schemas/                  # Esquemas Pydantic
+│   │   ├── api/routes/                  # Endpoint REST
+│   │   ├── schemas/                     # Esquemas Pydantic
 │   │   └── services/
-│   │       ├── transcription_service.py
+│   │       ├── transcription_service.py # faster-whisper
 │   │       ├── speech_metrics_service.py
-│   │       └── groq_service.py
-│   └── tests/                        # Pruebas de métricas de voz y feedback
-└── README.md
+│   │       └── groq_service.py          # Feedback IA o fallback local
+│   └── tests/                           # Pruebas automatizadas
+│
+└── 📖 README.md
 ```
 
-## Stack tecnológico
+---
+
+## 🤖 Stack tecnológico
 
 ### Frontend
 
 | Tecnología | Uso |
 |---|---|
-| React 19 | Interfaz de usuario y gestión de estado |
-| Vite | Entorno de desarrollo y build |
-| Tailwind CSS | Estilos de la interfaz |
-| WebRTC y MediaRecorder | Acceso a cámara, micrófono y grabación |
-| MediaPipe Pose vía CDN | Detección de 33 landmarks corporales |
-| Chart.js | Soporte para visualizaciones |
+| **React 19** | Interfaz de usuario y gestión de estado |
+| **Vite** | Desarrollo local y build de producción |
+| **Tailwind CSS** | Estilos de la interfaz |
+| **WebRTC · MediaRecorder** | Cámara, micrófono y grabación `.webm` |
+| **MediaPipe Pose** vía CDN | Detección de 33 landmarks corporales |
+| **Chart.js** | Soporte para visualizaciones |
 
 ### Backend
 
 | Tecnología | Uso |
 |---|---|
-| Python 3.11+ | Lenguaje principal del backend |
-| FastAPI | API REST |
-| faster-whisper | Transcripción local de audio |
-| Groq API | Feedback de oratoria cuando existe una API key |
-| pytest | Pruebas automatizadas |
+| **Python 3.11+** | Lenguaje principal del servidor |
+| **FastAPI** | API REST |
+| **faster-whisper** | Transcripción local de audio |
+| **Groq API** | Feedback de oratoria cuando existe una API key |
+| **pytest** | Pruebas automatizadas |
 
-## Módulo de análisis corporal
+---
 
-El análisis corporal se ejecuta en el navegador con MediaPipe Pose. No requiere enviar video a un servicio externo para detectar la postura.
+## 🧍 M3 · Análisis de lenguaje corporal
+
+El análisis corporal se ejecuta directamente en el navegador con **MediaPipe Pose**. No requiere enviar el video a un servicio externo para evaluar la postura.
 
 ### Métricas implementadas
 
-- Encuadre de rostro, hombros y torso.
-- Alineación de hombros.
-- Posible encorvamiento.
-- Pecho abierto aproximado.
-- Contacto visual aproximado usando la posición de nariz y ojos.
-- Estabilidad corporal y movimiento excesivo del torso.
-- Orientación frontal o lateral del torso.
-- Inclinación lateral.
-- Visibilidad de manos.
-- Actividad gestual aproximada mediante movimiento de muñecas.
-- Rigidez prolongada de brazos.
-- Estados de brazos: neutros, abiertos, elevados, cruzados o parcialmente visibles.
-- Porcentajes acumulados durante toda la sesión.
-- Eventos sostenidos con segundo de inicio y duración.
-- Recomendaciones corporales generadas mediante reglas.
+| Dimensión | ¿Qué mide? |
+|---|---|
+| **Encuadre** | Visibilidad del rostro, hombros y torso |
+| **Postura** | Alineación de hombros, posible encorvamiento y pecho abierto aproximado |
+| **Torso** | Orientación frontal o lateral, inclinación y estabilidad |
+| **Brazos** | Estados neutros, abiertos, elevados, cruzados o parcialmente visibles |
+| **Manos** | Visibilidad y actividad gestual aproximada mediante movimiento de muñecas |
+| **Contacto visual** | Aproximación basada en la posición de nariz y ojos |
+| **Sesión completa** | Porcentajes acumulados, eventos sostenidos y recomendaciones |
 
 ### Rendimiento visual
 
-La capa visual del esqueleto utiliza interpolación y una predicción breve de movimiento. El análisis de MediaPipe y el dibujo del canvas trabajan con ritmos separados para conservar una interfaz fluida sin ejecutar el modelo en cada frame.
+La visualización del esqueleto utiliza interpolación y una predicción breve de movimiento. El dibujo del canvas y el procesamiento de MediaPipe trabajan con ritmos separados para mantener una respuesta fluida.
 
-### Módulos opcionales preparados
+### Arquitectura modular
 
-El proyecto incluye una base modular para añadir posteriormente:
+| Hook | Estado | Propósito |
+|---|---|---|
+| `useBodyAnalysis.js` | ✅ Activo | Postura, torso, brazos, estabilidad y métricas acumuladas |
+| `useFaceAnalysis.js` | 🧩 Preparado | Base para integrar FaceMesh posteriormente |
+| `useHandAnalysis.js` | 🧩 Preparado | Base para integrar MediaPipe Hands posteriormente |
+| `useAnalysis.js` | ✅ Activo | Une audio y módulos corporales para la interfaz |
 
-- `useFaceAnalysis.js`: FaceMesh para mejorar orientación facial y seguimiento aproximado de mirada.
-- `useHandAnalysis.js`: MediaPipe Hands para gestos finos como palma abierta, puño o señalar.
+> FaceMesh y MediaPipe Hands están preparados como módulos opcionales, pero todavía no cargan modelos adicionales. Se mantienen desactivados para evitar una carga innecesaria en equipos modestos.
 
-Estos módulos permanecen desactivados por defecto y todavía no cargan modelos adicionales.
+---
 
-## Módulo de análisis de voz
+## 🎤 M2 · Análisis de voz
 
-El backend expone un endpoint que recibe audio o video y devuelve:
+El backend recibe audio o video y devuelve:
 
-- Transcripción.
-- Total de palabras.
+- Transcripción local con `faster-whisper`.
+- Total de palabras y duración.
 - Muletillas normalizadas y contextuales.
-- Duración de la grabación.
 - Palabras por minuto.
-- Clasificación del ritmo: `lento`, `adecuado` o `rapido`.
+- Ritmo: `lento`, `adecuado` o `rapido`.
 - Pausas largas y duración acumulada.
 - Puntaje ponderado de voz.
-- Feedback y recomendaciones.
+- Feedback con Groq API o recomendaciones locales como respaldo.
 
-Si `GROQ_API_KEY` no está configurada, se utiliza feedback local como respaldo.
+---
 
-## Historial de sesiones
+## 📈 Historial de progreso
 
-La vista de historial existe en el frontend, pero actualmente utiliza datos de demostración definidos en:
+La vista de historial existe, pero actualmente utiliza datos de demostración definidos en:
 
 ```text
 frontend/src/constants.js
 ```
 
-Pendiente:
+> ⚠️ **Pendiente:** el historial todavía no está conectado a una base de datos. Supabase o PostgreSQL no forman parte de la implementación actual.
 
-- Conectar una base de datos.
-- Guardar sesiones reales.
-- Consultar el historial por usuario.
-- Implementar autenticación y políticas de seguridad si se utiliza Supabase.
+---
 
-## Estado de los módulos
+## 📦 Estado de los módulos
 
 | Módulo | Nombre | Estado |
 |---|---|---|
-| M1 | Captura de medios | Implementado |
-| M2 | Análisis de voz | Implementado, sujeto a pruebas con audios reales |
-| M3 | Análisis de lenguaje corporal | Implementado con MediaPipe Pose |
-| M4 | Fusión de resultados | Parcial: el dashboard combina resultados de voz y cuerpo |
-| M5 | Evaluación y feedback | Parcial: existen dashboard y recomendaciones |
-| M6 | Historial persistente | Pendiente: solo existen datos de demostración |
+| **M1** | Captura de medios | ✅ Implementado |
+| **M2** | Análisis de voz | ✅ Implementado · sujeto a pruebas con audios reales |
+| **M3** | Análisis de lenguaje corporal | ✅ Implementado con MediaPipe Pose |
+| **M4** | Fusión de resultados | 🔄 Parcial · dashboard con voz y cuerpo |
+| **M5** | Evaluación y feedback | 🔄 Parcial · dashboard y recomendaciones |
+| **M6** | Historial persistente | ⏳ Pendiente · datos de demostración |
 
-## Equipo de desarrollo
+---
+
+## 👥 Equipo de desarrollo
 
 | Módulo | Encargado |
 |---|---|
-| M1 · Captura de medios | Jhon Peña Campos |
-| M2 · Análisis de voz | Raul Seminario |
-| M3 · Análisis de lenguaje corporal | Jeix Lopez Castillo |
-| M4 · Módulo de fusión IA | Raul Seminario |
-| M5 · Evaluación y feedback | Milene Lopez Cruz |
-| M6 · Historial de progreso | Israel Ramos Silva |
+| **M1** · Captura de medios | Jhon Peña Campos |
+| **M2** · Análisis de voz | Raul Seminario |
+| **M3** · Análisis de lenguaje corporal | Jeix Lopez Castillo |
+| **M4** · Módulo de fusión IA | Raul Seminario |
+| **M5** · Evaluación y feedback | Milene Lopez Cruz |
+| **M6** · Historial de progreso | Israel Ramos Silva |
 
-## Instalación y uso local
+---
+
+## 🚀 Instalación y uso local
 
 ### Prerrequisitos
 
@@ -185,7 +238,7 @@ cd HablaBienAI
 
 ### 2. Configurar variables de entorno
 
-Copia `.env.example` como `.env` en la raíz del proyecto y completa las variables necesarias:
+Copia `.env.example` como `.env` en la raíz y completa las variables necesarias:
 
 ```env
 GROQ_API_KEY=tu_clave_de_groq
@@ -193,7 +246,7 @@ BACKEND_PORT=8000
 VITE_API_URL=http://localhost:8000
 ```
 
-`GROQ_API_KEY` es opcional: si no existe, el backend utiliza recomendaciones locales.
+`GROQ_API_KEY` es opcional. Si no existe, el backend utiliza recomendaciones locales.
 
 ### 3. Levantar el backend
 
@@ -228,26 +281,24 @@ npm install
 npm run dev
 ```
 
-La aplicación estará disponible normalmente en:
+| Servicio | URL |
+|---|---|
+| Aplicación web | `http://localhost:5173` |
+| Documentación API | `http://localhost:8000/docs` |
+| Estado del backend | `http://localhost:8000/health` |
 
-```text
-http://localhost:5173
-```
+---
 
-La documentación interactiva de la API estará disponible en:
-
-```text
-http://localhost:8000/docs
-```
-
-## Endpoint disponible
+## 📡 Endpoints disponibles
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `POST` | `/api/v1/analizar` | Recibe audio o video y devuelve transcripción, métricas de voz, puntaje y feedback |
+| `POST` | `/api/v1/analizar` | Recibe audio o video y devuelve métricas de voz, puntaje y feedback |
 | `GET` | `/health` | Comprueba si la API está activa |
 
-## Pruebas y build
+---
+
+## 🧪 Pruebas y build
 
 Backend:
 
@@ -263,15 +314,30 @@ cd frontend
 npm run build
 ```
 
-## Convenciones de Git
+---
+
+## 🗺️ Roadmap técnico
+
+| Prioridad | Pendiente |
+|---|---|
+| Alta | Conectar el historial a una base de datos |
+| Alta | Configurar CORS para producción |
+| Media | Utilizar `VITE_API_URL` en la pantalla de grabación |
+| Media | Probar y calibrar umbrales corporales con distintas personas y cámaras |
+| Media | Añadir autenticación si se almacenan sesiones por estudiante |
+| Opcional | Integrar FaceMesh y MediaPipe Hands si el rendimiento lo permite |
+
+---
+
+## 🤝 Convenciones del equipo
 
 ### Ramas
 
 ```text
-main          Código estable
-develop       Rama de integración
-feature/xxx   Nueva funcionalidad
-fix/xxx       Corrección de errores
+main          → Código estable
+develop       → Rama de integración
+feature/xxx   → Nueva funcionalidad
+fix/xxx       → Corrección de errores
 ```
 
 ### Commits
@@ -286,16 +352,18 @@ test:      pruebas
 chore:     mantenimiento
 ```
 
-## Pendientes principales
+---
 
-- Conectar el historial a una base de datos.
-- Añadir autenticación si se almacenan sesiones por estudiante.
-- Configurar CORS para producción.
-- Mejorar la URL del backend en la pantalla de grabación usando `VITE_API_URL`.
-- Probar y calibrar umbrales corporales con distintas personas y cámaras.
-- Implementar FaceMesh y MediaPipe Hands solamente si el rendimiento lo permite.
-- Corregir textos con codificación incorrecta en algunos componentes del frontend.
+## 📄 Licencia
 
-## Licencia
+Proyecto desarrollado como parte del curso **Herramientas de Desarrollo** · UTP · 2026.
 
-Proyecto desarrollado como parte del curso Herramientas de Desarrollo, UTP 2026.
+---
+
+<div align="center">
+
+**Habla Bien · IA** · Porque el talento merece ser escuchado. 🎤
+
+*Ingeniería de Sistemas e Informática · UTP · Piura, Perú*
+
+</div>
