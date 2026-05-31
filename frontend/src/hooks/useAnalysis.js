@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useBodyAnalysis } from "./useBodyAnalysis";
+import { useFaceAnalysis } from "./useFaceAnalysis";
+import { useHandAnalysis } from "./useHandAnalysis";
 
 function getPosturaLabel(score) {
     if (score >= 80) return "excelente";
@@ -22,7 +24,9 @@ export const useAnalysis = (stream, isActive, videoRef) => {
     const analyserRef = useRef(null);
     const tickRef = useRef(null);
 
-    const { metrics, isReady, framing, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useBodyAnalysis(videoRef, stream);
+    const { metrics, isReady, framing, latestPoseRef } = useBodyAnalysis(videoRef, stream);
+    const face = useFaceAnalysis({ enabled: false });
+    const hands = useHandAnalysis({ enabled: false });
 
     useEffect(() => {
         if (!isReady || !stream || !isActive) {
@@ -113,5 +117,17 @@ export const useAnalysis = (stream, isActive, videoRef) => {
         };
     }, [stream, isActive, startAudio, stopAudio]);
 
-    return { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics: metrics, latestPoseRef, latestFaceRef, faceMeshReadyRef };
+    return {
+        postura,
+        contactoVisual,
+        audioLevel,
+        audioEstado,
+        framing,
+        bodyMetrics: { ...metrics, ...hands.metrics },
+        faceMetrics: face.metrics,
+        handMetrics: hands.metrics,
+        latestPoseRef,
+        latestFaceRef: face.latestFaceRef,
+        faceMeshReadyRef: face.faceMeshReadyRef,
+    };
 };
