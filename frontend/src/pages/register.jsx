@@ -69,7 +69,7 @@ function Register() {
             return;
         }
 
-        navigate("/camara");
+        navigate("/inicio");
     } catch (err) {
         setErrors({ email: "Error al crear la cuenta" });
     } finally {
