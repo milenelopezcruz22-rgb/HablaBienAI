@@ -50,7 +50,7 @@ function Login() {
                 return;
             }
 
-            navigate("/inicio");
+            navigate("/camara");
         } catch (err) {
             setErrors({ email: "Error al iniciar sesión" });
         } finally {
