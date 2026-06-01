@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MicrophoneIcon } from "../icons";
+import { supabase } from "../services/supabase";
 
 function Register() {
     const navigate = useNavigate();
@@ -43,13 +44,38 @@ function Register() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const validationErrors = validate();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return;
+    }
+    setLoading(true);
+
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+                data: {
+                    nombre: formData.nombre,
+                    apellido: formData.apellido,
+                }
+            }
+        });
+
+        if (error) {
+            setErrors({ email: error.message });
             return;
         }
-        setLoading(true);
+
+        navigate("/inicio");
+    } catch (err) {
+        setErrors({ email: "Error al crear la cuenta" });
+    } finally {
+        setLoading(false);
+    }
+};
 
         // TODO: conectar con el backend cuando esté listo
         // Ejemplo:
