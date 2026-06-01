@@ -77,23 +77,6 @@ function Register() {
     }
 };
 
-        // TODO: conectar con el backend cuando esté listo
-        // Ejemplo:
-        // const response = await registerUser({
-        //     nombre: formData.nombre,
-        //     apellido: formData.apellido,
-        //     email: formData.email,
-        //     password: formData.password,
-        // });
-        // if (response.token) { ... navigate("/camera"); }
-
-        // Simulación de delay de red
-        setTimeout(() => {
-            setLoading(false);
-            navigate("/camera");
-        }, 800);
-    };
-
     const inputClass = (field) =>
         `w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all
         ${errors[field]
@@ -249,6 +232,7 @@ function Register() {
             </div>
         </div>
     );
+    
 
-
+}
 export default Register;
