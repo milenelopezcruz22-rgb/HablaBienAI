@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MicrophoneIcon } from "../icons";
+import { supabase } from "../services/supabase";
 
 function Login() {
     const navigate = useNavigate();
@@ -38,16 +39,23 @@ function Login() {
         }
         setLoading(true);
 
-        // TODO: conectar con el backend cuando esté listo
-        // Ejemplo:
-        // const response = await loginUser(formData.email, formData.password);
-        // if (response.token) { localStorage.setItem("token", response.token); ... }
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
 
-        // Simulación de delay de red
-        setTimeout(() => {
+            if (error) {
+                setErrors({ email: "Correo o contraseña incorrectos" });
+                return;
+            }
+
+            navigate("/inicio");
+        } catch (err) {
+            setErrors({ email: "Error al iniciar sesión" });
+        } finally {
             setLoading(false);
-            navigate("/camera");
-        }, 800);
+        }
     };
 
     return (
