@@ -50,7 +50,7 @@ function Login() {
                 return;
             }
 
-            navigate("/incio");
+            navigate("/")
         } catch (err) {
             setErrors({ email: "Error al iniciar sesión" });
         } finally {
