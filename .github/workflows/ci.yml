@@ -1,33 +1,40 @@
 name: CI HablaBienAI
 
 on:
-  push:
-    branches:
-      - Modulo-de-Historial
+push:
+branches:
+- Modulo-de-Historial
 
-  pull_request:
-    branches:
-      - main
+pull_request:
+branches:
+- main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
+```
+defaults:
+  run:
+    working-directory: frontend
 
-    steps:
-      - name: Descargar código
-        uses: actions/checkout@v4
+steps:
+  - name: Descargar código
+    uses: actions/checkout@v4
 
-      - name: Instalar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  - name: Instalar Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
 
-      - name: Instalar dependencias
-        run: npm install
+  - name: Limpiar dependencias e instalar
+    run: |
+      rm -rf node_modules
+      npm install
 
-      - name: Compilar proyecto
-        run: npm run build
+  - name: Reconstruir paquetes nativos
+    run: npm rebuild
+
+  - name: Compilar proyecto
+    run: npm run build
+```
