@@ -40,9 +40,15 @@ function Dashboard() {
           Volver
         </Button>
 
-        <h1 className="text-xl font-semibold text-gray-900 text-center w-full md:w-auto">
-          Resultados del Análisis
-        </h1>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-6 text-center shadow-md">
+          <h1 className="text-2xl font-bold mb-2">
+            Resultados del Análisis
+          </h1>
+
+          <p className="text-blue-100 text-sm">
+            Aquí tienes el resumen de tu desempeño en comunicación
+          </p>
+        </div>
 
         <Button
           variant="outline"
@@ -54,11 +60,15 @@ function Dashboard() {
 
       </div>
 
+      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-6">
+        Indicadores principales
+      </h2>
+
       <div className="flex flex-col gap-8">
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          <Card className="flex flex-col items-center justify-center p-8 gap-4">
+          <Card className="flex flex-col items-center justify-center p-8 gap-3 bg-white shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 text-blue-600">
               <Volume2 size={22} />
 
@@ -74,7 +84,7 @@ function Dashboard() {
             </p>
           </Card>
 
-          <Card className="flex flex-col justify-center p-6">
+          <Card className="flex flex-col items-center justify-center p-8 gap-3 bg-white shadow-sm border border-gray-100">
             <p className="text-sm text-gray-500 mb-2">
               Total de palabras
             </p>
@@ -88,7 +98,7 @@ function Dashboard() {
             </p>
           </Card>
 
-          <Card className="flex flex-col justify-center p-6">
+          <Card className="flex flex-col items-center justify-center p-8 gap-3 bg-white shadow-sm border border-gray-100">
             <p className="text-sm text-gray-500 mb-2">
               Muletillas detectadas
             </p>
@@ -122,17 +132,35 @@ function Dashboard() {
             <ScoreDisplay score={contactoVisual} size="lg" />
           </Card>
 
-          <Card className="p-6 flex flex-col items-center">
-            <h2 className="text-sm text-gray-500">
-              Frames Analizados
-            </h2>
-
-            <h2 className="text-3xl font-bold">
-              {frames}
-            </h2>
-          </Card>
-
         </div>
+
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-10">
+          Insights de la IA
+        </h2>
+
+        <Card className="p-6 bg-white border border-gray-100 shadow-sm">
+          <div className="flex flex-col gap-3">
+            
+            {puntajeGeneral >= 75 && (
+              <div className="p-3 bg-green-50 border-l-4 border-green-500 rounded-md text-sm">
+                Tu comunicación general es sólida y clara.
+              </div>
+            )}
+
+            {voz?.total_muletillas > 5 && (
+              <div className="p-3 bg-amber-50 border-l-4 border-amber-500 rounded-md text-sm">
+                Usas muletillas con frecuencia, intenta reducirlas.
+              </div>
+            )}
+
+            {contactoVisual !== 'estable' && (
+              <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-md text-sm">
+                El contacto visual puede mejorar para generar más conexión.
+              </div>
+            )}
+
+          </div>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -141,7 +169,7 @@ function Dashboard() {
             {voz?.muletillas &&
             Object.keys(voz.muletillas).length > 0 ? (
 
-              <ul className="flex flex-col gap-4">
+              <ul className="grid gap-3">
 
                 {Object.entries(voz.muletillas).map(
                   ([muletilla, cantidad], i) => (
@@ -188,7 +216,7 @@ function Dashboard() {
 
             <div className="flex flex-col gap-4">
 
-              <div className="p-3 bg-purple-50 rounded-md border-l-4 border-purple-500">
+              <div className="p-3 bg-gray-50 rounded-md border border-gray-100">
 
                 <p className="text-sm text-gray-900">
                   <strong>Transcripción:</strong>
