@@ -119,8 +119,6 @@ const tips = [
 ];
 const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
-
-
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
@@ -182,6 +180,7 @@ export default function GrabarSesion() {
     startRecording,
     stopRecording
 } = useCamera();
+
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
