@@ -23,19 +23,12 @@ function Dashboard() {
   const voz = analysisResult?.voz || {}
   const corporal = analysisResult?.corporal || {}
   const contactoVisual = corporal?.contactoVisual || 0
-
   const posturaScore = corporal?.posturaScore || 0
-
-  const contactoVisualScore =
-    contactoVisual === 'estable' ? 100 :
-    contactoVisual === 'intermitente' ? 60 :
-    contactoVisual === 'ausente' ? 20 :
-    0
 
   const puntajeGeneral = Math.round(
     (voz?.score_voz || 0) * 0.6 +
     posturaScore * 0.2 +
-    contactoVisualScore * 0.2
+    contactoVisual * 0.2
   )
 
   const insights = []
@@ -110,7 +103,9 @@ function Dashboard() {
               <Volume2 size={16} />
               Voz
             </div>
-            <div className="text-3xl font-bold">{puntajeGeneral}</div>
+            <div className="text-3xl font-bold">
+              {voz?.score_voz || 0}
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -127,7 +122,7 @@ function Dashboard() {
               Contacto visual
             </div>
             <div className="text-3xl font-bold">
-              {contactoVisual === 'estable' ? 'Bueno' : 'Mejorar'}
+              {contactoVisual}%
             </div>
           </div>
         </div>

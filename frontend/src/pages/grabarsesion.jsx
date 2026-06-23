@@ -148,7 +148,7 @@ export default function GrabarSesion() {
 
         const data = await response.json();
 
-        console.log("RESULTADO IA:", data);
+        console.log("VOZ METRICS:", data);
         console.log("BODY METRICS:", bodyMetrics);
 
         const resultadoCompleto = {
@@ -161,7 +161,6 @@ export default function GrabarSesion() {
             JSON.stringify(resultadoCompleto)
         );
 
-        // navegar al dashboard
         navigate("/dashboard");
 
     } catch (error) {
@@ -170,16 +169,16 @@ export default function GrabarSesion() {
 };
     
     const {
-    videoRef,
-    stream,
-    error,
-    startCamera,
-    stopCamera,
-    isRecording,
-    videoBlob,
-    startRecording,
-    stopRecording
-} = useCamera();
+        videoRef,
+        stream,
+        error,
+        startCamera,
+        stopCamera,
+        isRecording,
+        videoBlob,
+        startRecording,
+        stopRecording
+    } = useCamera();
 
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
