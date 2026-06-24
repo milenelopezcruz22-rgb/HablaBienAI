@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
+import { analizarAudio } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
@@ -123,74 +124,50 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
 export default function GrabarSesion() {
     const navigate = useNavigate();
-
-    const [analysisResult, setAnalysisResult] = useState(null);
-
-    const enviarAnalisis = async (blob) => {
-    try {
-        const formData = new FormData();
-
-        formData.append(
-            "audio",
-            blob,
-            "grabacion.webm"
-        );
-
-        const response = await fetch(
-            "http://localhost:8000/api/v1/analizar",
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Error al analizar el video");
-        }
-
-        const data = await response.json();
-
-        console.log("RESULTADO IA:", data);
-        console.log("BODY METRICS:", bodyMetrics);
-
-        const resultadoCompleto = {
-            voz: data,
-            corporal: bodyMetrics
-        };
-
-        localStorage.setItem(
-            "analysisResult",
-            JSON.stringify(resultadoCompleto)
-        );
-
-        // navegar al dashboard
-        navigate("/dashboard");
-
-    } catch (error) {
-        console.error("Error enviando análisis:", error);
-    }
-};
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisError, setAnalysisError] = useState(null);
+    const getSnapshotRef = useRef(null);
     
    
     
     const {
-    videoRef,
-    stream,
-    error,
-    startCamera,
-    stopCamera,
-    isRecording,
-    videoBlob,
-    startRecording,
-    stopRecording
-} = useCamera();
-    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
+        videoRef,
+        stream,
+        error,
+        startCamera,
+        stopCamera,
+        isRecording,
+        videoBlob,
+        startRecording,
+        stopRecording,
+    } = useCamera();
+
+    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef, getSnapshot } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
+    // Mantiene getSnapshot siempre actualizado sin recrear el effect
+    useEffect(() => { getSnapshotRef.current = getSnapshot; }, [getSnapshot]);
+
     useEffect(() => {
-    if (videoBlob) {
-        enviarAnalisis(videoBlob);
-    }
+        if (!videoBlob) return;
+
+        const enviar = async () => {
+            setIsAnalyzing(true);
+            setAnalysisError(null);
+            try {
+                const corporal = getSnapshotRef.current?.() ?? {};
+                const data = await analizarAudio(videoBlob, corporal);
+                localStorage.setItem("analysisResult", JSON.stringify({ voz: data, corporal }));
+                navigate("/dashboard");
+            } catch (err) {
+                setAnalysisError("No se pudo analizar el audio. Verifica que el backend esté corriendo.");
+                console.error(err);
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+
+        enviar();
     }, [videoBlob]);
 
     const animRef = useRef(null);
@@ -259,9 +236,19 @@ export default function GrabarSesion() {
 
                     {/* COLUMNA 2: VIDEO Y CONTROLES */}
                     <div className="flex flex-col items-center">
-                        {error && (
+                        {(error || analysisError) && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
-                                {error}
+                                {error || analysisError}
+                            </div>
+                        )}
+
+                        {isAnalyzing && (
+                            <div className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-600 text-sm font-medium mb-4">
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                </svg>
+                                Analizando tu sesión con IA...
                             </div>
                         )}
 
