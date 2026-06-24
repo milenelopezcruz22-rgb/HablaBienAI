@@ -24,12 +24,9 @@ function Dashboard() {
   console.log('DATA DASHBOARD:', analysisResult)
 
   const puntajeGeneral = voz?.score_voz || 0
-  const posturaScore = corporal?.porcentajeBuenaPostura ?? corporal?.posturaScore ?? 0
-  const contactoVisual = corporal?.porcentajeContactoVisual ?? corporal?.contactoVisual ?? 0
-  const movimientoScore = corporal?.movimientoScore ?? 0
+  const posturaScore = corporal?.posturaScore || 0
+  const contactoVisual = corporal?.contactoVisual || 0
   const frames = corporal?.frames || 0
-  const recomendacionesCorporales = corporal?.recomendacionesCorporales || []
-  const eventosCorporales = corporal?.eventos || []
 
   return (
     <div className="flex flex-col gap-8 p-6">
@@ -62,7 +59,7 @@ function Dashboard() {
       <div className="flex flex-col gap-8">
 
         {/* TARJETAS SUPERIORES */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* SCORE */}
           <Card className="flex flex-col items-center justify-center p-8 gap-4">
@@ -130,14 +127,6 @@ function Dashboard() {
             </h2>
 
             <ScoreDisplay score={contactoVisual} size="lg" />
-          </Card>
-
-          <Card className="p-6 flex flex-col items-center">
-            <h2 className="text-sm text-gray-500">
-              Estabilidad Corporal
-            </h2>
-
-            <ScoreDisplay score={movimientoScore} size="lg" />
           </Card>
 
           <Card className="p-6 flex flex-col items-center">
@@ -262,53 +251,6 @@ function Dashboard() {
             </div>
           </Card>
         )}
-
-        <Card title="Análisis Corporal">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              ['Buena postura', corporal?.porcentajeBuenaPostura ?? 0],
-              ['Brazos abiertos', corporal?.porcentajeBrazosAbiertos ?? 0],
-              ['Brazos cruzados', corporal?.porcentajeBrazosCruzados ?? 0],
-              ['Actividad gestual', corporal?.actividadGestual ?? 0],
-              ['Manos visibles', corporal?.porcentajeManosVisibles ?? 0],
-              ['Torso de lado', corporal?.porcentajeTorsoDeLado ?? 0],
-              ['Inclinación lateral', corporal?.porcentajeInclinacionLateral ?? 0],
-              ['Rigidez de brazos', corporal?.porcentajeRigidezBrazos ?? 0],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-                <p className="text-xs text-slate-500">{label}</p>
-                <p className="mt-1 text-xl font-bold text-slate-800">{value}%</p>
-              </div>
-            ))}
-          </div>
-
-          {recomendacionesCorporales.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">Recomendaciones corporales</h3>
-              <ul className="flex flex-col gap-2">
-                {recomendacionesCorporales.map((recomendacion, index) => (
-                  <li key={index} className="flex gap-2 text-sm text-slate-600">
-                    <Lightbulb size={16} className="text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <span>{recomendacion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {eventosCorporales.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">Eventos relevantes</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eventosCorporales.slice(-8).map((evento, index) => (
-                  <li key={`${evento.tipo}-${index}`} className="text-xs text-slate-600 bg-amber-50 border border-amber-100 rounded-md p-3">
-                    {evento.tipo.replaceAll('_', ' ')}: segundo {evento.segundo}, durante {evento.duracion_segundos}s
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Card>
 
       </div>
 
