@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useBodyAnalysis } from "./useBodyAnalysis";
+import { useFaceAnalysis } from "./useFaceAnalysis";
+import { useHandAnalysis } from "./useHandAnalysis";
 
 function getPosturaLabel(score) {
   if (score >= 80) return "excelente";
@@ -19,16 +21,15 @@ export const useAnalysis = (stream, isActive, videoRef) => {
   const [noDetectTimeout, setNoDetectTimeout] = useState(false);
 
   const ctxRef = useRef(null);
+  const analyserRef = useRef(null);
   const tickRef = useRef(null);
 
-  const {
-    metrics,
-    isReady,
-    framing,
-    latestPoseRef,
-    latestFaceRef,
-    faceMeshReadyRef,
-  } = useBodyAnalysis(videoRef, stream);
+  const { metrics, isReady, framing, latestPoseRef } = useBodyAnalysis(
+    videoRef,
+    stream,
+  );
+  const face = useFaceAnalysis(videoRef, stream, { enabled: true });
+  const hands = useHandAnalysis({ enabled: false });
 
   useEffect(() => {
     if (!isReady || !stream || !isActive) {
@@ -62,6 +63,11 @@ export const useAnalysis = (stream, isActive, videoRef) => {
 
   const contactoVisual = useMemo(() => {
     if (!stream || !isActive) return null;
+
+    if (face.metrics.isReady && face.metrics.contactoVisualPreciso !== null) {
+      return getContactoLabel(face.metrics.contactoVisualPreciso);
+    }
+
     if (!isReady) return "esperando";
     if (!metrics.frames) {
       if (noDetectTimeout) return "nodetect";
@@ -75,7 +81,16 @@ export const useAnalysis = (stream, isActive, videoRef) => {
     stream,
     isActive,
     noDetectTimeout,
+    face.metrics.isReady,
+    face.metrics.contactoVisualPreciso,
   ]);
+
+  const contactoVisualRaw = useMemo(() => {
+    if (face.metrics.isReady && face.metrics.contactoVisualPreciso !== null) {
+      return face.metrics.contactoVisualPreciso;
+    }
+    return metrics.contactoVisual;
+  }, [metrics.contactoVisual, face.metrics.isReady, face.metrics.contactoVisualPreciso]);
 
   const startAudio = useCallback((mediaStream) => {
     try {
@@ -89,6 +104,7 @@ export const useAnalysis = (stream, isActive, videoRef) => {
       const source = ctx.createMediaStreamSource(mediaStream);
       source.connect(analyser);
       ctxRef.current = ctx;
+      analyserRef.current = analyser;
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
@@ -135,12 +151,15 @@ export const useAnalysis = (stream, isActive, videoRef) => {
   return {
     postura,
     contactoVisual,
+    contactoVisualRaw,
     audioLevel,
     audioEstado,
     framing,
-    bodyMetrics: metrics,
+    bodyMetrics: { ...metrics, ...hands.metrics },
+    faceMetrics: face.metrics,
+    handMetrics: hands.metrics,
     latestPoseRef,
-    latestFaceRef,
-    faceMeshReadyRef,
+    latestFaceRef: face.latestFaceRef,
+    faceMeshReadyRef: face.faceMeshReadyRef,
   };
 };

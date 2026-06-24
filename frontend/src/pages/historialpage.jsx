@@ -1,7 +1,7 @@
 // HistorialPage.jsx
 import { useState } from "react";
 import { Search, History, ArrowUpRight, SlidersHorizontal } from "lucide-react";
-import Historial from "../components/historial";
+import Historial from "../components/Historial";
 
 export default function HistorialPage() {
     const [busqueda, setBusqueda] = useState("");

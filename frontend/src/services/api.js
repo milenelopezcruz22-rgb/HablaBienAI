@@ -1,18 +1,34 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = "http://localhost:3001/api";
 
-export async function analizarAudio(audioBlob) {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'grabacion.webm');
+async function request(path, options = {}) {
+  const token = localStorage.getItem("token");
+  const headers = { "Content-Type": "application/json", ...options.headers };
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await fetch(`${API_URL}/api/v1/analizar`, {
-        method: 'POST',
-        body: formData,
-    });
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const data = await res.json();
 
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Error al analizar el audio' }));
-        throw new Error(error.detail || 'Error al analizar el audio');
-    }
-
-    return response.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Error del servidor");
+  }
+  return data;
 }
+
+export const api = {
+  login: (email, password) =>
+    request("/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+
+  register: (email, password, nombre, apellido) =>
+    request("/register", { method: "POST", body: JSON.stringify({ nombre, apellido, email, password }) }),
+
+  me: () => request("/me"),
+
+  sesiones: {
+    list: () => request("/sesiones"),
+    get: (id) => request(`/sesiones/${id}`),
+    create: (data) =>
+      request("/sesiones", { method: "POST", body: JSON.stringify(data) }),
+    delete: (id) =>
+      request(`/sesiones/${id}`, { method: "DELETE" }),
+  },
+};

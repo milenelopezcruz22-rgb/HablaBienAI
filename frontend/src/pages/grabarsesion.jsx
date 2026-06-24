@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
+import { api } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
@@ -16,7 +17,7 @@ const posturaConfig = {
 };
 
 const contactoConfig = {
-    estable: { label: 'Estable', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+    estable: { label: 'Estable (IA)', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
     intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
     ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
     esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
@@ -119,27 +120,21 @@ const tips = [
 ];
 const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
+
+
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
-    const [analysisResult, setAnalysisResult] = useState(null);
+    const grabarInicio = useRef(null);
 
     const enviarAnalisis = async (blob) => {
     try {
         const formData = new FormData();
-
-        formData.append(
-            "audio",
-            blob,
-            "grabacion.webm"
-        );
+        formData.append("audio", blob, "grabacion.webm");
 
         const response = await fetch(
             "http://localhost:8000/api/v1/analizar",
-            {
-                method: "POST",
-                body: formData,
-            }
+            { method: "POST", body: formData }
         );
 
         if (!response.ok) {
@@ -148,53 +143,66 @@ export default function GrabarSesion() {
 
         const data = await response.json();
 
-        console.log("VOZ METRICS:", data);
-        console.log("BODY METRICS:", bodyMetrics);
-
         const resultadoCompleto = {
             voz: data,
-            corporal: bodyMetrics
+            corporal: bodyMetrics,
+            facial: faceMetrics
         };
 
-        localStorage.setItem(
-            "analysisResult",
-            JSON.stringify(resultadoCompleto)
-        );
+        localStorage.setItem("analysisResult", JSON.stringify(resultadoCompleto));
 
-        navigate("/dashboard");
+        const duracion = grabarInicio.current
+            ? Math.round((Date.now() - grabarInicio.current) / 1000)
+            : 0;
+
+        const puntaje = data?.score_voz || 0;
+
+        const sesion = await api.sesiones.create({
+            titulo: `Sesion ${new Date().toLocaleDateString("es-MX")}`,
+            duracion_seg: duracion,
+            puntaje_general: puntaje,
+            analisis: resultadoCompleto,
+        });
+
+        navigate(`/dashboard/${sesion.sesion.id}`);
 
     } catch (error) {
-        console.error("Error enviando análisis:", error);
+        console.error("Error enviando analisis:", error);
     }
 };
     
+   
+    
     const {
-        videoRef,
-        stream,
-        error,
-        startCamera,
-        stopCamera,
-        isRecording,
-        videoBlob,
-        startRecording,
-        stopRecording
-    } = useCamera();
-    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
+    videoRef,
+    stream,
+    error,
+    startCamera,
+    stopCamera,
+    isRecording,
+    videoBlob,
+    startRecording,
+    stopRecording
+} = useCamera();
+    const { postura, contactoVisual, contactoVisualRaw, audioLevel, audioEstado, framing, bodyMetrics, faceMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (videoBlob) {
-            enviarAnalisis(videoBlob);
+        if (isRecording) {
+            grabarInicio.current = Date.now();
         }
+    }, [isRecording]);
+
+    useEffect(() => {
+    if (videoBlob) {
+        enviarAnalisis(videoBlob);
+    }
     }, [videoBlob]);
 
     const animRef = useRef(null);
     const cvRef = useRef(contactoVisual);
     useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !stream) return;
@@ -318,8 +326,8 @@ export default function GrabarSesion() {
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
                                             style={{ background: cc.bg, color: cc.color, border: `1px solid ${cc.color}40` }}
                                         >
-                                            <Eye size={13} />
-                                            <span>Contacto Visual: <strong>{cc.label}</strong></span>
+                                    <Eye size={13} />
+                                    <span>{faceMeshReadyRef.current ? "Contacto (IA):" : "Contacto Visual:"} <strong>{cc.label}</strong></span>
                                         </div>
                                     )}
                                     {bodyMetrics?.gestoMano && (
@@ -450,7 +458,7 @@ export default function GrabarSesion() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                                            <Eye size={12} /> Contacto Visual
+                                            <Eye size={12} /> {faceMetrics?.isReady ? "Contacto IA" : "Contacto Visual"}
                                         </span>
                                         {cc ? (
                                             <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: cc.color, background: cc.bg }}>
@@ -467,8 +475,8 @@ export default function GrabarSesion() {
                                         }} />
                                     </div>
                                     <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                                        {contactoVisual === 'estable' && 'Excelente. Mantienes la mirada hacia la cámara.'}
-                                        {contactoVisual === 'intermitente' && 'Intenta no desviar la mirada con tanta frecuencia.'}
+                                        {contactoVisual === 'estable' && (faceMetrics?.isReady ? 'FaceMesh detecta mirada centrada. Excelente contacto visual.' : 'Excelente. Mantienes la mirada hacia la cámara.')}
+                                        {contactoVisual === 'intermitente' && (faceMetrics?.isReady ? 'El iris se desvía del centro con frecuencia. Intenta fijar la mirada.' : 'Intenta no desviar la mirada con tanta frecuencia.')}
                                         {contactoVisual === 'ausente' && 'Mira directamente al lente de la cámara.'}
                                         {contactoVisual === 'esperando' && 'Esperando detección de tu mirada por la cámara...'}
                                         {contactoVisual === 'nodetect' && 'No se detecta tu rostro. Asegúrate de estar frente a la cámara.'}
@@ -485,4 +493,3 @@ export default function GrabarSesion() {
         </div>
     );
 }
-

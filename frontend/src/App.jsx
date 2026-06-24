@@ -1,53 +1,59 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { supabase } from './services/supabase';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from "./components/Navbar";
 import Inicio from "./pages/Inicio";
 import Dashboard from "./pages/Dashboard";
 import GrabarSesion from "./pages/GrabarSesion";
 import HistorialPage from "./pages/HistorialPage";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import AuthPage from "./pages/AuthPage";
 
-function RutaProtegida({ children }) {
-    const [sesion, setSesion] = useState(null);
-    const [cargando, setCargando] = useState(true);
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" />;
+  return children;
+}
 
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => {
-            setSesion(data.session);
-            setCargando(false);
-        });
-    }, []);
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 gap-4">
+      <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm text-gray-500">Cargando...</p>
+    </div>
+  );
+}
 
-    if (cargando) return null;
-    return sesion ? children : <Navigate to="/login" />;
+function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <LoadingScreen />;
+
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" /> : <AuthPage />} />
+      <Route path="/register" element={user ? <Navigate to="/" /> : <AuthPage />} />
+      <Route path="/*" element={
+        <>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Inicio />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/:id" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/camera" element={<ProtectedRoute><GrabarSesion /></ProtectedRoute>} />
+            <Route path="/historial" element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
+          </Routes>
+        </>
+      } />
+    </Routes>
+  );
 }
 
 export default function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                {/* Rutas sin Navbar */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-
-                {/* Rutas con Navbar - protegidas */}
-                <Route path="/*" element={
-                    <RutaProtegida>
-                        <>
-                            <Navbar />
-                            <Routes>
-                                <Route path="/" element={<Inicio />} />
-                                <Route path="/inicio" element={<Inicio />} />
-                                <Route path="/dashboard" element={<Dashboard />} />
-                                <Route path="/camera" element={<GrabarSesion />} />
-                                <Route path="/historial" element={<HistorialPage />} />
-                            </Routes>
-                        </>
-                    </RutaProtegida>
-                } />
-            </Routes>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
