@@ -41,7 +41,7 @@ function Login() {
         setLoading(true);
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email: formData.email,
                 password: formData.password,
             });
@@ -51,8 +51,9 @@ function Login() {
                 return;
             }
 
-            navigate("/")
+            navigate("/");
         } catch (err) {
+            console.error(err);
             setErrors({ email: "Error al iniciar sesión" });
         } finally {
             setLoading(false);
@@ -121,6 +122,7 @@ function Login() {
                                 />
                                 <button
                                     type="button"
+                                    box-type="button"
                                     onClick={() => setShowPassword((prev) => !prev)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-800"
                                 >

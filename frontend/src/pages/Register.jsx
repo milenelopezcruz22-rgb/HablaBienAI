@@ -46,38 +46,39 @@ function Register() {
     };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-    }
-    setLoading(true);
-
-    try {
-        const { data, error } = await supabase.auth.signUp({
-            email: formData.email,
-            password: formData.password,
-            options: {
-                data: {
-                    nombre: formData.nombre,
-                    apellido: formData.apellido,
-                }
-            }
-        });
-
-        if (error) {
-            setErrors({ email: error.message });
+        e.preventDefault();
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
             return;
         }
+        setLoading(true);
 
-        navigate("/inicio");
-    } catch (err) {
-        setErrors({ email: "Error al crear la cuenta" });
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            const { error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        nombre: formData.nombre,
+                        apellido: formData.apellido,
+                    }
+                }
+            });
+
+            if (error) {
+                setErrors({ email: error.message });
+                return;
+            }
+
+            navigate("/inicio");
+        } catch (err) {
+            console.error(err);
+            setErrors({ email: "Error al crear la cuenta" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const inputClass = (field) =>
         `w-full px-4 py-3 rounded-2xl border text-sm outline-none transition-all duration-200 shadow-sm
