@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
@@ -119,82 +119,80 @@ const tips = [
 ];
 const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
-
-
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
-    const enviarAnalisis = async (blob) => {
-    try {
-        const formData = new FormData();
-
-        formData.append(
-            "audio",
-            blob,
-            "grabacion.webm"
-        );
-
-        const response = await fetch(
-            "http://localhost:8000/api/v1/analizar",
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Error al analizar el video");
-        }
-
-        const data = await response.json();
-
-        console.log("RESULTADO IA:", data);
-        console.log("BODY METRICS:", bodyMetrics);
-
-        const resultadoCompleto = {
-            voz: data,
-            corporal: bodyMetrics
-        };
-
-        localStorage.setItem(
-            "analysisResult",
-            JSON.stringify(resultadoCompleto)
-        );
-
-        // navegar al dashboard
-        navigate("/dashboard");
-
-    } catch (error) {
-        console.error("Error enviando análisis:", error);
-    }
-};
-    
-   
-    
     const {
-    videoRef,
-    stream,
-    error,
-    startCamera,
-    stopCamera,
-    isRecording,
-    videoBlob,
-    startRecording,
-    stopRecording
-} = useCamera();
+        videoRef,
+        stream,
+        error,
+        startCamera,
+        stopCamera,
+        isRecording,
+        videoBlob,
+        startRecording,
+        stopRecording
+    } = useCamera();
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const enviarAnalisis = async (blob) => {
+        try {
+            const formData = new FormData();
+
+            formData.append(
+                "audio",
+                blob,
+                "grabacion.webm"
+            );
+
+            const response = await fetch(
+                "http://localhost:8000/api/v1/analizar",
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Error al analizar el video");
+            }
+
+            const data = await response.json();
+
+            console.log("RESULTADO IA:", data);
+            console.log("BODY METRICS:", bodyMetrics);
+
+            const resultadoCompleto = {
+                voz: data,
+                corporal: bodyMetrics
+            };
+
+            localStorage.setItem(
+                "analysisResult",
+                JSON.stringify(resultadoCompleto)
+            );
+
+            // navegar al dashboard
+            navigate("/dashboard");
+
+        } catch (error) {
+            console.error("Error enviando análisis:", error);
+        }
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-    if (videoBlob) {
-        enviarAnalisis(videoBlob);
-    }
+        if (videoBlob) {
+            enviarAnalisis(videoBlob);
+        }
     }, [videoBlob]);
 
     const animRef = useRef(null);
     const cvRef = useRef(contactoVisual);
     useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !stream) return;
