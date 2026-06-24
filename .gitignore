@@ -1,5 +1,34 @@
-node_modules/
-.env
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# VS Code history
 .history/
+
+# Variables de entorno reales
+.env
+.env.local
+.env.*.local
+
+# Node / Vite
+node_modules/
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+dist/
+build/
+
+# Sistema / logs
 *.log
 .DS_Store
+
+# Archivos comprimidos temporales
+*.zip
