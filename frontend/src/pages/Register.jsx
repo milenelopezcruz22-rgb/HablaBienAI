@@ -3,15 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { MicrophoneIcon } from "../icons";
 import { supabase } from "../services/supabase";
 
-function Login() {
+function Register() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ email: "", password: "" });
+    const [formData, setFormData] = useState({
+        nombre: "",
+        apellido: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const validate = () => {
         const newErrors = {};
+        if (!formData.nombre.trim()) newErrors.nombre = "El nombre es requerido";
+        if (!formData.apellido.trim()) newErrors.apellido = "El apellido es requerido";
         if (!formData.email.trim()) {
             newErrors.email = "El correo es requerido";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -21,6 +30,11 @@ function Login() {
             newErrors.password = "La contraseña es requerida";
         } else if (formData.password.length < 6) {
             newErrors.password = "Mínimo 6 caracteres";
+        }
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = "Confirma tu contraseña";
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = "Las contraseñas no coinciden";
         }
         return newErrors;
     };
@@ -41,20 +55,26 @@ function Login() {
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
+                options: {
+                    data: {
+                        nombre: formData.nombre,
+                        apellido: formData.apellido,
+                    }
+                }
             });
 
             if (error) {
-                setErrors({ email: "Correo o contraseña incorrectos" });
+                setErrors({ email: error.message });
                 return;
             }
 
-            navigate("/");
+            navigate("/inicio");
         } catch (err) {
             console.error(err);
-            setErrors({ email: "Error al iniciar sesión" });
+            setErrors({ email: "Error al crear la cuenta" });
         } finally {
             setLoading(false);
         }
@@ -80,12 +100,47 @@ function Login() {
                             <span className="text-sm font-semibold uppercase tracking-[0.2em]">Habla Bien IA</span>
                         </div>
                         <div>
-                            <h1 className="text-3xl font-semibold text-slate-900">Iniciar Sesión</h1>
-                            <p className="mt-2 text-sm text-slate-500">Accede a tus ejercicios de oratoria y métricas personalizadas.</p>
+                            <h1 className="text-3xl font-semibold text-slate-900">Crear Cuenta</h1>
+                            <p className="mt-2 text-sm text-slate-500">Regístrate para practicar oratoria con métricas personalizadas.</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="nombre" className="text-sm font-medium text-slate-700">
+                                    Nombre
+                                </label>
+                                <input
+                                    id="nombre"
+                                    name="nombre"
+                                    type="text"
+                                    autoComplete="given-name"
+                                    value={formData.nombre}
+                                    onChange={handleChange}
+                                    placeholder="Juan"
+                                    className={inputClass("nombre")}
+                                />
+                                {errors.nombre && <span className="text-xs text-red-500">{errors.nombre}</span>}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="apellido" className="text-sm font-medium text-slate-700">
+                                    Apellido
+                                </label>
+                                <input
+                                    id="apellido"
+                                    name="apellido"
+                                    type="text"
+                                    autoComplete="family-name"
+                                    value={formData.apellido}
+                                    onChange={handleChange}
+                                    placeholder="Pérez"
+                                    className={inputClass("apellido")}
+                                />
+                                {errors.apellido && <span className="text-xs text-red-500">{errors.apellido}</span>}
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label htmlFor="email" className="text-sm font-medium text-slate-700">
                                 Correo electrónico
@@ -100,9 +155,7 @@ function Login() {
                                 placeholder="tucorreo@ejemplo.com"
                                 className={inputClass("email")}
                             />
-                            {errors.email && (
-                                <span className="text-xs text-red-500">{errors.email}</span>
-                            )}
+                            {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
                         </div>
 
                         <div className="space-y-2">
@@ -114,7 +167,7 @@ function Login() {
                                     id="password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
@@ -122,16 +175,39 @@ function Login() {
                                 />
                                 <button
                                     type="button"
-                                    box-type="button"
                                     onClick={() => setShowPassword((prev) => !prev)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-800"
                                 >
                                     {showPassword ? "Ocultar" : "Mostrar"}
                                 </button>
                             </div>
-                            {errors.password && (
-                                <span className="text-xs text-red-500">{errors.password}</span>
-                            )}
+                            {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">
+                                Confirmar contraseña
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    autoComplete="new-password"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="••••••••"
+                                    className={inputClass("confirmPassword")}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-800"
+                                >
+                                    {showConfirmPassword ? "Ocultar" : "Mostrar"}
+                                </button>
+                            </div>
+                            {errors.confirmPassword && <span className="text-xs text-red-500">{errors.confirmPassword}</span>}
                         </div>
 
                         <button
@@ -145,18 +221,18 @@ function Login() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
-                                    Ingresando...
+                                    Creando cuenta...
                                 </>
                             ) : (
-                                "Ingresar"
+                                "Crear Cuenta"
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
-                        <span>¿No tienes cuenta?</span>
-                        <Link to="/register" className="font-semibold text-sky-600 hover:text-sky-700">
-                            Regístrate aquí
+                    <div className="mt-6 flex flex-col items-center justify-between gap-2 text-sm text-slate-500 sm:flex-row">
+                        <span>¿Ya tienes cuenta?</span>
+                        <Link to="/login" className="font-semibold text-sky-600 hover:text-sky-700">
+                            Inicia sesión
                         </Link>
                     </div>
                 </div>
@@ -164,5 +240,4 @@ function Login() {
         </div>
     );
 }
-
-export default Login;
+export default Register;

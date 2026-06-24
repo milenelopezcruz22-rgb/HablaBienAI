@@ -1,9 +1,9 @@
-name: CI HablaBien - Modulo Analisis de Voz Raul
+name: CI HablaBien - Modulo Captura de Medios Jhon
 
 on:
   push:
     branches:
-      - "Modulo-Análisis-de-Voz-Raul"
+      - "Jhon-Modulo-captura-de-medios"
 
   pull_request:
     branches:

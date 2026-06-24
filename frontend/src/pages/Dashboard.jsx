@@ -7,9 +7,9 @@ import {
   Lightbulb
 } from 'lucide-react'
 
-import Card from '../components/Card'
-import Button from '../components/Button'
-import ScoreDisplay from '../components/ScoreDisplay'
+import Card from '../components/card'
+import Button from '../components/button'
+import ScoreDisplay from '../components/scoredisplay'
 
 function Dashboard() {
   const navigate = useNavigate()
