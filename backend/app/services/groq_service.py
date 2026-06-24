@@ -1,109 +1,125 @@
+import json
 import os
-from groq import Groq
-from dotenv import load_dotenv
-import tempfile
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv():
+        return None
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
+
 
 load_dotenv()
 
-# Inicializar cliente de Groq
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY and Groq else None
 
-# Muletillas comunes en español
-MULETILLAS = [
-    "ehhh", "eee", "mmmm", "mmm", "este", "esta", "esto",
-    "bueno", "o sea", "en plan", "tipo", "como", "verdad",
-    "vale", "entonces", "así que", "por ejemplo", "digo yo",
-    "sabes", "entiendes", "más o menos", "al final", "literalmente",
-    "básicamente", "obviamente", "claramente", "de hecho", "en realidad"
-]
 
-def transcribir_audio(audio_bytes: bytes) -> str:
-    """
-    Transcribe audio usando Faster-Whisper (local).
-    """
+def _feedback_local(metricas: dict | None = None) -> dict:
+    metricas = metricas or {}
+    recomendaciones = []
+
+    if metricas.get("total_muletillas", 0) > 0:
+        recomendaciones.append("Reduce muletillas preparando frases de transicion antes de hablar.")
+
+    if metricas.get("ritmo_habla") == "lento":
+        recomendaciones.append("Aumenta ligeramente el ritmo para mantener la atencion.")
+    elif metricas.get("ritmo_habla") == "rapido":
+        recomendaciones.append("Baja el ritmo y marca pausas breves en ideas importantes.")
+
+    if metricas.get("total_pausas_largas", 0) > 0:
+        recomendaciones.append("Evita pausas largas practicando bloques cortos de tu presentacion.")
+
+    if not recomendaciones:
+        recomendaciones.append("Manten claridad, ritmo estable y pausas breves entre ideas.")
+
+    return {
+        "feedback": "Analisis local generado porque Groq API no esta disponible.",
+        "recomendaciones": recomendaciones[:3],
+        "fuente_feedback": "local"
+    }
+
+
+def _extraer_json_respuesta(content: str) -> dict:
     try:
-        from faster_whisper import WhisperModel
-    except ImportError:
-        raise ImportError("faster-whisper no está instalado. Ejecuta: pip install faster-whisper==1.1.0")
+        return json.loads(content)
+    except json.JSONDecodeError:
+        inicio = content.find("{")
+        fin = content.rfind("}")
 
-    # Crear archivo temporal
-    with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as f:
-        f.write(audio_bytes)
-        temp_path = f.name
+        if inicio != -1 and fin != -1 and fin > inicio:
+            return json.loads(content[inicio:fin + 1])
 
-    try:
-        # Usar Faster-Whisper para transcripción (modelo pequeño para velocidad)
-        model = WhisperModel("tiny", device="cpu", compute_type="int8")
-        segments, _ = model.transcribe(temp_path, language="es")
-        transcripcion = " ".join([segment.text for segment in segments])
-        return transcripcion.strip()
-    except Exception as e:
-        raise Exception(f"Error en transcripción: {str(e)}")
-    finally:
-        os.unlink(temp_path)
+        raise
 
-def detectar_muletillas(transcripcion: str) -> dict:
+
+def _normalizar_feedback(data: dict, fallback_content: str = "") -> dict:
+    feedback = data.get("feedback") or fallback_content
+    recomendaciones = data.get("recomendaciones") or []
+
+    if not isinstance(recomendaciones, list):
+        recomendaciones = [str(recomendaciones)]
+
+    return {
+        "feedback": str(feedback).strip(),
+        "recomendaciones": [str(item).strip() for item in recomendaciones if str(item).strip()][:3],
+        "fuente_feedback": "groq"
+    }
+
+
+def analizar_con_groq(transcripcion: str, metricas: dict | None = None) -> dict:
     """
-    Detecta muletillas en la transcripción y cuenta su frecuencia.
-    """
-    transcripcion_lower = transcripcion.lower()
-    muletillas_count = {}
-
-    for muletilla in MULETILLAS:
-        count = transcripcion_lower.count(muletilla)
-        if count > 0:
-            muletillas_count[muletilla] = count
-
-    return muletillas_count
-
-def analizar_con_groq(transcripcion: str) -> dict:
-    """
-    Usa Groq API para analizar la transcripción y dar feedback.
+    Usa Groq API para generar feedback de voz basado en transcripcion y metricas.
     """
     if not client:
-        return {
-            "feedback": "No se pudo conectar con Groq API",
-            "recomendaciones": ["Revisa tu configuración de API key"]
-        }
+        return _feedback_local(metricas)
 
+    metricas = metricas or {}
     prompt = f"""
-    Analiza la siguiente transcripción de una presentación oral y proporciona:
-    1. Un feedback general sobre la claridad del discurso
-    2. Tres recomendaciones específicas para mejorar la oratoria
+Eres un entrenador de oratoria en espanol. Analiza la presentacion con base en
+la transcripcion y las metricas del sistema.
 
-    Transcripción:
-    {transcripcion}
+Transcripcion:
+{transcripcion}
 
-    Responde en formato JSON con:
-    {{
-        "feedback": "texto del feedback",
-        "recomendaciones": ["rec1", "rec2", "rec3"]
-    }}
-    """
+Metricas:
+{json.dumps(metricas, ensure_ascii=False)}
+
+Responde SOLO en JSON valido con esta forma:
+{{
+  "feedback": "un parrafo breve, directo y util",
+  "recomendaciones": [
+    "recomendacion accionable 1",
+    "recomendacion accionable 2",
+    "recomendacion accionable 3"
+  ]
+}}
+"""
 
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=500
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Responde siempre en JSON valido y en espanol."
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.4,
+            max_tokens=600,
+            response_format={"type": "json_object"},
         )
 
-        import json
         content = response.choices[0].message.content.strip()
-
-        # Intentar parsear JSON
-        try:
-            return json.loads(content)
-        except:
-            return {
-                "feedback": content,
-                "recomendaciones": []
-            }
+        data = _extraer_json_respuesta(content)
+        return _normalizar_feedback(data, content)
 
     except Exception as e:
-        return {
-            "feedback": f"Error al analizar con Groq: {str(e)}",
-            "recomendaciones": []
-        }
+        fallback = _feedback_local(metricas)
+        fallback["feedback"] = f"{fallback['feedback']} Detalle tecnico: {str(e)}"
+        return fallback

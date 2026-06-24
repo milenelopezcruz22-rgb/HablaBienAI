@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
@@ -122,52 +122,6 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
-    const [analysisResult, setAnalysisResult] = useState(null);
-
-    const enviarAnalisis = async (blob) => {
-    try {
-        const formData = new FormData();
-
-        formData.append(
-            "audio",
-            blob,
-            "grabacion.webm"
-        );
-
-        const response = await fetch(
-            "http://localhost:8000/api/v1/analizar",
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Error al analizar el video");
-        }
-
-        const data = await response.json();
-
-        console.log("VOZ METRICS:", data);
-        console.log("BODY METRICS:", bodyMetrics);
-
-        const resultadoCompleto = {
-            voz: data,
-            corporal: bodyMetrics
-        };
-
-        localStorage.setItem(
-            "analysisResult",
-            JSON.stringify(resultadoCompleto)
-        );
-
-        navigate("/dashboard");
-
-    } catch (error) {
-        console.error("Error enviando análisis:", error);
-    }
-};
-    
     const {
         videoRef,
         stream,
@@ -179,20 +133,66 @@ export default function GrabarSesion() {
         startRecording,
         stopRecording
     } = useCamera();
-
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
+    const enviarAnalisis = async (blob) => {
+        try {
+            const formData = new FormData();
+
+            formData.append(
+                "audio",
+                blob,
+                "grabacion.webm"
+            );
+
+            const response = await fetch(
+                "http://localhost:8000/api/v1/analizar",
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Error al analizar el video");
+            }
+
+            const data = await response.json();
+
+            console.log("RESULTADO IA:", data);
+            console.log("BODY METRICS:", bodyMetrics);
+
+            const resultadoCompleto = {
+                voz: data,
+                corporal: bodyMetrics
+            };
+
+            localStorage.setItem(
+                "analysisResult",
+                JSON.stringify(resultadoCompleto)
+            );
+
+            // navegar al dashboard
+            navigate("/dashboard");
+
+        } catch (error) {
+            console.error("Error enviando análisis:", error);
+        }
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-    if (videoBlob) {
-        enviarAnalisis(videoBlob);
-    }
+        if (videoBlob) {
+            enviarAnalisis(videoBlob);
+        }
     }, [videoBlob]);
 
     const animRef = useRef(null);
     const cvRef = useRef(contactoVisual);
     useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
-
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !stream) return;
@@ -233,6 +233,7 @@ export default function GrabarSesion() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8 items-start">
 
+                    {/* COLUMNA 1: INSTRUCCIONES */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <h3 className="font-semibold text-slate-900 text-sm mb-4">Instrucciones</h3>
                         <div className="flex flex-col gap-4">
@@ -252,6 +253,7 @@ export default function GrabarSesion() {
                         </div>
                     </div>
 
+                    {/* COLUMNA 2: VIDEO Y CONTROLES */}
                     <div className="flex flex-col items-center">
                         {error && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
@@ -372,6 +374,7 @@ export default function GrabarSesion() {
                         )}
                     </div>
 
+                    {/* COLUMNA 3: ANÁLISIS Y TIPS */}
                     <div className="flex flex-col gap-5">
                         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                             <div className="flex items-center gap-2 mb-3 text-slate-700 font-semibold text-sm">
@@ -388,6 +391,7 @@ export default function GrabarSesion() {
                             </h3>
                             <div className="flex flex-col gap-6">
 
+                                {/* Postura */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Postura</span>
@@ -415,6 +419,7 @@ export default function GrabarSesion() {
                                     </p>
                                 </div>
 
+                                {/* Audio */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
@@ -439,6 +444,7 @@ export default function GrabarSesion() {
                                     </p>
                                 </div>
 
+                                {/* Contacto Visual */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">

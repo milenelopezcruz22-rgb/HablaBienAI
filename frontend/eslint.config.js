@@ -17,12 +17,9 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-<<<<<<< HEAD
     rules: {
       // Permitir setState en efectos para sincronización con sistemas externos (WebRTC, AudioContext)
       'react-hooks/set-state-in-effect': 'off',
     },
-=======
->>>>>>> origin/main
   },
 ])

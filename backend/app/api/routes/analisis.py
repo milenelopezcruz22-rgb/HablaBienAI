@@ -1,5 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.services.groq_service import transcribir_audio, detectar_muletillas
+from app.services.groq_service import analizar_con_groq
+from app.services.speech_metrics_service import (
+    calcular_score_voz,
+    calcular_velocidad_habla,
+    detectar_pausas_largas,
+    detectar_muletillas,
+)
+from app.services.transcription_service import transcribir_audio_detallado
 
 router = APIRouter()
 
@@ -16,8 +23,12 @@ async def analizar_audio(audio: UploadFile = File(...)):
         # Leer el archivo
         audio_bytes = await audio.read()
 
-        # Transcribir con Groq
-        transcripcion = transcribir_audio(audio_bytes)
+        # Transcribir con Faster-Whisper
+        resultado_transcripcion = transcribir_audio_detallado(audio_bytes)
+        transcripcion = resultado_transcripcion["transcripcion"]
+        duracion_segundos = resultado_transcripcion["duracion_segundos"]
+        segmentos = resultado_transcripcion["segmentos"]
+        palabras_transcritas = resultado_transcripcion["palabras"]
 
         # Detectar muletillas
         muletillas = detectar_muletillas(transcripcion)
@@ -26,20 +37,42 @@ async def analizar_audio(audio: UploadFile = File(...)):
         total_muletillas = sum(muletillas.values())
         palabras = len(transcripcion.split())
 
-        score_voz = max(
-            0,
-            min(
-                100,
-                100 - (total_muletillas / max(palabras, 1)) * 100
-            )
-        )
+        velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
+        pausas = detectar_pausas_largas(segmentos, palabras_transcritas)
+        score = calcular_score_voz(transcripcion, muletillas, velocidad, pausas)
+        metricas_voz = {
+            "score_voz": score["score_voz"],
+            "detalle_score_voz": score["detalle_score_voz"],
+            "total_palabras": palabras,
+            "muletillas": muletillas,
+            "total_muletillas": total_muletillas,
+            "duracion_segundos": velocidad["duracion_segundos"],
+            "palabras_por_minuto": velocidad["palabras_por_minuto"],
+            "ritmo_habla": velocidad["ritmo_habla"],
+            "pausas_largas": pausas["pausas_largas"],
+            "total_pausas_largas": pausas["total_pausas_largas"],
+            "duracion_pausas_largas": pausas["duracion_pausas_largas"],
+        }
+        feedback_ia = analizar_con_groq(transcripcion, metricas_voz)
 
         return {
             "transcripcion": transcripcion,
             "muletillas": muletillas,
-            "score_voz": round(score_voz, 1),
+            "score_voz": score["score_voz"],
+            "detalle_score_voz": score["detalle_score_voz"],
             "total_palabras": palabras,
-            "total_muletillas": total_muletillas
+            "total_muletillas": total_muletillas,
+            "duracion_segundos": velocidad["duracion_segundos"],
+            "palabras_por_minuto": velocidad["palabras_por_minuto"],
+            "ritmo_habla": velocidad["ritmo_habla"],
+            "pausas_largas": pausas["pausas_largas"],
+            "total_pausas_largas": pausas["total_pausas_largas"],
+            "duracion_pausas_largas": pausas["duracion_pausas_largas"],
+            "fuente_pausas": pausas["fuente_pausas"],
+            "umbral_pausa_segundos": pausas["umbral_pausa_segundos"],
+            "feedback": feedback_ia["feedback"],
+            "recomendaciones": feedback_ia["recomendaciones"],
+            "fuente_feedback": feedback_ia["fuente_feedback"]
         }
 
     except Exception as e:
