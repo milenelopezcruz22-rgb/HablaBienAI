@@ -8,6 +8,7 @@ function Login() {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const validate = () => {
         const newErrors = {};
@@ -107,16 +108,25 @@ function Login() {
                             <label htmlFor="password" className="text-sm font-medium text-slate-700">
                                 Contraseña
                             </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                className={inputClass("password")}
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    autoComplete="current-password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder="••••••••"
+                                    className={inputClass("password")}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-800"
+                                >
+                                    {showPassword ? "Ocultar" : "Mostrar"}
+                                </button>
+                            </div>
                             {errors.password && (
                                 <span className="text-xs text-red-500">{errors.password}</span>
                             )}
