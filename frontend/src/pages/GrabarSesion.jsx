@@ -122,6 +122,52 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
+    const [analysisResult, setAnalysisResult] = useState(null);
+
+    const enviarAnalisis = async (blob) => {
+    try {
+        const formData = new FormData();
+
+        formData.append(
+            "audio",
+            blob,
+            "grabacion.webm"
+        );
+
+        const response = await fetch(
+            "http://localhost:8000/api/v1/analizar",
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Error al analizar el video");
+        }
+
+        const data = await response.json();
+
+        console.log("VOZ METRICS:", data);
+        console.log("BODY METRICS:", bodyMetrics);
+
+        const resultadoCompleto = {
+            voz: data,
+            corporal: bodyMetrics
+        };
+
+        localStorage.setItem(
+            "analysisResult",
+            JSON.stringify(resultadoCompleto)
+        );
+
+        navigate("/dashboard");
+
+    } catch (error) {
+        console.error("Error enviando análisis:", error);
+    }
+};
+    
     const {
         videoRef,
         stream,
@@ -483,3 +529,4 @@ export default function GrabarSesion() {
         </div>
     );
 }
+
