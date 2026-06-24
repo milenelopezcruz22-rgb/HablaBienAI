@@ -124,8 +124,6 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 export default function GrabarSesion() {
     const navigate = useNavigate();
 
-    const [analysisResult, setAnalysisResult] = useState(null);
-
     const enviarAnalisis = async (blob) => {
     try {
         const formData = new FormData();
@@ -186,7 +184,7 @@ export default function GrabarSesion() {
 } = useCamera();
     const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
     if (videoBlob) {
         enviarAnalisis(videoBlob);
@@ -196,7 +194,7 @@ export default function GrabarSesion() {
     const animRef = useRef(null);
     const cvRef = useRef(contactoVisual);
     useEffect(() => { cvRef.current = contactoVisual; }, [contactoVisual]);
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !stream) return;
