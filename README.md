@@ -20,6 +20,8 @@
 [![React](https://img.shields.io/badge/Frontend-React_19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![Python](https://img.shields.io/badge/Backend-Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![MediaPipe](https://img.shields.io/badge/IA-MediaPipe_Pose-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/edge/mediapipe)
 [![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
 
@@ -53,6 +55,18 @@
 
 ## ✨ ¿Cómo funciona?
 
+El estudiante activa su cámara o sube un video. La IA analiza **tres capas simultáneas**:
+
+| 🎤 Voz | 🧍 Cuerpo | 🧠 Fusión IA |
+|--------|-----------|-------------|
+| Muletillas | Postura | Groq (Llama 3) |
+| Velocidad de habla | Contacto visual | Análisis integrado |
+| Pausas largas | Brazos cruzados | Puntuación 0 – 100 |
+
+| 📊 Dashboard de resultados | 📈 Historial de progreso |
+|---------------------------|-------------------------|
+| Radar chart con 5 dimensiones | Evolución sesión por sesión |
+| Línea de tiempo de errores | Comparativa mes a mes |
 El estudiante activa la cámara y realiza una exposición. La aplicación combina el análisis de voz con métricas corporales acumuladas durante toda la sesión.
 
 | 🎤 Voz | 🧍 Cuerpo | 📊 Resultados |
@@ -117,6 +131,9 @@ HablaBienAI/
 | Tecnología | Uso |
 |---|---|
 | **React 19** | Interfaz de usuario y gestión de estado |
+| **WebRTC** | Acceso a cámara y micrófono en tiempo real |
+| **MediaPipe Pose** (vía CDN) | Análisis de postura, contacto visual y gestos en el navegador |
+| **Chart.js** | Gráficas de puntuación y progreso |
 | **Vite** | Desarrollo local y build de producción |
 | **Tailwind CSS** | Estilos de la interfaz |
 | **WebRTC · MediaRecorder** | Cámara, micrófono y grabación `.webm` |
@@ -126,6 +143,19 @@ HablaBienAI/
 ### Backend
 
 | Tecnología | Uso |
+|------------|-----|
+| **Python 3.11** | Lenguaje principal del servidor |
+| **FastAPI** | Framework REST de alto rendimiento |
+| **faster-whisper** | Transcripción de audio local (sin costos de API) |
+| **Groq API (Llama 3)** | Análisis avanzado del discurso y feedback |
+| **SQLAlchemy** | ORM para la base de datos |
+| **PostgreSQL** | Almacenamiento del historial de sesiones |
+
+### DevOps
+| Tecnología | Uso |
+|------------|-----|
+| **Railway** | Despliegue del backend en la nube |
+| **Vercel** | Despliegue del frontend |
 |---|---|
 | **Python 3.11+** | Lenguaje principal del servidor |
 | **FastAPI** | API REST |
@@ -197,6 +227,22 @@ frontend/src/constants.js
 
 ## 📦 Estado de los módulos
 
+| Módulo | Nombre | Tecnología | Estado |
+|--------|--------|------------|--------|
+| **M1** | Captura de medios | React · WebRTC | ✅ **Completado** |
+| **M2** | Análisis de voz | Python · FastAPI · faster-whisper · Groq | 🔄 **En desarrollo** |
+| **M3** | Análisis de lenguaje corporal | MediaPipe Pose (CDN) | ✅ **Completado** |
+| M4 | Módulo de fusión | Groq API (Llama 3) | ⏳ Pendiente — APF2/3 |
+| M5 | Evaluación y feedback | React · Chart.js | ⏳ Pendiente — APF3 |
+| M6 | Historial de progreso | PostgreSQL · SQLAlchemy | ⏳ Pendiente — Final |
+
+> **M1:** Captura de video y audio desde el navegador con WebRTC. El estudiante puede grabar en vivo con su cámara. Maneja permisos, inicio/parada de la cámara y grabación en formato webm.
+>
+> **M2:** Endpoint en FastAPI que recibe audio/video y lo procesa con **faster-whisper** para obtener transcripción, duración y marcas de tiempo. Calcula muletillas normalizadas y contextuales ("mmm", "ummm", "ehhh", "este,", "bueno,", "como diría"), velocidad de habla en palabras por minuto, ritmo (`lento`, `adecuado`, `rápido`), pausas largas, score de voz ponderado y feedback/recomendaciones con Groq o fallback local.
+>
+> **M3:** Análisis de lenguaje corporal en tiempo real usando **MediaPipe Pose** vía CDN (33 landmarks). Detecta postura (hombros alineados, encorvamiento, pecho abierto), contacto visual (posición de nariz y ojos), brazos cruzados. Las métricas se calculan por frame con una ventana móvil de ~1s para contacto visual. Sin dependencias npm — el modelo se carga directamente desde jsdelivr. Todo corre 100% en el navegador del cliente.
+>
+> **M4 al M6:** Se implementarán progresivamente en las unidades 2 y 3 del curso.
 | Módulo | Nombre | Estado |
 |---|---|---|
 | **M1** | Captura de medios | ✅ Implementado |
@@ -271,6 +317,18 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+En Linux o macOS:
+### 3. Instalar dependencias del frontend
+### 4. Levantar el frontend
+
+Desde otra terminal:
+
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
 ### 4. Levantar el frontend
 
 Desde otra terminal:
@@ -281,6 +339,8 @@ npm install
 npm run dev
 ```
 
+La app estará disponible en `http://localhost:5173`
+La API en `http://localhost:8000/docs`
 | Servicio | URL |
 |---|---|
 | Aplicación web | `http://localhost:5173` |
@@ -306,6 +366,10 @@ Backend:
 cd backend
 pytest
 ```
+POST   /api/v1/analizar          →  Recibe audio/video y devuelve transcripción, métricas de voz, score y feedback
+GET    /api/v1/historial/{id}    →  Historial de sesiones de un estudiante
+GET    /api/v1/sesion/{id}       →  Detalle de una sesión específica
+DELETE /api/v1/sesion/{id}       →  Elimina una sesión del historial
 
 Frontend:
 
@@ -318,6 +382,12 @@ npm run build
 
 ## 🗺️ Roadmap técnico
 
+| Dimensión | Qué mide |
+|-----------|----------|
+| 🎤 Voz | Muletillas normalizadas · Palabras/min · Ritmo · Pausas largas · Score ponderado · Feedback |
+| 🧍 Postura | Hombros alineados · Encorvamiento · Pecho abierto · Brazos cruzados |
+| 👀 Contacto visual | % de tiempo mirando a la cámara (ventana móvil ~1s) |
+| ⚡ Energía / Tono | Monotonía vs. dinamismo (análisis Groq Llama 3) |
 | Prioridad | Pendiente |
 |---|---|
 | Alta | Conectar el historial a una base de datos |

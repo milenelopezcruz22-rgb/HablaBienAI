@@ -71,7 +71,9 @@ export const useAnalysis = (stream, isActive, videoRef) => {
             ctxRef.current = ctx;
             analyserRef.current = analyser;
 
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  const ctxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const tickRef = useRef(null);
 
             const tick = () => {
                 try {
