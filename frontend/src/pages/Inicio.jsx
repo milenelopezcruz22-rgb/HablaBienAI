@@ -11,7 +11,7 @@ function Inicio() {
                 <div className="max-w-3xl">
                     <h1 className="text-7xl font-bold">
                         Mejora tu{" "}
-                        <span className="bg-linear-to-r from-sky-400 to-blue-600 text-transparent bg-clip-text">
+                        <span className="bg-gradient-to-r from-sky-400 to-blue-600 text-transparent bg-clip-text">
                             Oratoria
                         </span>{" "}
                         con Inteligencia Artificial
