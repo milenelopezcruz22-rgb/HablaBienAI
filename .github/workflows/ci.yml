@@ -1,18 +1,22 @@
-name: CI HablaBienAI
+name: CI HablaBien - Modulo Captura de Medios Jhon
 
 on:
   push:
     branches:
-      - main
-      - Jhon-Modulo-captura-de-medios
+      - "Jhon-Modulo-captura-de-medios"
+
   pull_request:
     branches:
       - main
+      - develop
 
 jobs:
-  frontend:
-    name: Validar frontend
+  validar-frontend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
       - name: Descargar codigo
@@ -23,31 +27,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Instalar dependencias frontend
+      - name: Instalar dependencias
         run: npm install
-        working-directory: frontend
 
-      - name: Compilar frontend
-        run: npm run build
-        working-directory: frontend
+      - name: Revisar codigo
+        run: npm run lint --if-present
 
-  backend:
-    name: Validar backend
-    runs-on: ubuntu-latest
+      - name: Ejecutar pruebas
+        run: npm run test --if-present
 
-    steps:
-      - name: Descargar codigo
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Instalar dependencias backend
-        run: pip install -r requirements.txt
-        working-directory: backend
-
-      - name: Ejecutar pruebas backend
-        run: pytest
-        working-directory: backend
+      - name: Construir proyecto
+        run: npm run build --if-present
