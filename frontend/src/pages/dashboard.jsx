@@ -687,6 +687,53 @@ function Dashboard() {
           </div>
         </Card>
 
+        <Card title="Analisis Corporal">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              ["Buena postura", corporal?.porcentajeBuenaPostura ?? 0],
+              ["Brazos abiertos", corporal?.porcentajeBrazosAbiertos ?? 0],
+              ["Brazos cruzados", corporal?.porcentajeBrazosCruzados ?? 0],
+              ["Actividad gestual", corporal?.actividadGestual ?? 0],
+              ["Manos visibles", corporal?.porcentajeManosVisibles ?? 0],
+              ["Torso de lado", corporal?.porcentajeTorsoDeLado ?? 0],
+              ["Inclinacion lateral", corporal?.porcentajeInclinacionLateral ?? 0],
+              ["Rigidez de brazos", corporal?.porcentajeRigidezBrazos ?? 0],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg bg-slate-50 p-3 border border-slate-100">
+                <p className="text-xs text-slate-500">{label}</p>
+                <p className="mt-1 text-xl font-bold text-slate-800">{value}%</p>
+              </div>
+            ))}
+          </div>
+
+          {recomendacionesCorporales.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Recomendaciones corporales</h3>
+              <ul className="flex flex-col gap-2">
+                {recomendacionesCorporales.map((r, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-slate-600">
+                    <Lightbulb size={16} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {eventosCorporales.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Eventos relevantes</h3>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {eventosCorporales.slice(-8).map((evento, i) => (
+                  <li key={i} className="text-xs text-slate-600 bg-amber-50 border border-amber-100 rounded-md p-3">
+                    {evento.tipo.replaceAll("_", " ")}: segundo {evento.segundo}, durante {evento.duracion_segundos}s
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Card>
+
       </div>
 
       {/* ── Fila 4: Muletillas + Transcripción ── */}
