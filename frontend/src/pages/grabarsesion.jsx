@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
-import { analizarAudio } from "../services/api";
+import { api } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
@@ -17,7 +17,7 @@ const posturaConfig = {
 };
 
 const contactoConfig = {
-    estable: { label: 'Estable', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+    estable: { label: 'Estable (IA)', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
     intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
     ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
     esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
@@ -124,50 +124,119 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
 export default function GrabarSesion() {
     const navigate = useNavigate();
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [analysisError, setAnalysisError] = useState(null);
-    const getSnapshotRef = useRef(null);
+
+    const grabarInicio = useRef(null);
+    const [analizando, setAnalizando]       = useState(false);
+    const [errorAnalisis, setErrorAnalisis] = useState(null);
+    const [pasoAnalisis, setPasoAnalisis]   = useState("");
+
+    const enviarAnalisis = async (blob) => {
+        setAnalizando(true);
+        setErrorAnalisis(null);
+
+        try {
+            // ── Paso 1: transcribir y analizar voz ──
+            setPasoAnalisis("Transcribiendo audio con Whisper…");
+            const formData = new FormData();
+            formData.append("audio", blob, "grabacion.webm");
+
+            const response = await fetch(
+                "http://localhost:8001/api/v1/analizar",
+                { method: "POST", body: formData }
+            );
+
+            if (!response.ok) {
+                const texto = await response.text().catch(() => "");
+                throw new Error(`Error del servidor (${response.status}): ${texto.slice(0, 200)}`);
+            }
+
+            setPasoAnalisis("Calculando métricas de voz y prosodia…");
+            const data = await response.json();
+
+            // ── Paso 2: combinar con métricas corporales ──
+            setPasoAnalisis("Combinando análisis corporal y vocal…");
+
+            const scorePostura   = bodyMetrics?.porcentajeBuenaPostura ?? 0;
+            // Use cumulative session average, not rolling window (contactoVisualRaw is only last ~1.2s)
+            const scoreContacto  = faceMetrics?.isReady
+                ? (faceMetrics?.porcentajeContactoVisual ?? 0)
+                : (bodyMetrics?.porcentajeContactoVisual ?? 0);
+            const scoreGestos    = bodyMetrics?.actividadGestual ?? 0;
+            const scoreEnergia   = data?.habla_efectiva?.porcentaje_habla ?? 50;
+
+            const radar = {
+                voz:             Math.round(data?.score_voz ?? 0),
+                postura:         Math.round(scorePostura),
+                contactoVisual:  Math.round(scoreContacto),
+                movimientoManos: Math.round(scoreGestos),
+                energia:         Math.round(scoreEnergia),
+            };
+
+            const puntaje = Math.round(
+                (radar.voz             * 0.40) +
+                (radar.postura         * 0.20) +
+                (radar.contactoVisual  * 0.20) +
+                (radar.energia         * 0.10) +
+                (radar.movimientoManos * 0.10)
+            );
+
+            const resultadoCompleto = {
+                voz: data,
+                corporal: bodyMetrics,
+                facial: faceMetrics,
+                radar,
+            };
+
+            localStorage.setItem("analysisResult", JSON.stringify(resultadoCompleto));
+
+            // ── Paso 3: guardar sesión ──
+            setPasoAnalisis("Guardando sesión…");
+            const duracion = grabarInicio.current
+                ? Math.round((Date.now() - grabarInicio.current) / 1000)
+                : 0;
+
+            const sesion = await api.sesiones.create({
+                titulo: `Sesion ${new Date().toLocaleDateString("es-MX")}`,
+                duracion_seg: duracion,
+                puntaje_general: puntaje,
+                analisis: resultadoCompleto,
+            });
+
+            navigate(`/dashboard/${sesion.sesion.id}`);
+
+        } catch (err) {
+            console.error("Error enviando analisis:", err);
+            setErrorAnalisis(err.message || "Error desconocido al analizar la grabación.");
+            setAnalizando(false);
+        }
+    };
     
    
     
     const {
-        videoRef,
-        stream,
-        error,
-        startCamera,
-        stopCamera,
-        isRecording,
-        videoBlob,
-        startRecording,
-        stopRecording,
-    } = useCamera();
-
-    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef, getSnapshot } = useAnalysis(stream, !!stream, videoRef);
+    videoRef,
+    stream,
+    error,
+    startCamera,
+    stopCamera,
+    isRecording,
+    videoBlob,
+    startRecording,
+    stopRecording
+} = useCamera();
+    const { postura, contactoVisual, contactoVisualRaw, audioLevel, audioEstado, framing, bodyMetrics, faceMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
-    // Mantiene getSnapshot siempre actualizado sin recrear el effect
-    useEffect(() => { getSnapshotRef.current = getSnapshot; }, [getSnapshot]);
+    useEffect(() => {
+        if (isRecording) {
+            grabarInicio.current = Date.now();
+        }
+    }, [isRecording]);
 
     useEffect(() => {
-        if (!videoBlob) return;
-
-        const enviar = async () => {
-            setIsAnalyzing(true);
-            setAnalysisError(null);
-            try {
-                const corporal = getSnapshotRef.current?.() ?? {};
-                const data = await analizarAudio(videoBlob, corporal);
-                localStorage.setItem("analysisResult", JSON.stringify({ voz: data, corporal }));
-                navigate("/dashboard");
-            } catch (err) {
-                setAnalysisError("No se pudo analizar el audio. Verifica que el backend esté corriendo.");
-                console.error(err);
-            } finally {
-                setIsAnalyzing(false);
-            }
-        };
-
-        enviar();
+    if (videoBlob) {
+        enviarAnalisis(videoBlob);
+    }
     }, [videoBlob]);
 
     const animRef = useRef(null);
@@ -206,6 +275,23 @@ export default function GrabarSesion() {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+
+            {/* ── Overlay de análisis ── */}
+            {analizando && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="text-center">
+                            <p className="text-lg font-semibold text-slate-900 mb-1">Analizando tu presentación</p>
+                            <p className="text-sm text-slate-500">{pasoAnalisis || "Procesando…"}</p>
+                        </div>
+                        <p className="text-xs text-slate-400 text-center">
+                            Esto puede tardar entre 15 y 40 segundos según la duración de la grabación.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <main className="max-w-[1600px] mx-auto px-6 py-10">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">Grabar Sesión</h1>
@@ -236,19 +322,22 @@ export default function GrabarSesion() {
 
                     {/* COLUMNA 2: VIDEO Y CONTROLES */}
                     <div className="flex flex-col items-center">
-                        {(error || analysisError) && (
+                        {error && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
-                                {error || analysisError}
+                                {error}
                             </div>
                         )}
 
-                        {isAnalyzing && (
-                            <div className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-600 text-sm font-medium mb-4">
-                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                </svg>
-                                Analizando tu sesión con IA...
+                        {errorAnalisis && (
+                            <div className="w-full bg-red-50 border border-red-200 rounded-xl p-4 mb-4 flex flex-col gap-2">
+                                <p className="text-sm font-semibold text-red-700">Error al analizar la grabación</p>
+                                <p className="text-xs text-red-600 font-mono break-all">{errorAnalisis}</p>
+                                <button
+                                    onClick={() => setErrorAnalisis(null)}
+                                    className="text-xs text-red-500 underline self-start mt-1"
+                                >
+                                    Cerrar y volver a intentar
+                                </button>
                             </div>
                         )}
 
@@ -307,14 +396,14 @@ export default function GrabarSesion() {
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
                                             style={{ background: cc.bg, color: cc.color, border: `1px solid ${cc.color}40` }}
                                         >
-                                            <Eye size={13} />
-                                            <span>Contacto Visual: <strong>{cc.label}</strong></span>
+                                    <Eye size={13} />
+                                    <span>{faceMeshReadyRef.current ? "Contacto (IA):" : "Contacto Visual:"} <strong>{cc.label}</strong></span>
                                         </div>
                                     )}
-                                    {bodyMetrics?.gestoMano && (
+                                    {bodyMetrics?.estadoBrazos && bodyMetrics.estadoBrazos !== 'sin_datos' && bodyMetrics.estadoBrazos !== 'neutros' && bodyMetrics.estadoBrazos !== 'cruzados' && bodyMetrics.estadoBrazos !== 'parcialmente_visibles' && (
                                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/20 text-white border border-white/30">
                                             <Hand size={13} />
-                                            <span>Mano: <strong>{bodyMetrics.gestoMano === 'abierta' ? 'Abierta' : bodyMetrics.gestoMano === 'punio' ? 'Puño' : bodyMetrics.gestoMano === 'senyalando' ? 'Señalando' : 'Neutra'}</strong></span>
+                                            <span>Brazos: <strong>{bodyMetrics.estadoBrazos === 'abiertos' ? 'Abiertos' : 'Elevados'}</strong></span>
                                         </div>
                                     )}
                                     {bodyMetrics?.brazosCruzados && (
@@ -439,7 +528,7 @@ export default function GrabarSesion() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                                            <Eye size={12} /> Contacto Visual
+                                            <Eye size={12} /> {faceMetrics?.isReady ? "Contacto IA" : "Contacto Visual"}
                                         </span>
                                         {cc ? (
                                             <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: cc.color, background: cc.bg }}>
@@ -456,8 +545,8 @@ export default function GrabarSesion() {
                                         }} />
                                     </div>
                                     <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                                        {contactoVisual === 'estable' && 'Excelente. Mantienes la mirada hacia la cámara.'}
-                                        {contactoVisual === 'intermitente' && 'Intenta no desviar la mirada con tanta frecuencia.'}
+                                        {contactoVisual === 'estable' && (faceMetrics?.isReady ? 'FaceMesh detecta mirada centrada. Excelente contacto visual.' : 'Excelente. Mantienes la mirada hacia la cámara.')}
+                                        {contactoVisual === 'intermitente' && (faceMetrics?.isReady ? 'El iris se desvía del centro con frecuencia. Intenta fijar la mirada.' : 'Intenta no desviar la mirada con tanta frecuencia.')}
                                         {contactoVisual === 'ausente' && 'Mira directamente al lente de la cámara.'}
                                         {contactoVisual === 'esperando' && 'Esperando detección de tu mirada por la cámara...'}
                                         {contactoVisual === 'nodetect' && 'No se detecta tu rostro. Asegúrate de estar frente a la cámara.'}

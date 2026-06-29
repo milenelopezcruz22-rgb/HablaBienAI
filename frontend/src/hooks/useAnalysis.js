@@ -24,14 +24,12 @@ export const useAnalysis = (stream, isActive, videoRef) => {
   const analyserRef = useRef(null);
   const tickRef = useRef(null);
 
-  const { metrics, isReady, framing, latestPoseRef, getSnapshot } = useBodyAnalysis(
+  const { metrics, isReady, framing, latestPoseRef } = useBodyAnalysis(
     videoRef,
     stream,
   );
-  // FaceMesh/Hands desactivados: cargar los 3 modelos MediaPipe a la vez
-  // entra en conflicto. Se reactivarán vía Holistic (un solo modelo).
-  const face = useFaceAnalysis({ videoRef, stream, enabled: false });
-  const hands = useHandAnalysis({ videoRef, stream, enabled: false });
+  const face = useFaceAnalysis(videoRef, stream, { enabled: true });
+  const hands = useHandAnalysis({ enabled: false });
 
   useEffect(() => {
     if (!isReady || !stream || !isActive) {
@@ -65,6 +63,11 @@ export const useAnalysis = (stream, isActive, videoRef) => {
 
   const contactoVisual = useMemo(() => {
     if (!stream || !isActive) return null;
+
+    if (face.metrics.isReady && face.metrics.contactoVisualPreciso !== null) {
+      return getContactoLabel(face.metrics.contactoVisualPreciso);
+    }
+
     if (!isReady) return "esperando";
     if (!metrics.frames) {
       if (noDetectTimeout) return "nodetect";
@@ -78,7 +81,16 @@ export const useAnalysis = (stream, isActive, videoRef) => {
     stream,
     isActive,
     noDetectTimeout,
+    face.metrics.isReady,
+    face.metrics.contactoVisualPreciso,
   ]);
+
+  const contactoVisualRaw = useMemo(() => {
+    if (face.metrics.isReady && face.metrics.contactoVisualPreciso !== null) {
+      return face.metrics.contactoVisualPreciso;
+    }
+    return metrics.contactoVisual;
+  }, [metrics.contactoVisual, face.metrics.isReady, face.metrics.contactoVisualPreciso]);
 
   const startAudio = useCallback((mediaStream) => {
     try {
@@ -139,6 +151,7 @@ export const useAnalysis = (stream, isActive, videoRef) => {
   return {
     postura,
     contactoVisual,
+    contactoVisualRaw,
     audioLevel,
     audioEstado,
     framing,
@@ -148,6 +161,5 @@ export const useAnalysis = (stream, isActive, videoRef) => {
     latestPoseRef,
     latestFaceRef: face.latestFaceRef,
     faceMeshReadyRef: face.faceMeshReadyRef,
-    getSnapshot,
   };
 };

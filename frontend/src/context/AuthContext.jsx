@@ -1,52 +1,47 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from 'react';
-import {
-    loginUsuario,
-    registrarUsuario,
-    obtenerPerfil,
-    setToken,
-} from '../services/api';
+import { createContext, useContext, useState, useEffect } from "react";
+import { api } from "../services/api";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [cargando, setCargando] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    // Al cargar la app, si hay token guardado, recupera el perfil.
-    useEffect(() => {
-        obtenerPerfil()
-            .then(setUser)
-            .catch(() => setToken(null))
-            .finally(() => setCargando(false));
-    }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    const login = async (email, password) => {
-        const { token, usuario } = await loginUsuario(email, password);
-        setToken(token);
-        setUser(usuario);
-        return usuario;
-    };
+    api.me()
+      .then(({ user }) => setUser(user))
+      .catch(() => localStorage.removeItem("token"))
+      .finally(() => setLoading(false));
+  }, []);
 
-    const register = async (datos) => {
-        const { token, usuario } = await registrarUsuario(datos);
-        setToken(token);
-        setUser(usuario);
-        return usuario;
-    };
+  const login = async (email, password) => {
+    const { user, token } = await api.login(email, password);
+    localStorage.setItem("token", token);
+    setUser(user);
+  };
 
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-    };
+  const register = async (email, password, nombre, apellido) => {
+    const { user, token } = await api.register(email, password, nombre, apellido);
+    localStorage.setItem("token", token);
+    setUser(user);
+  };
 
-    return (
-        <AuthContext.Provider value={{ user, cargando, login, register, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export function useAuth() {
-    return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

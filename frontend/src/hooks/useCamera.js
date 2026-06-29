@@ -68,6 +68,8 @@ export const useCamera = () => {
           type: "video/webm",
         });
 
+        console.log("VIDEO GRABADO:", blob);
+
         setVideoBlob(blob);
       };
       mr.start();

@@ -52,16 +52,12 @@ function Register() {
             return;
         }
         setLoading(true);
+
         try {
-            await register({
-                nombre: formData.nombre,
-                apellido: formData.apellido,
-                email: formData.email,
-                password: formData.password,
-            });
-            navigate("/camera");
+            await register(formData.email, formData.password, formData.nombre, formData.apellido);
+            navigate("/");
         } catch (err) {
-            setErrors({ general: err.message || "No se pudo crear la cuenta" });
+            setErrors({ email: err.message || "Error al crear la cuenta" });
         } finally {
             setLoading(false);
         }
@@ -77,9 +73,7 @@ function Register() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 px-4 py-10">
             <div className="w-full max-w-md">
-                {/* Card */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {/* Logo y título */}
                     <div className="flex flex-col items-center mb-8">
                         <div className="flex items-center gap-2 mb-2">
                             <MicrophoneIcon className="text-sky-500" size={28} />
@@ -89,14 +83,7 @@ function Register() {
                         <p className="text-gray-500 text-sm mt-1">Únete y mejora tu oratoria</p>
                     </div>
 
-                    {/* Formulario */}
                     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-                        {errors.general && (
-                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-200 text-center">
-                                {errors.general}
-                            </div>
-                        )}
-                        {/* Nombre y Apellido en fila */}
                         <div className="flex gap-3">
                             <div className="flex flex-col gap-1 flex-1">
                                 <label htmlFor="nombre" className="text-sm font-medium text-gray-700">
@@ -136,7 +123,6 @@ function Register() {
                             </div>
                         </div>
 
-                        {/* Email */}
                         <div className="flex flex-col gap-1">
                             <label htmlFor="email" className="text-sm font-medium text-gray-700">
                                 Correo electrónico
@@ -156,7 +142,6 @@ function Register() {
                             )}
                         </div>
 
-                        {/* Contraseña */}
                         <div className="flex flex-col gap-1">
                             <label htmlFor="password" className="text-sm font-medium text-gray-700">
                                 Contraseña
@@ -176,7 +161,6 @@ function Register() {
                             )}
                         </div>
 
-                        {/* Confirmar contraseña */}
                         <div className="flex flex-col gap-1">
                             <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
                                 Confirmar contraseña
@@ -196,11 +180,10 @@ function Register() {
                             )}
                         </div>
 
-                        {/* Botón submit */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-md hover:shadow-lg"
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-blue-300 disabled:to-indigo-300 text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-md hover:shadow-lg"
                         >
                             {loading ? (
                                 <>
@@ -216,7 +199,6 @@ function Register() {
                         </button>
                     </form>
 
-                    {/* Link a login */}
                     <p className="text-center text-sm text-gray-500 mt-6">
                         ¿Ya tienes cuenta?{" "}
                         <Link to="/login" className="text-blue-500 font-medium hover:text-blue-700 hover:underline transition-colors">

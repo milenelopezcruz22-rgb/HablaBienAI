@@ -41,9 +41,9 @@ function Login() {
         setLoading(true);
         try {
             await login(formData.email, formData.password);
-            navigate("/camera");
+            navigate("/");
         } catch (err) {
-            setErrors({ general: err.message || "No se pudo iniciar sesión" });
+            setErrors({ email: err.message || "Credenciales incorrectas" });
         } finally {
             setLoading(false);
         }
@@ -52,9 +52,7 @@ function Login() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 px-4">
             <div className="w-full max-w-md">
-                {/* Card */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {/* Logo y título */}
                     <div className="flex flex-col items-center mb-8">
                         <div className="flex items-center gap-2 mb-2">
                             <MicrophoneIcon className="text-sky-500" size={28} />
@@ -64,14 +62,7 @@ function Login() {
                         <p className="text-gray-500 text-sm mt-1">Bienvenido de nuevo</p>
                     </div>
 
-                    {/* Formulario */}
                     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-                        {errors.general && (
-                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-200 text-center">
-                                {errors.general}
-                            </div>
-                        )}
-                        {/* Email */}
                         <div className="flex flex-col gap-1">
                             <label htmlFor="email" className="text-sm font-medium text-gray-700">
                                 Correo electrónico
@@ -95,7 +86,6 @@ function Login() {
                             )}
                         </div>
 
-                        {/* Contraseña */}
                         <div className="flex flex-col gap-1">
                             <label htmlFor="password" className="text-sm font-medium text-gray-700">
                                 Contraseña
@@ -119,15 +109,14 @@ function Login() {
                             )}
                         </div>
 
-                        {/* Botón submit */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-1 shadow-md hover:shadow-lg"
+                            className="w-full border-2 border-blue-500 text-blue-600 font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-1 hover:bg-blue-50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <>
-                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
@@ -139,7 +128,6 @@ function Login() {
                         </button>
                     </form>
 
-                    {/* Link a registro */}
                     <p className="text-center text-sm text-gray-500 mt-6">
                         ¿No tienes cuenta?{" "}
                         <Link to="/register" className="text-blue-500 font-medium hover:text-blue-700 hover:underline transition-colors">

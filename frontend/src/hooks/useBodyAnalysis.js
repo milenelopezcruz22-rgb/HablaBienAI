@@ -266,7 +266,7 @@ export const useBodyAnalysis = (videoRef, stream) => {
         });
 
         pose.setOptions({
-            modelComplexity: 0,
+            modelComplexity: 1,
             smoothLandmarks: true,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5,
@@ -462,8 +462,36 @@ export const useBodyAnalysis = (videoRef, stream) => {
     }, []);
 
     const getSnapshot = useCallback(() => {
-        // Devuelve las métricas tal cual (camelCase), que es como las lee el Dashboard.
-        return { ...metricsRef.current };
+        const current = metricsRef.current;
+
+        return {
+            postura_score: current.posturaScore,
+            contacto_visual_pct: current.contactoVisual,
+            hombros_alineados: current.hombrosAlineados,
+            encorvado: current.encorvado,
+            brazos_cruzados: current.brazosCruzados,
+            estado_brazos: current.estadoBrazos,
+            brazos_elevados: current.brazosElevados,
+            brazos_abiertos: current.brazosAbiertos,
+            torso_de_lado: current.torsoDeLado,
+            inclinacion_lateral: current.inclinacionLateral,
+            rigidez_brazos: current.rigidezBrazos,
+            actividad_gestual_pct: current.actividadGestual,
+            pecho_abierto: current.pechoAbierto,
+            manos_visibles: current.manosVisibles,
+            movimiento_score: current.movimientoScore,
+            porcentaje_buena_postura: current.porcentajeBuenaPostura,
+            porcentaje_contacto_visual: current.porcentajeContactoVisual,
+            porcentaje_brazos_cruzados: current.porcentajeBrazosCruzados,
+            porcentaje_brazos_abiertos: current.porcentajeBrazosAbiertos,
+            porcentaje_torso_de_lado: current.porcentajeTorsoDeLado,
+            porcentaje_inclinacion_lateral: current.porcentajeInclinacionLateral,
+            porcentaje_rigidez_brazos: current.porcentajeRigidezBrazos,
+            recomendaciones_corporales: current.recomendacionesCorporales,
+            porcentaje_manos_visibles: current.porcentajeManosVisibles,
+            eventos: current.eventos,
+            frames_analizados: current.frames,
+        };
     }, []);
 
     return {
