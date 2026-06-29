@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MicrophoneIcon } from "../icons";
 import { useAuth } from "../context/AuthContext";
@@ -182,7 +182,7 @@ function RegisterForm({ onSuccess }) {
     );
 }
 
-export default function AuthPage() {
+export default function AuthPage({ isModal = false, onClose }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(location.pathname === "/login");
@@ -209,6 +209,12 @@ export default function AuthPage() {
         }
     }, [isLogin]);
 
+    useEffect(() => {
+        if (!isModal) return;
+        document.body.style.overflow = "hidden";
+        return () => { document.body.style.overflow = ""; };
+    }, [isModal]);
+
     const toggle = (login) => {
         if (animating) return;
         setAnimating(true);
@@ -224,56 +230,89 @@ export default function AuthPage() {
         }, 250);
     };
 
+    const handleSuccess = useCallback(() => {
+        if (isModal) onClose?.();
+        else navigate("/");
+    }, [isModal, onClose, navigate]);
+
+    const card = (isModalCard = false) => (
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="px-8 pt-8 pb-2">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <MicrophoneIcon className="text-sky-500" size={28} />
+                        <span className="text-xl font-semibold text-gray-800">Habla Bien IA</span>
+                    </div>
+                    {isModalCard && (
+                        <button
+                            onClick={onClose}
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                            aria-label="Cerrar"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+
+                <div ref={tabsRef} className="relative flex border-b border-gray-200 mb-6">
+                    <button onClick={() => toggle(true)}
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors duration-300 relative z-10 ${isLogin ? "text-sky-600" : "text-gray-400 hover:text-gray-600"}`}>
+                        Iniciar Sesión
+                    </button>
+                    <button onClick={() => toggle(false)}
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors duration-300 relative z-10 ${!isLogin ? "text-sky-600" : "text-gray-400 hover:text-gray-600"}`}>
+                        Crear Cuenta
+                    </button>
+                    <div ref={indicatorRef}
+                        className="absolute bottom-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300 ease-in-out" />
+                </div>
+            </div>
+
+            <div className="relative overflow-hidden px-8 pb-8">
+                <div ref={contentRef} className={animClass}>
+                    {isLogin
+                        ? <LoginForm onSuccess={handleSuccess} />
+                        : <RegisterForm onSuccess={handleSuccess} />}
+                </div>
+
+                <div className="text-center text-sm text-gray-500 mt-6">
+                    {isLogin ? (
+                        <>¿No tienes cuenta?{" "}
+                            <button onClick={() => toggle(false)}
+                                className="text-sky-600 font-medium hover:text-sky-800 hover:underline transition-colors bg-transparent border-none cursor-pointer">
+                                Regístrate aquí
+                            </button>
+                        </>
+                    ) : (
+                        <>¿Ya tienes cuenta?{" "}
+                            <button onClick={() => toggle(true)}
+                                className="text-sky-600 font-medium hover:text-sky-800 hover:underline transition-colors bg-transparent border-none cursor-pointer">
+                                Inicia sesión
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    if (isModal) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-in" />
+                <div className="relative z-10 w-full max-w-md animate-slide-up-in">
+                    {card(true)}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 px-4 py-10">
             <div className="w-full max-w-md">
-                <div className="bg-white rounded-2xl shadow-xl">
-                    <div className="px-8 pt-8 pb-2">
-                        <div className="flex flex-col items-center mb-6">
-                            <div className="flex items-center gap-2 mb-2">
-                                <MicrophoneIcon className="text-sky-500" size={28} />
-                                <span className="text-xl font-semibold text-gray-800">Habla Bien IA</span>
-                            </div>
-                        </div>
-
-                        <div ref={tabsRef} className="relative flex border-b border-gray-200 mb-6">
-                            <button onClick={() => toggle(true)}
-                                className={`flex-1 pb-3 text-sm font-semibold transition-colors duration-300 relative z-10 ${isLogin ? "text-sky-600" : "text-gray-400 hover:text-gray-600"}`}>
-                                Iniciar Sesión
-                            </button>
-                            <button onClick={() => toggle(false)}
-                                className={`flex-1 pb-3 text-sm font-semibold transition-colors duration-300 relative z-10 ${!isLogin ? "text-sky-600" : "text-gray-400 hover:text-gray-600"}`}>
-                                Crear Cuenta
-                            </button>
-                            <div ref={indicatorRef}
-                                className="absolute bottom-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300 ease-in-out" />
-                        </div>
-                    </div>
-
-                    <div className="relative overflow-hidden px-8 pb-8">
-                        <div ref={contentRef} className={animClass}>
-                            {isLogin ? <LoginForm onSuccess={() => navigate("/")} /> : <RegisterForm onSuccess={() => navigate("/")} />}
-                        </div>
-
-                        <div className="text-center text-sm text-gray-500 mt-6">
-                            {isLogin ? (
-                                <>¿No tienes cuenta?{" "}
-                                    <button onClick={() => toggle(false)}
-                                        className="text-sky-600 font-medium hover:text-sky-800 hover:underline transition-colors bg-transparent border-none cursor-pointer">
-                                        Regístrate aquí
-                                    </button>
-                                </>
-                            ) : (
-                                <>¿Ya tienes cuenta?{" "}
-                                    <button onClick={() => toggle(true)}
-                                        className="text-sky-600 font-medium hover:text-sky-800 hover:underline transition-colors bg-transparent border-none cursor-pointer">
-                                        Inicia sesión
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                {card(false)}
             </div>
         </div>
     );

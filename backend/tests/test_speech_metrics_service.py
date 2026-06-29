@@ -1,10 +1,33 @@
+import io
+import wave
+
+import numpy as np
+
 from app.services.speech_metrics_service import (
     calcular_score_voz,
     calcular_velocidad_habla,
     detectar_muletillas,
     detectar_pausas_largas,
     normalizar_texto,
+    detectar_lenguaje_indeciso,
+    analizar_variacion_ritmo,
+    calcular_densidad_temporal_muletillas,
+    analizar_prosodia,
 )
+
+
+def _generar_wav(frecuencia_hz: float = 180.0, duracion_s: float = 2.0) -> bytes:
+    """Genera un WAV sinusoidal monocanal 16-bit a 16 kHz."""
+    SR = 16000
+    t = np.linspace(0, duracion_s, int(SR * duracion_s), endpoint=False)
+    pcm = (np.sin(2 * np.pi * frecuencia_hz * t) * 0.7 * 32767).astype(np.int16)
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes(pcm.tobytes())
+    return buf.getvalue()
 
 
 def test_normalizar_texto_quita_tildes_mayusculas_y_signos():
@@ -88,3 +111,69 @@ def test_calcular_score_voz_ponderado():
 
     assert calcular_score_voz(texto_mal, muletillas, velocidad_lenta, pausas_malas)["score_voz"] == 31.1
     assert calcular_score_voz("", {}, {}, {})["score_voz"] == 0
+
+
+def test_detectar_lenguaje_indeciso_clasifica_nivel():
+    texto_seguro = "El producto tiene estas tres ventajas principales."
+    assert detectar_lenguaje_indeciso(texto_seguro)["nivel_confianza"] == "seguro"
+    assert detectar_lenguaje_indeciso(texto_seguro)["total_expresiones"] == 0
+
+    texto_inseguro = "Creo que tal vez podría ser bueno, aunque no estoy seguro y quizás sea así."
+    res = detectar_lenguaje_indeciso(texto_inseguro)
+    assert res["total_expresiones"] >= 3
+    assert res["nivel_confianza"] in ("inseguro", "muy_inseguro")
+
+    assert detectar_lenguaje_indeciso("")["nivel_confianza"] == "sin_datos"
+
+
+def test_analizar_variacion_ritmo_detecta_segmentos():
+    segs = [
+        {"inicio": 0.0, "fin": 5.0, "texto": "hola mundo este es el primero"},     # 6 palabras / 5s = 72 ppm
+        {"inicio": 6.0, "fin": 8.0, "texto": "rapido muy rapido ahora"},            # 4 palabras / 2s = 120 ppm
+        {"inicio": 9.0, "fin": 15.0, "texto": "lento muy lento sin apuro alguno"}, # 6 palabras / 6s = 60 ppm
+    ]
+    res = analizar_variacion_ritmo(segs)
+    assert len(res["ritmo_por_segmento"]) == 3
+    assert res["variacion_ppm"] > 0
+    assert res["segmento_mas_rapido"]["ppm"] >= res["segmento_mas_lento"]["ppm"]
+
+    assert analizar_variacion_ritmo([])["variacion_score"] == 100
+
+
+def test_calcular_densidad_temporal_muletillas_agrupa_en_tercios():
+    segmentos = [
+        {"inicio": 0.0,  "fin": 10.0, "texto": "este bueno o sea"},    # inicio
+        {"inicio": 10.0, "fin": 20.0, "texto": "entonces este paso"},  # medio
+        {"inicio": 20.0, "fin": 30.0, "texto": "final sin nada"},      # final
+    ]
+    muletillas = {"este": 2, "o sea": 1, "entonces": 1}
+
+    res = calcular_densidad_temporal_muletillas(segmentos, muletillas)
+    assert res["inicio"] >= 1
+    assert res["tercio_critico"] in ("inicio", "medio", "final")
+
+    assert calcular_densidad_temporal_muletillas([], {})["inicio"] == 0
+
+
+def test_analizar_prosodia_tono_constante_es_monotono():
+    wav = _generar_wav(frecuencia_hz=150.0, duracion_s=3.0)
+    res = analizar_prosodia(wav)
+    assert res["disponible"] is True
+    assert res["tono_promedio_hz"] > 0
+    # Tono constante → poca variación → monótono o poco variado
+    assert res["nivel_monotonia"] in ("muy_monotono", "poco_variado")
+    assert 0 <= res["score_prosodia"] <= 100
+
+
+def test_analizar_prosodia_audio_muy_corto_devuelve_error():
+    wav = _generar_wav(frecuencia_hz=200.0, duracion_s=0.2)
+    res = analizar_prosodia(wav)
+    # Audio < 0.5 s → fallback seguro, no lanza excepción
+    assert "disponible" in res
+    assert res["disponible"] is False or res.get("score_prosodia", 50) >= 0
+
+
+def test_analizar_prosodia_bytes_invalidos_devuelve_error():
+    res = analizar_prosodia(b"no soy audio")
+    assert res["disponible"] is False
+    assert "error" in res

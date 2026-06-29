@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from "./components/Navbar";
 import Inicio from "./pages/Inicio";
@@ -25,26 +25,29 @@ function LoadingScreen() {
 
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (loading) return <LoadingScreen />;
 
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
+
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" /> : <AuthPage />} />
-      <Route path="/register" element={user ? <Navigate to="/" /> : <AuthPage />} />
-      <Route path="/*" element={
-        <>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Inicio />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/:id" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/camera" element={<ProtectedRoute><GrabarSesion /></ProtectedRoute>} />
-            <Route path="/historial" element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
-          </Routes>
-        </>
-      } />
-    </Routes>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Inicio />} />
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Inicio />} />
+        <Route path="/register" element={user ? <Navigate to="/" /> : <Inicio />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/:id" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/camera" element={<ProtectedRoute><GrabarSesion /></ProtectedRoute>} />
+        <Route path="/historial" element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
+      </Routes>
+      {!user && isAuthRoute && (
+        <AuthPage isModal onClose={() => navigate('/')} />
+      )}
+    </>
   );
 }
 
