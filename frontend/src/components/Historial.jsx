@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { obtenerSesiones } from "../services/supabase";
+import { api } from "../services/api";
 import { nivelEstilos } from "../constants";
 
 export default function Historial({ busqueda }) {
   const [sesiones, setSesiones] = useState([]);
 
   useEffect(() => {
-    obtenerSesiones().then(setSesiones);
-  }, []);
+  api.sesiones.list().then(setSesiones);
+}, []);
 
   const sesionesFiltradas = sesiones.filter((s) =>
     s.titulo?.toLowerCase().includes(busqueda.toLowerCase())

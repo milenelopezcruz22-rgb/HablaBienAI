@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "../services/api";
 import Historial from "../components/Historial";
 
 export default function HistorialPage() {
   const [busqueda, setBusqueda] = useState("");
+  const [totalSesiones, setTotalSesiones] = useState(0);
+
+  useEffect(() => {
+    api.sesiones.list().then((data) => setTotalSesiones(data.length));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg">
@@ -27,14 +32,12 @@ export default function HistorialPage() {
         </div>
       </header>
 
-      {/* Contenido */}
       <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Progreso */}
         <div className="flex items-start justify-between mb-10">
           <div>
             <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Tus Progresos</h2>
             <p className="text-gray-500 text-sm">
-              Has completado 3 sesiones este mes. ¡Vas por buen camino!
+              No has completado {totalSesiones} sesiones aun. {totalSesiones > 0 ? "¡Vas por buen camino!" : "¡Graba tu primera sesión!"}
             </p>
           </div>
           <div className="flex items-center gap-2 bg-green-100 text-green-600 font-bold text-sm px-4 py-2 rounded-xl">
@@ -43,7 +46,6 @@ export default function HistorialPage() {
           </div>
         </div>
 
-        {/* Lista de sesiones */}
         <Historial busqueda={busqueda} />
       </div>
     </div>
