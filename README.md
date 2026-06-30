@@ -19,9 +19,12 @@
 [![Express](https://img.shields.io/badge/Express-4.21-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org/)
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![faster-whisper](https://img.shields.io/badge/Whisper-faster--whisper-FF6F00?style=flat-square&logo=openai&logoColor=white)](https://github.com/SYSTRAN/faster-whisper)
+[![Groq](https://img.shields.io/badge/Groq-API-F55036?style=flat-square&logo=groq&logoColor=white)](https://groq.com/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-Pose_+_FaceMesh-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/edge/mediapipe)
-[![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06D6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)]()
 
 </div>
@@ -103,11 +106,11 @@ La aplicación está diseñada para estudiantes, profesionales y cualquier perso
 | **MediaPipe FaceMesh** | CDN | 478 landmarks faciales con refineLandmarks para tracking de iris |
 | **WebRTC API** | Nativo | Acceso a cámara, micrófono y grabación de video en formato webm |
 
-### Backend
+### Backend — Express (API REST)
 
 | Tecnología | Versión | Propósito |
 |---|---|---|
-| **Node.js** | 18+ | Entorno de ejecución del servidor |
+| **Node.js** | 18+ | Entorno de ejecución del servidor Express |
 | **Express** | 4.21 | Framework HTTP con enrutamiento modular y middleware |
 | **PostgreSQL** | 16 | Base de datos relacional con columna JSONB para análisis flexible |
 | **jsonwebtoken** | 9 | Autenticación stateless con tokens JWT de 7 días de expiración |
@@ -115,6 +118,17 @@ La aplicación está diseñada para estudiantes, profesionales y cualquier perso
 | **pg** | 8 | Cliente PostgreSQL nativo con Pool de conexiones |
 | **cors** | 2 | Middleware de seguridad para peticiones cross-origin |
 | **dotenv** | 16 | Gestión de variables de entorno |
+| **concurrently** | 10 | Lanzamiento simultáneo de Express + FastAPI |
+
+### Backend — FastAPI (Análisis de Voz con IA)
+
+| Tecnología | Versión | Propósito |
+|---|---|---|
+| **Python** | 3.14 | Entorno de ejecución del servicio de análisis de voz |
+| **FastAPI** | 0.115 | Framework HTTP para la API de análisis de voz |
+| **uvicorn** | — | Servidor ASGI para FastAPI |
+| **faster-whisper** | — | Transcripción de voz a texto con modelo "base" (int8, CPU) |
+| **Groq API** | — | Generación de feedback y recomendaciones por IA (fallback local si no hay API key) |
 
 ---
 
@@ -123,39 +137,46 @@ La aplicación está diseñada para estudiantes, profesionales y cualquier perso
 ### Diagrama de flujo de datos
 
 ```
-                    ┌──────────────────────────────────┐
-                    │         Navegador (React)         │
-                    │                                  │
-  ┌─────────────┐   │  ┌──────────┐  ┌─────────────┐  │
-  │   Cámara    │──▶│  │ Pose     │  │ FaceMesh     │  │
-  │ Micrófono   │   │  │ (33 lmk) │  │ (478 lmk)    │  │
-  └─────────────┘   │  └────┬─────┘  └──────┬───────┘  │
-                    │       │                │          │
-                    │  ┌────▼────────────────▼──────┐   │
-                    │  │     useAnalysis.js          │   │
-                    │  │   (fusión cuerpo + rostro)  │   │
-                    │  └───────────────┬──────────────┘   │
-                    │                  │                  │
-                    │  ┌───────────────▼──────────────┐   │
-                    │  │   Grabación .webm            │   │
-                    │  └───────────────┬──────────────┘   │
-                    └─────────────────┼────────────────────┘
+                    ┌──────────────────────────────────────┐
+                    │         Navegador (React)            │
+                    │                                      │
+  ┌─────────────┐   │  ┌──────────┐  ┌───────────────┐    │
+  │   Cámara    │──▶│  │ Pose     │  │ FaceMesh       │    │
+  │ Micrófono   │   │  │ (33 lmk) │  │ (478 lmk)      │    │
+  └─────────────┘   │  └────┬─────┘  └──────┬─────────┘    │
+                    │       │                │              │
+                    │  ┌────▼────────────────▼──────────┐   │
+                    │  │     useAnalysis.js              │   │
+                    │  │   (fusión cuerpo + rostro)      │   │
+                    │  └───────────────┬──────────────────┘   │
+                    │                  │                      │
+                    │  ┌───────────────▼──────────────────┐   │
+                    │  │   Grabación .webm                │   │
+                    │  └───────────────┬──────────────────┘   │
+                    └─────────────────┼────────────────────────┘
                                       │
-                    ┌─────────────────▼────────────────────┐
-                    │     Backend (Express)                │
-                    │                                     │
-                    │  POST /api/analizar (voz)           │
-                    │  POST /api/sesiones (guardar)       │
-                    │  GET  /api/sesiones (historial)     │
-                    │  POST /api/register (auth)          │
-                    │  POST /api/login (JWT)              │
-                    │                                     │
-                    │  ┌─────────────────────────────┐    │
-                    │  │  PostgreSQL                 │    │
-                    │  │  - usuarios                 │    │
-                    │  │  - sesiones (JSONB)         │    │
-                    │  └─────────────────────────────┘    │
-                    └─────────────────────────────────────┘
+          ┌───────────────────────────┼───────────────────────────┐
+          │                           │                           │
+          │  ┌────────────────────────▼────────────────────┐      │
+          │  │   FastAPI (puerto 8000)                     │      │
+          │  │   POST /api/v1/analizar                     │      │
+          │  │   - faster-whisper (transcripción)          │      │
+          │  │   - Groq API (feedback IA)                  │      │
+          │  └────────────────────────┬────────────────────┘      │
+          │                           │                           │
+          │  ┌────────────────────────▼────────────────────┐      │
+          │  │   Express (puerto 3001)                     │      │
+          │  │   POST /api/sesiones (guardar)               │      │
+          │  │   GET  /api/sesiones (historial)             │      │
+          │  │   POST /api/register | /api/login (JWT)     │      │
+          │  │                                              │      │
+          │  │  ┌────────────────────────────────────┐     │      │
+          │  │  │  PostgreSQL                        │     │      │
+          │  │  │  - usuarios                        │     │      │
+          │  │  │  - sesiones (JSONB)                │     │      │
+          │  │  └────────────────────────────────────┘     │      │
+          │  └─────────────────────────────────────────────┘      │
+          └───────────────────────────────────────────────────────┘
 ```
 
 ### Principios de diseño
@@ -189,7 +210,15 @@ Estados: inactivo → activo → grabando → detenido → inactivo
 
 ### M2 — Análisis de Voz
 
-El análisis de voz se realiza mediante un servicio externo (FastAPI + faster-whisper + Groq API). El frontend envía el blob de audio grabado y recibe:
+**Ubicación:** `backend/app/` (FastAPI)
+
+El análisis de voz se realiza mediante un servicio **FastAPI** independiente que corre en el puerto **8000**. El frontend envía el blob de audio (`POST /api/v1/analizar`) y el backend procesa:
+
+1. **Extracción de audio** — El blob webm se convierte a WAV mediante **ffmpeg**
+2. **Transcripción** — **faster-whisper** modelo "base" en CPU con cuantización int8 (~30s la primera solicitud)
+3. **Métricas de voz** — Velocidad (palabras por minuto), pausas largas (>2s), muletillas detectadas por patrón
+4. **Feedback por IA** — Si `GROQ_API_KEY` está configurada, envía la transcripción a Groq API para generar recomendaciones. Si no, usa un generador local de feedback offline
+5. **Puntaje general** — Score ponderado 0–100 basado en velocidad, pausas, muletillas y claridad
 
 | Métrica | Descripción | Rango |
 |---|---|---|
@@ -200,6 +229,14 @@ El análisis de voz se realiza mediante un servicio externo (FastAPI + faster-wh
 | Pausas largas | Silencios > 2s con duración acumulada | segundos |
 | Puntaje de voz | Score ponderado compuesto | 0–100 |
 | Feedback | Recomendaciones generadas por IA | texto |
+
+#### Manejo de errores
+
+Si el servicio FastAPI no está disponible o falla, el frontend **no bloquea** la sesión:
+- Muestra un modal de "Procesando análisis..." durante la espera
+- Si FastAPI falla, muestra una alerta informativa
+- Guarda la sesión igual con los datos corporales y faciales (voz queda en cero)
+- Navega al dashboard con los datos disponibles
 
 ---
 
@@ -405,6 +442,30 @@ DELETE /api/sesiones/:id
   Respuesta: { mensaje: "Sesión eliminada" }
 ```
 
+### FastAPI — Análisis de Voz
+
+**Base URL:** `http://localhost:8000`
+
+```
+POST /api/v1/analizar
+  Body:    multipart/form-data { audio: blob.webm }
+  Respuesta: {
+    "score_voz": 69.3,
+    "total_palabras": 245,
+    "velocidad_palabras_por_minuto": 142.5,
+    "ritmo": "adecuado",
+    "total_muletillas": 8,
+    "muletillas": { "este": 3, "eh": 4, "como": 1 },
+    "pausas_largas": 2,
+    "duracion_pausas_seg": 5.2,
+    "transcripcion": "...",
+    "feedback": "Recomendaciones generadas por IA...",
+    "recomendaciones": ["Reducir muletillas", "Mejorar ritmo"]
+  }
+```
+
+> **Nota:** La primera solicitud puede demorar ~30s mientras Whisper carga el modelo en CPU. Solicitudes subsecuentes son más rápidas.
+
 ### Esquema de base de datos
 
 ```sql
@@ -434,7 +495,9 @@ CREATE TABLE sesiones (
 ### Prerrequisitos
 
 - **Node.js** 18 o superior
+- **Python** 3.10 o superior
 - **PostgreSQL** 14 o superior
+- **ffmpeg** (para conversión de audio en el análisis de voz)
 - **Git**
 
 ### 1. Clonar el repositorio
@@ -454,11 +517,11 @@ CREATE DATABASE hablabien_db;
 \q
 ```
 
-### 3. Configurar el backend
+### 3. Configurar el backend (Express)
 
 ```bash
 cd backend
-cp .env.example .env    # o crea el archivo manualmente
+cp .env.example .env
 npm install
 ```
 
@@ -474,36 +537,75 @@ JWT_SECRET=HablaBienIA_secret_key_cambiar_en_produccion
 PORT=3001
 ```
 
-Las tablas se crean automáticamente al iniciar el servidor.
+Las tablas de PostgreSQL se crean automáticamente al iniciar el servidor.
 
-### 4. Configurar el frontend
+### 4. Configurar el backend (FastAPI — Análisis de Voz)
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+Asegúrate de tener **ffmpeg** instalado y accesible desde el PATH (necesario para convertir el audio webm a WAV).
+
+Edita `backend/.env` y agrega (opcional):
+
+```env
+GROQ_API_KEY=tu_api_key_de_groq
+BACKEND_PORT=8000
+```
+
+Si no configuras `GROQ_API_KEY`, el feedback de voz usará un generador local offline.
+
+### 5. Configurar el frontend
 
 ```bash
 cd frontend
 npm install
 ```
 
-### 5. Iniciar los servidores
+### 6. Iniciar los servidores
 
-**Terminal 1 — Backend:**
+**Opción A — Un solo comando (Express + FastAPI simultáneamente):**
 
 ```bash
 cd backend
-npm run dev
+npm start
 ```
 
-El servidor Express se inicia en `http://localhost:3001`.
+Esto lanza **Express** (puerto 3001) y **FastAPI** (puerto 8000) en paralelo usando `concurrently`.
 
-**Terminal 2 — Frontend:**
+**Opción B — Terminales separadas:**
 
 ```bash
+# Terminal 1 — Express
+cd backend
+npm run dev
+
+# Terminal 2 — FastAPI
+cd backend
+npm run start:fastapi
+
+# Terminal 3 — Frontend
 cd frontend
 npm run dev
 ```
 
-La aplicación React se inicia en `http://localhost:5173`.
+**Opción C — Script automatizado:**
 
-### 6. Probar el build de producción
+```powershell
+.\start.ps1
+```
+
+### Servidores
+
+| Servicio | Puerto | Propósito |
+|---|---|---|
+| **Express** | 3001 | API REST (auth, sesiones) |
+| **FastAPI** | 8000 | Análisis de voz (Whisper + Groq) |
+| **Vite (React)** | 5173 | Frontend de desarrollo |
+
+### 8. Probar el build de producción
 
 ```bash
 cd frontend
@@ -519,57 +621,69 @@ npm run lint     # Verifica el código con ESLint
 HablaBienAI/
 │
 ├── backend/
+│   ├── app/                              # FastAPI — Análisis de voz
+│   │   ├── main.py                       # Punto de entrada FastAPI
+│   │   ├── api/
+│   │   │   └── routes/
+│   │   │       └── analisis.py           # POST /api/v1/analizar
+│   │   ├── services/
+│   │   │   └── audio_service.py          # Whisper + métricas + Groq
+│   │   └── utils/
+│   │       └── feedback.py               # Generador local de feedback
 │   ├── routes/
-│   │   ├── auth.js                    # Registro, login, perfil
-│   │   └── sesiones.js                # CRUD de sesiones
+│   │   ├── auth.js                       # Registro, login, perfil
+│   │   └── sesiones.js                   # CRUD de sesiones
 │   ├── middleware/
-│   │   └── auth.js                    # Verificación JWT
-│   ├── db.js                          # Pool de conexión PostgreSQL
-│   ├── server.js                      # Configuración y punto de entrada
+│   │   └── auth.js                       # Verificación JWT
+│   ├── db.js                             # Pool de conexión PostgreSQL
+│   ├── server.js                         # Express — punto de entrada
+│   ├── requirements.txt                  # Dependencias Python
 │   ├── package.json
 │   └── .env
 │
 ├── frontend/
-│   ├── index.html                     # CDN: MediaPipe Pose + FaceMesh
+│   ├── index.html                        # CDN: MediaPipe Pose + FaceMesh
 │   ├── src/
-│   │   ├── main.jsx                   # Punto de entrada React
-│   │   ├── App.jsx                    # Router con rutas protegidas
+│   │   ├── main.jsx                      # Punto de entrada React
+│   │   ├── App.jsx                       # Router con rutas protegidas
 │   │   │
 │   │   ├── context/
-│   │   │   └── AuthContext.jsx         # Estado global de autenticación
+│   │   │   └── AuthContext.jsx            # Estado global de autenticación
 │   │   │
 │   │   ├── hooks/
-│   │   │   ├── useCamera.js           # WebRTC + MediaRecorder
-│   │   │   ├── useAnalysis.js         # Orquestador de análisis
-│   │   │   ├── useBodyAnalysis.js     # MediaPipe Pose (postura, brazos, torso)
-│   │   │   ├── useFaceAnalysis.js     # MediaPipe FaceMesh (iris tracking)
-│   │   │   └── useHandAnalysis.js     # [Base] MediaPipe Hands
+│   │   │   ├── useCamera.js              # WebRTC + MediaRecorder
+│   │   │   ├── useAnalysis.js            # Orquestador de análisis
+│   │   │   ├── useBodyAnalysis.js        # MediaPipe Pose (postura, brazos, torso)
+│   │   │   ├── useFaceAnalysis.js        # MediaPipe FaceMesh (iris tracking)
+│   │   │   └── useHandAnalysis.js        # [Base] MediaPipe Hands
 │   │   │
 │   │   ├── pages/
-│   │   │   ├── inicio.jsx             # Landing dual (auth / guest)
-│   │   │   ├── AuthPage.jsx           # Login + Register con tabs
-│   │   │   ├── grabarsesion.jsx       # Cámara, grabación, análisis en vivo
-│   │   │   ├── dashboard.jsx          # Resultados detallados
-│   │   │   └── historialpage.jsx      # Lista de sesiones guardadas
+│   │   │   ├── inicio.jsx                # Landing dual (auth / guest)
+│   │   │   ├── AuthPage.jsx              # Login + Register con tabs
+│   │   │   ├── grabarsesion.jsx          # Cámara, grabación, análisis en vivo
+│   │   │   ├── dashboard.jsx             # Resultados detallados
+│   │   │   └── historialpage.jsx         # Lista de sesiones guardadas
 │   │   │
 │   │   ├── components/
-│   │   │   ├── navbar.jsx             # Navegación con nombre de usuario
-│   │   │   ├── historial.jsx          # Tabla de sesiones
-│   │   │   ├── cards.jsx / card.jsx   # Sección "Cómo funciona"
-│   │   │   ├── scoredisplay.jsx       # Display de puntaje
-│   │   │   ├── resultcard.jsx         # Tarjeta de métrica
-│   │   │   ├── radarchart.jsx         # Gráfico radar 5 dimensiones
-│   │   │   ├── button.jsx             # Botón reutilizable
+│   │   │   ├── navbar.jsx                # Navegación con nombre de usuario
+│   │   │   ├── historial.jsx             # Tabla de sesiones
+│   │   │   ├── cards.jsx / card.jsx      # Sección "Cómo funciona"
+│   │   │   ├── scoredisplay.jsx          # Display de puntaje
+│   │   │   ├── resultcard.jsx            # Tarjeta de métrica
+│   │   │   ├── radarchart.jsx            # Gráfico radar 5 dimensiones
+│   │   │   ├── button.jsx                # Botón reutilizable
 │   │   │   └── Camera/
-│   │   │       └── GrabarSesion.jsx   # [Alternativo] Componente de grabación
+│   │   │       └── GrabarSesion.jsx      # [Alternativo] Componente de grabación
 │   │   │
 │   │   └── services/
-│   │       └── api.js                 # Cliente HTTP con interceptor JWT
+│   │       └── api.js                    # Cliente HTTP con interceptor JWT
 │   │
 │   ├── tailwind.config.js
 │   ├── vite.config.js
 │   └── package.json
 │
+├── .env.example
+├── start.ps1                             # Script para lanzar servidores
 └── README.md
 ```
 
@@ -580,7 +694,11 @@ HablaBienAI/
 | Módulo | Componente | Estado | Prioridad |
 |---|---|---|---|
 | **M1** | Captura de medios (cámara + micrófono) | ✅ Completado | — |
-| **M2** | Análisis de voz (servicio externo) | ✅ Completado | — |
+| **M2** | Análisis de voz (FastAPI + Whisper + Groq) | ✅ Completado | — |
+| **M2.1** | Servidor FastAPI con concurrently | ✅ Completado | — |
+| **M2.2** | Fallback offline sin GROQ_API_KEY | ✅ Completado | — |
+| **M2.3** | Manejo de errores: modal + alerta si FastAPI falla | ✅ Completado | — |
+| **M2.4** | ffmpeg para conversión webm → WAV | ✅ Completado | — |
 | **M3** | Análisis corporal (MediaPipe Pose) | ✅ Completado | — |
 | **M3.1** | FaceMesh iris tracking | ✅ Completado | — |
 | **M4** | Fusión de resultados (dashboard) | ✅ Completado | — |
