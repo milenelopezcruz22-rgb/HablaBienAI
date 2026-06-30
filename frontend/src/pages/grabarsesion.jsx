@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
-import { analizarAudio } from "../services/api";
+import { api, analizarAudio } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
@@ -155,10 +155,27 @@ export default function GrabarSesion() {
             setIsAnalyzing(true);
             setAnalysisError(null);
             try {
-                const corporal = getSnapshotRef.current?.() ?? {};
-                const data = await analizarAudio(videoBlob, corporal);
-                localStorage.setItem("analysisResult", JSON.stringify({ voz: data, corporal }));
-                navigate("/dashboard");
+            const corporal = getSnapshotRef.current?.() ?? {};
+            const data = await analizarAudio(videoBlob, corporal);
+            const analysisResult = { voz: data, corporal };
+            localStorage.setItem("analysisResult", JSON.stringify(analysisResult));
+
+            const fechaTitulo = new Date().toLocaleString("es-MX", {
+                day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+            });
+
+            try {
+                await api.sesiones.create({
+                    titulo: `Sesión ${fechaTitulo}`,
+                    duracion_seg: Math.round(data?.duracion_segundos ?? 0),
+                    puntaje_general: Math.round(data?.score_voz ?? 0),
+                    analisis: analysisResult,
+                });
+            } catch (saveErr) {
+                console.error("No se pudo guardar la sesión en el historial:", saveErr);
+            }
+
+            navigate("/dashboard");
             } catch (err) {
                 setAnalysisError("No se pudo analizar el audio. Verifica que el backend esté corriendo.");
                 console.error(err);

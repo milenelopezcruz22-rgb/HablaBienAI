@@ -32,3 +32,19 @@ export const api = {
       request(`/sesiones/${id}`, { method: "DELETE" }),
   },
 };
+export async function analizarAudio(videoBlob) {
+  const formData = new FormData();
+  formData.append("audio", videoBlob, "grabacion.webm");
+
+  const res = await fetch("http://localhost:8000/api/v1/analizar", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Error al analizar el audio");
+  }
+
+  return res.json();
+}
