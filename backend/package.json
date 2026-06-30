@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js"
+    "start": "concurrently --names \"EXPRESS,FASTAPI\" --prefix-colors \"blue,green\" \"node server.js\" \"python -m uvicorn app.main:app --host 0.0.0.0 --port 8000\"",
+    "start:fastapi": "python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -13,5 +14,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
   }
 }

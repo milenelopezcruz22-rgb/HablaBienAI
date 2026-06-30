@@ -124,27 +124,36 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
 export default function GrabarSesion() {
     const navigate = useNavigate();
+    const [processing, setProcessing] = useState(false);
+    const [errorMsg, setErrorMsg] = useState(null);
 
     const grabarInicio = useRef(null);
 
     const enviarAnalisis = async (blob) => {
-    try {
-        const formData = new FormData();
-        formData.append("audio", blob, "grabacion.webm");
+        setProcessing(true);
+        setErrorMsg(null);
+        let data = null;
+        try {
+            const formData = new FormData();
+            formData.append("audio", blob, "grabacion.webm");
 
-        const response = await fetch(
-            "http://localhost:8000/api/v1/analizar",
-            { method: "POST", body: formData }
-        );
+            const response = await fetch(
+                "http://localhost:8000/api/v1/analizar",
+                { method: "POST", body: formData }
+            );
 
-        if (!response.ok) {
-            throw new Error("Error al analizar el video");
+            if (!response.ok) {
+                throw new Error("Error al analizar el video");
+            }
+
+            data = await response.json();
+        } catch (error) {
+            console.error("Error en FastAPI:", error);
+            setErrorMsg("No se pudo conectar con el servidor de análisis de voz. Los datos corporales se guardarán igual.");
         }
 
-        const data = await response.json();
-
         const resultadoCompleto = {
-            voz: data,
+            voz: data || { score_voz: 0, total_palabras: 0, total_muletillas: 0, transcripcion: "", muletillas: {}, feedback: "", recomendaciones: [] },
             corporal: bodyMetrics,
             facial: faceMetrics
         };
@@ -157,19 +166,19 @@ export default function GrabarSesion() {
 
         const puntaje = data?.score_voz || 0;
 
-        const sesion = await api.sesiones.create({
-            titulo: `Sesion ${new Date().toLocaleDateString("es-MX")}`,
-            duracion_seg: duracion,
-            puntaje_general: puntaje,
-            analisis: resultadoCompleto,
-        });
-
-        navigate(`/dashboard/${sesion.sesion.id}`);
-
-    } catch (error) {
-        console.error("Error enviando analisis:", error);
-    }
-};
+        try {
+            const sesion = await api.sesiones.create({
+                titulo: `Sesion ${new Date().toLocaleDateString("es-MX")}`,
+                duracion_seg: duracion,
+                puntaje_general: puntaje,
+                analisis: resultadoCompleto,
+            });
+            navigate(`/dashboard/${sesion.sesion.id}`);
+        } catch (err) {
+            console.error("Error guardando sesion:", err);
+            navigate("/dashboard");
+        }
+    };
     
    
     
@@ -240,6 +249,24 @@ export default function GrabarSesion() {
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">Grabar Sesión</h1>
                     <p className="text-slate-500">Activa tu cámara y graba una presentación para analizar tu oratoria</p>
                 </div>
+
+                {processing && (
+                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                        <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4">
+                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            <p className="text-lg font-semibold text-slate-800">Procesando análisis...</p>
+                            <p className="text-sm text-slate-500 text-center">Esto puede tomar unos segundos. No cierres esta ventana.</p>
+                        </div>
+                    </div>
+                )}
+
+                {errorMsg && (
+                    <div className="max-w-[1600px] mx-auto px-6 mb-4">
+                        <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg text-sm">
+                            {errorMsg}
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8 items-start">
 
