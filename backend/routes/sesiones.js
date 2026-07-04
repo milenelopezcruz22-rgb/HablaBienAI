@@ -10,7 +10,11 @@ router.get("/", authenticate, async (req, res) => {
       "SELECT id, titulo, duracion_seg, fecha, puntaje_general, analisis FROM sesiones WHERE usuario_id = $1 ORDER BY fecha DESC",
       [req.userId]
     );
-    res.json({ sesiones: result.rows });
+    const sesiones = result.rows.map(s => ({
+      ...s,
+      analisis: typeof s.analisis === "string" ? JSON.parse(s.analisis) : s.analisis
+    }));
+    res.json({ sesiones });
   } catch (err) {
     console.error("GET /sesiones error:", err.message);
     res.status(500).json({ error: err.message || "Error del servidor" });
@@ -26,7 +30,9 @@ router.get("/:id", authenticate, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Sesion no encontrada" });
     }
-    res.json({ sesion: result.rows[0] });
+    const sesion = result.rows[0];
+    sesion.analisis = typeof sesion.analisis === "string" ? JSON.parse(sesion.analisis) : sesion.analisis;
+    res.json({ sesion });
   } catch (err) {
     console.error("GET /sesiones/:id error:", err.message);
     res.status(500).json({ error: err.message || "Error del servidor" });

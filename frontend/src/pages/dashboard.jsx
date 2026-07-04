@@ -414,21 +414,31 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      api.sesiones
-        .get(id)
-        .then(({ sesion }) => setAnalysisResult(sesion.analisis || {}))
-        .catch(() => {
-          const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
-          setAnalysisResult(Object.keys(local).length ? local : null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
-      setAnalysisResult(Object.keys(local).length ? local : null);
-      setLoading(false);
-    }
-  }, [id]);
+  if (id) {
+    setLoading(true);
+    api.sesiones
+      .get(id)
+      .then(({ sesion }) => {
+        const analisis = sesion?.analisis;
+        // Validar que realmente tenga contenido (no un objeto vacío)
+        if (analisis && Object.keys(analisis).length > 0) {
+          setAnalysisResult(analisis);
+        } else {
+          setAnalysisResult(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Error cargando sesión:", err); // <- para ver el error real en consola
+        const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
+        setAnalysisResult(Object.keys(local).length ? local : null);
+      })
+      .finally(() => setLoading(false));
+  } else {
+    const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
+    setAnalysisResult(Object.keys(local).length ? local : null);
+    setLoading(false);
+  }
+}, [id]);
 
   if (loading) {
     return (
