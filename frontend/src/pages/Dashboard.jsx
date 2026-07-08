@@ -412,33 +412,95 @@ function Dashboard() {
   const { id } = useParams();
   const [analysisResult, setAnalysisResult] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasSessions, setHasSessions] = useState(false);
 
   useEffect(() => {
-  if (id) {
-    setLoading(true);
-    api.sesiones
-      .get(id)
-      .then(({ sesion }) => {
-        const analisis = sesion?.analisis;
-        // Validar que realmente tenga contenido (no un objeto vacío)
-        if (analisis && Object.keys(analisis).length > 0) {
-          setAnalysisResult(analisis);
-        } else {
+
+    if (id) {
+
+      setLoading(true);
+
+      api.sesiones
+        .get(id)
+        .then(({ sesion }) => {
+
+          const analisis = sesion?.analisis;
+
+          if (analisis && Object.keys(analisis).length > 0) {
+            setAnalysisResult(analisis);
+          } else {
+            setAnalysisResult(null);
+          }
+
+        })
+        .catch((err) => {
+          console.error("Error cargando sesión:", err);
           setAnalysisResult(null);
-        }
-      })
-      .catch((err) => {
-        console.error("Error cargando sesión:", err); // <- para ver el error real en consola
-        const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
-        setAnalysisResult(Object.keys(local).length ? local : null);
-      })
-      .finally(() => setLoading(false));
-  } else {
-    const local = JSON.parse(localStorage.getItem("analysisResult") || "{}");
-    setAnalysisResult(Object.keys(local).length ? local : null);
-    setLoading(false);
-  }
-}, [id]);
+        })
+        .finally(() => setLoading(false));
+
+
+    } else {
+
+
+      api.sesiones
+        .list()
+        .then(({ sesiones }) => {
+
+
+          if (sesiones && sesiones.length > 0) {
+
+            setHasSessions(true);
+
+
+            const ultimaSesion = sesiones[0];
+
+
+            if (
+              ultimaSesion.analisis &&
+              Object.keys(ultimaSesion.analisis).length > 0
+            ) {
+
+              setAnalysisResult(ultimaSesion.analisis);
+
+            } else {
+
+              setAnalysisResult(null);
+
+            }
+
+
+          } else {
+
+
+            setHasSessions(false);
+            setAnalysisResult(null);
+
+
+          }
+
+
+        })
+        .catch((err)=>{
+
+          console.error(
+            "Error obteniendo sesiones:",
+            err
+          );
+
+          setAnalysisResult(null);
+
+        })
+        .finally(()=>{
+
+          setLoading(false);
+
+        });
+
+    }
+
+
+  }, [id]);
 
   if (loading) {
     return (
@@ -449,10 +511,36 @@ function Dashboard() {
   }
 
   if (!analysisResult) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-gray-500">No hay resultados de análisis</p>
-        <Button onClick={() => navigate("/camera")} icon={RotateCcw}>Nueva Sesion</Button>
+  return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6 text-center px-5">
+
+
+        <div className="bg-blue-100 p-6 rounded-full">
+          <Mic2 size={50} className="text-blue-600"/>
+        </div>
+
+
+        <h1 className="text-2xl font-bold text-gray-800">
+          ¡Bienvenido a tu Dashboard!
+        </h1>
+
+
+        <p className="text-gray-500 max-w-md">
+          Todavía no tienes una sesión evaluada.
+          Graba tu primera presentación para obtener
+          análisis de voz, postura, contacto visual
+          y recomendaciones personalizadas.
+        </p>
+
+
+        <Button
+          onClick={() => navigate("/camera")}
+          icon={Mic2}
+        >
+          Grabar mi primera sesión
+        </Button>
+
+
       </div>
     );
   }
