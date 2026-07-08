@@ -158,7 +158,6 @@ export default function GrabarSesion() {
             const corporal = getSnapshotRef.current?.() ?? {};
             const data = await analizarAudio(videoBlob, corporal);
             const analysisResult = { voz: data, corporal };
-            localStorage.setItem("analysisResult", JSON.stringify(analysisResult));
 
             const fechaTitulo = new Date().toLocaleString("es-MX", {
                 day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
