@@ -47,14 +47,17 @@ def _feedback_local(metricas: dict | None = None) -> dict:
 def _extraer_json_respuesta(content: str) -> dict:
     try:
         return json.loads(content)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         inicio = content.find("{")
         fin = content.rfind("}")
 
         if inicio != -1 and fin != -1 and fin > inicio:
-            return json.loads(content[inicio:fin + 1])
+            try:
+                return json.loads(content[inicio:fin + 1])
+            except json.JSONDecodeError:
+                raise ValueError(f"No se pudo extraer JSON válido de la respuesta de Groq: {content[:100]}...")
 
-        raise
+        raise ValueError(f"Formato de respuesta inválido de Groq: {content[:100]}...")
 
 
 def _normalizar_feedback(data: dict, fallback_content: str = "") -> dict:
@@ -74,6 +77,7 @@ def _normalizar_feedback(data: dict, fallback_content: str = "") -> dict:
 def analizar_con_groq(transcripcion: str, metricas: dict | None = None) -> dict:
     """
     Usa Groq API para generar feedback de voz basado en transcripcion y metricas.
+    Fallback a feedback local si API no disponible.
     """
     if not client:
         return _feedback_local(metricas)
@@ -113,13 +117,15 @@ Responde SOLO en JSON valido con esta forma:
             temperature=0.4,
             max_tokens=600,
             response_format={"type": "json_object"},
+            timeout=30  # Timeout de 30 segundos
         )
 
         content = response.choices[0].message.content.strip()
         data = _extraer_json_respuesta(content)
         return _normalizar_feedback(data, content)
 
+    except json.JSONDecodeError:
+        return _feedback_local(metricas)
     except Exception as e:
-        fallback = _feedback_local(metricas)
-        fallback["feedback"] = f"{fallback['feedback']} Detalle tecnico: {str(e)}"
-        return fallback
+        # Fallback silencioso sin exponer detalles técnicos
+        return _feedback_local(metricas)

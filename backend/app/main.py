@@ -5,12 +5,21 @@ from app.api.routes import analisis
 app = FastAPI(title="HablaBien AI API", version="1.0.0")
 
 # CORS para el frontend
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev frontend
+    "http://localhost:5174",  # Vite dev frontend alternativo
+    "http://localhost:3000",  # React dev
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especificar el dominio del frontend
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Rutas

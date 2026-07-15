@@ -10,6 +10,10 @@ from app.services.transcription_service import transcribir_audio_detallado
 
 router = APIRouter()
 
+# Constantes de validación
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+ALLOWED_AUDIO_TYPES = ["audio/", "video/"]
+
 @router.post("/analizar")
 async def analizar_audio(audio: UploadFile = File(...)):
     """
@@ -20,8 +24,29 @@ async def analizar_audio(audio: UploadFile = File(...)):
     """
 
     try:
+        # Validar tipo de archivo
+        if not audio.content_type or not any(audio.content_type.startswith(t) for t in ALLOWED_AUDIO_TYPES):
+            raise HTTPException(
+                status_code=400,
+                detail="El archivo debe ser de tipo audio o video"
+            )
+
         # Leer el archivo
         audio_bytes = await audio.read()
+
+        # Validar que no esté vacío
+        if not audio_bytes or len(audio_bytes) == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="El archivo de audio está vacío"
+            )
+
+        # Validar tamaño
+        if len(audio_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"El archivo excede el tamaño máximo permitido ({MAX_FILE_SIZE // (1024*1024)}MB)"
+            )
 
         # Transcribir con Faster-Whisper
         resultado_transcripcion = transcribir_audio_detallado(audio_bytes)
@@ -75,13 +100,10 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "fuente_feedback": feedback_ia["fuente_feedback"]
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print("ERROR COMPLETO:", e)
-
-        import traceback
-        traceback.print_exc()
-
         raise HTTPException(
             status_code=500,
-            detail=f"Error al analizar el audio: {str(e)}"
+            detail="Error al procesar el audio. Por favor, intenta nuevamente."
         )

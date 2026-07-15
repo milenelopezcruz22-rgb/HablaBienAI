@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, ChevronRight } from "lucide-react";
+import { Clock, ChevronRight, Film, Search } from "lucide-react";
+import { motion } from "framer-motion";
 import { api } from "../services/api";
 
 function formatearFecha(fechaISO) {
@@ -52,9 +53,32 @@ export default function Historial({ busqueda }) {
 
   if (filtradas.length === 0) {
     return (
-      <p className="text-center text-slate-400 py-12 text-sm bg-white border border-slate-200 rounded-2xl">
-        {busqueda ? "No se encontraron sesiones." : "Aun no tienes sesiones. Graba tu primera presentacion!"}
-      </p>
+      <motion.div 
+        className="flex flex-col items-center justify-center py-16 px-6 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          {busqueda ? (
+            <Search size={32} className="text-slate-400" />
+          ) : (
+            <Film size={32} className="text-slate-400" />
+          )}
+        </motion.div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+          {busqueda ? "Sin resultados" : "Sin sesiones grabadas"}
+        </h3>
+        <p className="text-sm text-slate-600 text-center max-w-sm">
+          {busqueda 
+            ? "No se encontraron sesiones con ese término. Intenta otra búsqueda."
+            : "Aún no tienes sesiones grabadas. ¡Graba tu primera presentación para obtener análisis detallado!"}
+        </p>
+      </motion.div>
     );
   }
 

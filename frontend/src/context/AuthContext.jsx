@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       setLoading(false);
       return;
@@ -16,24 +16,44 @@ export function AuthProvider({ children }) {
 
     api.me()
       .then(({ user }) => setUser(user))
-      .catch(() => localStorage.removeItem("token"))
+      .catch(() => sessionStorage.removeItem("token"))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Sincronizar token entre pestañas
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "token") {
+        if (e.newValue) {
+          // Token agregado en otra pestaña
+          api.me()
+            .then(({ user }) => setUser(user))
+            .catch(() => sessionStorage.removeItem("token"));
+        } else {
+          // Token removido en otra pestaña
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = async (email, password) => {
     const { user, token } = await api.login(email, password);
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
     setUser(user);
   };
 
   const register = async (email, password, nombre, apellido) => {
     const { user, token } = await api.register(email, password, nombre, apellido);
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
     setUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setUser(null);
   };
 
@@ -44,4 +64,5 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/jsx-no-comment-textnodes
 export const useAuth = () => useContext(AuthContext);

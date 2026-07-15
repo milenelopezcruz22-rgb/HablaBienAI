@@ -2,27 +2,22 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCamera } from "../hooks/useCamera";
 import { useAnalysis } from "../hooks/useAnalysis";
-import { api } from "../services/api";
+import { api, analizarAudio } from "../services/api";
 import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
 } from 'lucide-react';
+import { posturaConfig as basePosturaConfig, contactoConfig as baseContactoConfig } from "../constants/styles";
 
 const posturaConfig = {
-    excelente: { label: 'Excelente', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', icon: <CheckCircle size={13} /> },
-    buena: { label: 'Buena', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: <CheckCircle size={13} /> },
-    mejorar: { label: 'Mejorar', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', icon: <AlertCircle size={13} /> },
-    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: <Activity size={13} /> },
-    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)', icon: <CameraOff size={13} /> },
+    excelente: { ...basePosturaConfig.excelente, icon: <CheckCircle size={13} /> },
+    buena: { ...basePosturaConfig.buena, icon: <CheckCircle size={13} /> },
+    mejorar: { ...basePosturaConfig.mejorar, icon: <AlertCircle size={13} /> },
+    esperando: { ...basePosturaConfig.esperando, icon: <Activity size={13} /> },
+    nodetect: { ...basePosturaConfig.nodetect, icon: <CameraOff size={13} /> },
 };
 
-const contactoConfig = {
-    estable: { label: 'Estable (IA)', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
-    intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
-    ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
-    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
-    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)' },
-};
+const contactoConfig = baseContactoConfig;
 
 const audioConfig = {
     optimo: { label: 'Óptimo', barColor: '#22c55e' },
@@ -124,88 +119,67 @@ const todayTip = tips[Math.floor(Math.random() * tips.length)];
 
 export default function GrabarSesion() {
     const navigate = useNavigate();
-    const [processing, setProcessing] = useState(false);
-    const [errorMsg, setErrorMsg] = useState(null);
-
-    const grabarInicio = useRef(null);
-
-    const enviarAnalisis = async (blob) => {
-        setProcessing(true);
-        setErrorMsg(null);
-        let data = null;
-        try {
-            const formData = new FormData();
-            formData.append("audio", blob, "grabacion.webm");
-
-            const response = await fetch(
-                "http://localhost:8000/api/v1/analizar",
-                { method: "POST", body: formData }
-            );
-
-            if (!response.ok) {
-                throw new Error("Error al analizar el video");
-            }
-
-            data = await response.json();
-        } catch (error) {
-            console.error("Error en FastAPI:", error);
-            setErrorMsg("No se pudo conectar con el servidor de análisis de voz. Los datos corporales se guardarán igual.");
-        }
-
-        const resultadoCompleto = {
-            voz: data || { score_voz: 0, total_palabras: 0, total_muletillas: 0, transcripcion: "", muletillas: {}, feedback: "", recomendaciones: [] },
-            corporal: bodyMetrics,
-            facial: faceMetrics
-        };
-
-        localStorage.setItem("analysisResult", JSON.stringify(resultadoCompleto));
-
-        const duracion = grabarInicio.current
-            ? Math.round((Date.now() - grabarInicio.current) / 1000)
-            : 0;
-
-        const puntaje = data?.score_voz || 0;
-
-        try {
-            const sesion = await api.sesiones.create({
-                titulo: `Sesion ${new Date().toLocaleDateString("es-MX")}`,
-                duracion_seg: duracion,
-                puntaje_general: puntaje,
-                analisis: resultadoCompleto,
-            });
-            navigate(`/dashboard/${sesion.sesion.id}`);
-        } catch (err) {
-            console.error("Error guardando sesion:", err);
-            navigate("/dashboard");
-        }
-    };
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisError, setAnalysisError] = useState(null);
+    const getSnapshotRef = useRef(null);
     
    
     
     const {
-    videoRef,
-    stream,
-    error,
-    startCamera,
-    stopCamera,
-    isRecording,
-    videoBlob,
-    startRecording,
-    stopRecording
-} = useCamera();
-    const { postura, contactoVisual, contactoVisualRaw, audioLevel, audioEstado, framing, bodyMetrics, faceMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef } = useAnalysis(stream, !!stream, videoRef);
+        videoRef,
+        stream,
+        error,
+        startCamera,
+        stopCamera,
+        isRecording,
+        videoBlob,
+        startRecording,
+        stopRecording,
+    } = useCamera();
+
+    const { postura, contactoVisual, audioLevel, audioEstado, framing, bodyMetrics, latestPoseRef, latestFaceRef, faceMeshReadyRef, getSnapshot } = useAnalysis(stream, !!stream, videoRef);
     const canvasRef = useRef(null);
 
-    useEffect(() => {
-        if (isRecording) {
-            grabarInicio.current = Date.now();
-        }
-    }, [isRecording]);
+    // Mantiene getSnapshot siempre actualizado sin recrear el effect
+    useEffect(() => { getSnapshotRef.current = getSnapshot; }, [getSnapshot]);
 
     useEffect(() => {
-    if (videoBlob) {
-        enviarAnalisis(videoBlob);
-    }
+        if (!videoBlob) return;
+
+        const enviar = async () => {
+            setIsAnalyzing(true);
+            setAnalysisError(null);
+            try {
+            const corporal = getSnapshotRef.current?.() ?? {};
+            const data = await analizarAudio(videoBlob, corporal);
+            const analysisResult = { voz: data, corporal };
+            localStorage.setItem("analysisResult", JSON.stringify(analysisResult));
+
+            const fechaTitulo = new Date().toLocaleString("es-MX", {
+                day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+            });
+
+            try {
+                await api.sesiones.create({
+                    titulo: `Sesión ${fechaTitulo}`,
+                    duracion_seg: Math.round(data?.duracion_segundos ?? 0),
+                    puntaje_general: Math.round(data?.score_voz ?? 0),
+                    analisis: analysisResult,
+                });
+            } catch (saveErr) {
+                console.error("No se pudo guardar la sesión en el historial:", saveErr);
+            }
+
+            navigate("/dashboard");
+            } catch (err) {
+                setAnalysisError("No se pudo analizar el audio. Verifica que el backend esté corriendo.");
+                console.error(err);
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+
+        enviar();
     }, [videoBlob]);
 
     const animRef = useRef(null);
@@ -250,24 +224,6 @@ export default function GrabarSesion() {
                     <p className="text-slate-500">Activa tu cámara y graba una presentación para analizar tu oratoria</p>
                 </div>
 
-                {processing && (
-                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-                        <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4">
-                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                            <p className="text-lg font-semibold text-slate-800">Procesando análisis...</p>
-                            <p className="text-sm text-slate-500 text-center">Esto puede tomar unos segundos. No cierres esta ventana.</p>
-                        </div>
-                    </div>
-                )}
-
-                {errorMsg && (
-                    <div className="max-w-[1600px] mx-auto px-6 mb-4">
-                        <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg text-sm">
-                            {errorMsg}
-                        </div>
-                    </div>
-                )}
-
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8 items-start">
 
                     {/* COLUMNA 1: INSTRUCCIONES */}
@@ -292,9 +248,19 @@ export default function GrabarSesion() {
 
                     {/* COLUMNA 2: VIDEO Y CONTROLES */}
                     <div className="flex flex-col items-center">
-                        {error && (
+                        {(error || analysisError) && (
                             <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center border border-red-200">
-                                {error}
+                                {error || analysisError}
+                            </div>
+                        )}
+
+                        {isAnalyzing && (
+                            <div className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-600 text-sm font-medium mb-4">
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                </svg>
+                                Analizando tu sesión con IA...
                             </div>
                         )}
 
@@ -353,8 +319,8 @@ export default function GrabarSesion() {
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
                                             style={{ background: cc.bg, color: cc.color, border: `1px solid ${cc.color}40` }}
                                         >
-                                    <Eye size={13} />
-                                    <span>{faceMeshReadyRef.current ? "Contacto (IA):" : "Contacto Visual:"} <strong>{cc.label}</strong></span>
+                                            <Eye size={13} />
+                                            <span>Contacto Visual: <strong>{cc.label}</strong></span>
                                         </div>
                                     )}
                                     {bodyMetrics?.gestoMano && (
@@ -485,7 +451,7 @@ export default function GrabarSesion() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                                            <Eye size={12} /> {faceMetrics?.isReady ? "Contacto IA" : "Contacto Visual"}
+                                            <Eye size={12} /> Contacto Visual
                                         </span>
                                         {cc ? (
                                             <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: cc.color, background: cc.bg }}>
@@ -502,8 +468,8 @@ export default function GrabarSesion() {
                                         }} />
                                     </div>
                                     <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                                        {contactoVisual === 'estable' && (faceMetrics?.isReady ? 'FaceMesh detecta mirada centrada. Excelente contacto visual.' : 'Excelente. Mantienes la mirada hacia la cámara.')}
-                                        {contactoVisual === 'intermitente' && (faceMetrics?.isReady ? 'El iris se desvía del centro con frecuencia. Intenta fijar la mirada.' : 'Intenta no desviar la mirada con tanta frecuencia.')}
+                                        {contactoVisual === 'estable' && 'Excelente. Mantienes la mirada hacia la cámara.'}
+                                        {contactoVisual === 'intermitente' && 'Intenta no desviar la mirada con tanta frecuencia.'}
                                         {contactoVisual === 'ausente' && 'Mira directamente al lente de la cámara.'}
                                         {contactoVisual === 'esperando' && 'Esperando detección de tu mirada por la cámara...'}
                                         {contactoVisual === 'nodetect' && 'No se detecta tu rostro. Asegúrate de estar frente a la cámara.'}
