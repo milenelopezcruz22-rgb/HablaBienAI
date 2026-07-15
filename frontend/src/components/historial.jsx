@@ -27,17 +27,21 @@ function nivelDesdePuntaje(puntaje) {
   return { label: "EN PROGRESO", style: "text-gray-800" };
 }
 
-export default function Historial({ busqueda }) {
+export default function Historial({ busqueda, sesionesExternas, cargandoExterno }) {
   const navigate = useNavigate();
-  const [sesiones, setSesiones] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [sesionesInternas, setSesionesInternas] = useState([]);
+  const [cargandoInterno, setCargandoInterno] = useState(!sesionesExternas);
 
   useEffect(() => {
+    if (sesionesExternas) return; // ya las tiene el padre
     api.sesiones.list()
-      .then(({ sesiones }) => setSesiones(sesiones))
+      .then(({ sesiones }) => setSesionesInternas(sesiones))
       .catch(() => {})
-      .finally(() => setCargando(false));
-  }, []);
+      .finally(() => setCargandoInterno(false));
+  }, [sesionesExternas]);
+
+  const sesiones = sesionesExternas ?? sesionesInternas;
+  const cargando = sesionesExternas ? (cargandoExterno ?? false) : cargandoInterno;
 
   const filtradas = sesiones.filter((s) =>
     (s.titulo || "").toLowerCase().includes(busqueda.toLowerCase())

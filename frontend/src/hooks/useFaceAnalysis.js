@@ -60,7 +60,7 @@ export const useFaceAnalysis = (videoRef, stream, { enabled = true } = {}) => {
 
         let mounted = true;
         const faceMesh = new window.FaceMesh({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`,
         });
 
         faceMesh.setOptions({

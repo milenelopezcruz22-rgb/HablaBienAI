@@ -5,13 +5,17 @@ from threading import Lock
 
 _whisper_model = None
 _whisper_model_lock = Lock()
-WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
+WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "small")
+# Prompt en español castellano. Enfatiza que todo el output debe ser en español,
+# evitando que el modelo "traduzca" o mezcle inglés cuando no lo escucha claro.
 TRANSCRIPCION_LITERAL_PROMPT = (
-    "Transcribe literalmente en espanol. Incluye muletillas, repeticiones "
-    "y sonidos de duda como mmm, mmmm, umm, ummm, ehh, eee, este, bueno, o sea."
+    "El siguiente audio es en español castellano de España o Latinoamérica. "
+    "Transcribe únicamente lo que se escucha, en español, sin traducir ni corregir. "
+    "Palabras de relleno y dudas como 'mmm', 'ehh', 'este', 'pues', 'o sea', "
+    "'a ver', 'la la la', escríbelas tal cual suenan."
 )
 TRANSCRIPCION_HOTWORDS = (
-    "mmm mmmm mmmmm umm ummm ummmm emmm ammm ehh ehhh eee este bueno o sea"
+    "mmm umm ehh este pues bueno o sea a ver la la nada igual"
 )
 
 
@@ -45,9 +49,17 @@ def _transcribir_archivo(temp_path: str) -> dict:
         initial_prompt=TRANSCRIPCION_LITERAL_PROMPT,
         condition_on_previous_text=False,
         hotwords=TRANSCRIPCION_HOTWORDS,
-        suppress_blank=False,
-        suppress_tokens=[],
-        no_speech_threshold=0.8,
+        suppress_blank=True,
+        no_speech_threshold=0.5,
+        log_prob_threshold=-1.0,
+        compression_ratio_threshold=2.2,  # rechaza segmentos muy repetitivos (alucinaciones)
+        temperature=0,                    # determinístico: evita que invente palabras
+        vad_filter=True,
+        vad_parameters={
+            "min_silence_duration_ms": 400,
+            "speech_pad_ms": 150,
+        },
+        beam_size=5,
     )
 
     segmentos = []
@@ -74,7 +86,8 @@ def _transcribir_archivo(temp_path: str) -> dict:
             palabras.append({
                 "inicio": round(float(word.start), 2),
                 "fin": round(float(word.end), 2),
-                "texto": palabra
+                "texto": palabra,
+                "probabilidad": round(float(getattr(word, "probability", 1.0)), 3),
             })
 
     transcripcion = " ".join(textos).strip()

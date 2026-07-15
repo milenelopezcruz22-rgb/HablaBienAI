@@ -5,6 +5,14 @@ from app.services.speech_metrics_service import (
     calcular_velocidad_habla,
     detectar_pausas_largas,
     detectar_muletillas,
+    calcular_riqueza_vocabulario,
+    calcular_habla_efectiva,
+    calcular_claridad_palabras,
+    detectar_oraciones_largas,
+    detectar_lenguaje_indeciso,
+    analizar_variacion_ritmo,
+    calcular_densidad_temporal_muletillas,
+    analizar_prosodia,
 )
 from app.services.transcription_service import transcribir_audio_detallado
 
@@ -62,9 +70,18 @@ async def analizar_audio(audio: UploadFile = File(...)):
         total_muletillas = sum(muletillas.values())
         palabras = len(transcripcion.split())
 
-        velocidad = calcular_velocidad_habla(transcripcion, duracion_segundos)
-        pausas = detectar_pausas_largas(segmentos, palabras_transcritas)
-        score = calcular_score_voz(transcripcion, muletillas, velocidad, pausas)
+        velocidad        = calcular_velocidad_habla(transcripcion, duracion_segundos)
+        pausas           = detectar_pausas_largas(segmentos, palabras_transcritas)
+        vocabulario      = calcular_riqueza_vocabulario(transcripcion)
+        habla_efectiva   = calcular_habla_efectiva(segmentos, duracion_segundos)
+        claridad         = calcular_claridad_palabras(palabras_transcritas)
+        oraciones        = detectar_oraciones_largas(segmentos)
+        lenguaje_indeciso   = detectar_lenguaje_indeciso(transcripcion)
+        variacion_ritmo     = analizar_variacion_ritmo(segmentos)
+        densidad_muletillas = calcular_densidad_temporal_muletillas(segmentos, muletillas)
+        prosodia            = analizar_prosodia(audio_bytes)
+        score               = calcular_score_voz(transcripcion, muletillas, velocidad, pausas, claridad)
+
         metricas_voz = {
             "score_voz": score["score_voz"],
             "detalle_score_voz": score["detalle_score_voz"],
@@ -77,6 +94,10 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "pausas_largas": pausas["pausas_largas"],
             "total_pausas_largas": pausas["total_pausas_largas"],
             "duracion_pausas_largas": pausas["duracion_pausas_largas"],
+            "vocabulario": vocabulario,
+            "habla_efectiva": habla_efectiva,
+            "claridad_palabras": claridad,
+            "total_oraciones_largas": oraciones["total_oraciones_largas"],
         }
         feedback_ia = analizar_con_groq(transcripcion, metricas_voz)
 
@@ -95,9 +116,20 @@ async def analizar_audio(audio: UploadFile = File(...)):
             "duracion_pausas_largas": pausas["duracion_pausas_largas"],
             "fuente_pausas": pausas["fuente_pausas"],
             "umbral_pausa_segundos": pausas["umbral_pausa_segundos"],
+            # Nuevas métricas
+            "vocabulario": vocabulario,
+            "habla_efectiva": habla_efectiva,
+            "claridad_palabras": claridad,
+            "oraciones_largas": oraciones["oraciones_largas"],
+            "total_oraciones_largas": oraciones["total_oraciones_largas"],
+            # Análisis avanzado
+            "lenguaje_indeciso": lenguaje_indeciso,
+            "variacion_ritmo": variacion_ritmo,
+            "densidad_muletillas": densidad_muletillas,
+            "prosodia": prosodia,
             "feedback": feedback_ia["feedback"],
             "recomendaciones": feedback_ia["recomendaciones"],
-            "fuente_feedback": feedback_ia["fuente_feedback"]
+            "fuente_feedback": feedback_ia["fuente_feedback"],
         }
 
     except HTTPException:
