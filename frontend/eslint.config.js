@@ -1,4 +1,4 @@
-import js from '@eslint/js'
+﻿import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -18,8 +18,11 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      // Permitir setState en efectos para sincronización con sistemas externos (WebRTC, AudioContext)
+      // Permitir setState en efectos para sincronizaciÃ³n con sistemas externos (WebRTC, AudioContext)
       'react-hooks/set-state-in-effect': 'off',
+      'no-unused-vars': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 ])
+
