@@ -64,5 +64,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/jsx-no-comment-textnodes
 export const useAuth = () => useContext(AuthContext);

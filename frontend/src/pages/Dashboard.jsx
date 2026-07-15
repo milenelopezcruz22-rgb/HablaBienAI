@@ -583,11 +583,8 @@ function Dashboard() {
   const variacionScore  = variacionRitmo?.variacion_score     ?? null;
 
   // Corporal
-  // eslint-disable-next-line no-unused-vars
   const posturaScore     = corporal?.porcentajeBuenaPostura      ?? 0;
-// eslint-disable-next-line no-unused-vars
   const contactoVisual   = corporal?.porcentajeContactoVisual    ?? 0;
-// eslint-disable-next-line no-unused-vars
   const movimientoScore  = corporal?.movimientoScore             ?? 0;
   const frames          = corporal?.frames                      ?? 0;
   const recomCorporales = corporal?.recomendacionesCorporales   ?? [];
