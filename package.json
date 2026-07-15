@@ -1,1 +1,17 @@
-{}
+{
+  "name": "hablabienai",
+  "version": "1.0.0",
+  "description": "HablaBienAI - Oratoria Analysis Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend-node\" \"npm run dev:backend-python\" \"npm run dev:frontend\"",
+    "dev:backend-node": "cd backend && npm start",
+    "dev:backend-python": "cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}

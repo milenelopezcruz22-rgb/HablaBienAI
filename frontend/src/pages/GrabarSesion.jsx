@@ -7,22 +7,17 @@ import {
     Mic, Video, Play, CameraOff,
     CheckCircle, AlertCircle, Eye, Activity, Lightbulb, Hand
 } from 'lucide-react';
+import { posturaConfig as basePosturaConfig, contactoConfig as baseContactoConfig } from "../constants/styles";
 
 const posturaConfig = {
-    excelente: { label: 'Excelente', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', icon: <CheckCircle size={13} /> },
-    buena: { label: 'Buena', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: <CheckCircle size={13} /> },
-    mejorar: { label: 'Mejorar', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', icon: <AlertCircle size={13} /> },
-    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: <Activity size={13} /> },
-    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)', icon: <CameraOff size={13} /> },
+    excelente: { ...basePosturaConfig.excelente, icon: <CheckCircle size={13} /> },
+    buena: { ...basePosturaConfig.buena, icon: <CheckCircle size={13} /> },
+    mejorar: { ...basePosturaConfig.mejorar, icon: <AlertCircle size={13} /> },
+    esperando: { ...basePosturaConfig.esperando, icon: <Activity size={13} /> },
+    nodetect: { ...basePosturaConfig.nodetect, icon: <CameraOff size={13} /> },
 };
 
-const contactoConfig = {
-    estable: { label: 'Estable', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
-    intermitente: { label: 'Intermitente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
-    ausente: { label: 'Ausente', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
-    esperando: { label: 'Detectando...', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
-    nodetect: { label: 'Sin detección', color: '#f97316', bg: 'rgba(249,115,22,0.15)' },
-};
+const contactoConfig = baseContactoConfig;
 
 const audioConfig = {
     optimo: { label: 'Óptimo', barColor: '#22c55e' },
@@ -158,6 +153,7 @@ export default function GrabarSesion() {
             const corporal = getSnapshotRef.current?.() ?? {};
             const data = await analizarAudio(videoBlob, corporal);
             const analysisResult = { voz: data, corporal };
+            localStorage.setItem("analysisResult", JSON.stringify(analysisResult));
 
             const fechaTitulo = new Date().toLocaleString("es-MX", {
                 day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"

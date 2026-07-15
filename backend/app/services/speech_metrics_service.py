@@ -789,7 +789,7 @@ def analizar_prosodia(audio_bytes: bytes) -> dict:
         rms = librosa.feature.rms(y=audio, frame_length=2048, hop_length=512)[0]
         rms_mean = float(np.mean(rms))
         energia_variacion = round(float(np.std(rms)) / (rms_mean + 1e-8) * 100, 1)
-    except Exception:
+    except (ValueError, IndexError, RuntimeError):
         energia_variacion = 0.0
 
     # Solo frames con voz activa detectada por pyin

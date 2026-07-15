@@ -11,7 +11,7 @@ function Button({
 }) {
 
     const baseStyles =
-        "inline-flex items-center justify-center gap-2 font-medium rounded-md transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+        "inline-flex items-center justify-center gap-2 font-medium rounded-md transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
 
     const variants = {
         primary: "bg-blue-600 text-white hover:bg-blue-700",

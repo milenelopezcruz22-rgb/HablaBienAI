@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { MicrophoneIcon } from "../icons";
 import { useAuth } from "../context/AuthContext";
+import { animations } from "../hooks/useAnimations";
 
 // eslint-disable-next-line no-unused-vars
 function PasswordInput({ value, onChange, error, placeholder, name, autoComplete, inputClass }) {
@@ -36,10 +38,15 @@ function LoginForm({ onSuccess }) {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email) && email.length <= 254 && !email.startsWith(".") && !email.endsWith(".");
+    };
+
     const validate = () => {
         const e = {};
         if (!form.email.trim()) e.email = "El correo es requerido";
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Correo inválido";
+        else if (!validateEmail(form.email)) e.email = "Correo inválido";
         if (!form.password) e.password = "La contraseña es requerida";
         else if (form.password.length < 6) e.password = "Mínimo 6 caracteres";
         return e;
@@ -99,12 +106,17 @@ function RegisterForm({ onSuccess }) {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email) && email.length <= 254 && !email.startsWith(".") && !email.endsWith(".");
+    };
+
     const validate = () => {
         const e = {};
         if (!form.nombre.trim()) e.nombre = "Requerido";
         if (!form.apellido.trim()) e.apellido = "Requerido";
         if (!form.email.trim()) e.email = "El correo es requerido";
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Correo inválido";
+        else if (!validateEmail(form.email)) e.email = "Correo inválido";
         if (!form.password) e.password = "Requerida";
         else if (form.password.length < 6) e.password = "Mínimo 6 caracteres";
         if (!form.confirmPassword) e.confirmPassword = "Confirma tu contraseña";
@@ -301,20 +313,32 @@ export default function AuthPage({ isModal = false, onClose }) {
 
     if (isModal) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
-                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-in" />
-                <div className="relative z-10 w-full max-w-md animate-slide-up-in">
+            <motion.div 
+                className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
+                {...animations.fadeIn}
+            >
+                <motion.div 
+                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                    {...animations.backdrop}
+                />
+                <motion.div 
+                    className="relative z-10 w-full max-w-md"
+                    {...animations.modal}
+                >
                     {card(true)}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         );
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 px-4 py-10">
-            <div className="w-full max-w-md">
+        <motion.div 
+            className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 px-4 py-10"
+            {...animations.page}
+        >
+            <motion.div className="w-full max-w-md" {...animations.slideUp}>
                 {card(false)}
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
