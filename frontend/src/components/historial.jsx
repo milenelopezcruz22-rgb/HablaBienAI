@@ -22,9 +22,9 @@ function formatoDuracion(seg) {
 }
 
 function nivelDesdePuntaje(puntaje) {
-  if (puntaje >= 85) return { label: "SOBRESALIENTE", style: "text-indigo-500" };
-  if (puntaje >= 70) return { label: "BUENO", style: "text-amber-500" };
-  return { label: "EN PROGRESO", style: "text-gray-800" };
+  if (puntaje >= 85) return { label: "SOBRESALIENTE", style: "text-emerald-600 font-bold" };
+  if (puntaje >= 70) return { label: "BUENO", style: "text-sky-600 font-bold" };
+  return { label: "EN PROGRESO", style: "text-amber-600 font-bold" };
 }
 
 export default function Historial({ busqueda, sesionesExternas, cargandoExterno }) {
@@ -58,26 +58,26 @@ export default function Historial({ busqueda, sesionesExternas, cargandoExterno 
   if (filtradas.length === 0) {
     return (
       <motion.div 
-        className="flex flex-col items-center justify-center py-16 px-6 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl"
+        className="flex flex-col items-center justify-center py-16 px-6 bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-200 rounded-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4"
+          className="w-16 h-16 bg-sky-200 rounded-full flex items-center justify-center mb-4"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           {busqueda ? (
-            <Search size={32} className="text-slate-400" />
+            <Search size={32} className="text-sky-600" />
           ) : (
-            <Film size={32} className="text-slate-400" />
+            <Film size={32} className="text-sky-600" />
           )}
         </motion.div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
           {busqueda ? "Sin resultados" : "Sin sesiones grabadas"}
         </h3>
-        <p className="text-sm text-slate-600 text-center max-w-sm">
+        <p className="text-sm text-gray-700 text-center max-w-sm">
           {busqueda 
             ? "No se encontraron sesiones con ese término. Intenta otra búsqueda."
             : "Aún no tienes sesiones grabadas. ¡Graba tu primera presentación para obtener análisis detallado!"}
@@ -95,7 +95,7 @@ export default function Historial({ busqueda, sesionesExternas, cargandoExterno 
           <li
             key={s.id}
             onClick={() => navigate(`/dashboard/${s.id}`)}
-            className="bg-white border border-slate-200 rounded-2xl px-6 py-5 flex items-center gap-6 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all shadow-sm"
+            className="bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl px-6 py-5 flex items-center gap-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all shadow-md hover:border-sky-200 hover:bg-white"
           >
             <div className="flex flex-col items-center min-w-14">
               <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">

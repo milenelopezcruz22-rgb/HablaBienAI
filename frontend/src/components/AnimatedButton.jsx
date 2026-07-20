@@ -11,11 +11,11 @@ function AnimatedButton({
     return (
         <motion.button
             type={type}
-            className={className}
+            className={`${className} transition-shadow duration-200`}
             onClick={onClick}
             disabled={disabled}
-            whileHover={!disabled ? { scale: 1.02 } : {}}
-            whileTap={!disabled ? { scale: 0.98 } : {}}
+            whileHover={!disabled ? { scale: 1.03, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.12)" } : {}}
+            whileTap={!disabled ? { scale: 0.97 } : {}}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
             {...props}
         >

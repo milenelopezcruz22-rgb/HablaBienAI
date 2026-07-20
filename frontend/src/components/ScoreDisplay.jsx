@@ -130,7 +130,7 @@ function ScoreDisplay({ score, size = "lg" }) {
                         rounded-full border-0
                         font-bold relative
                         bg-gradient-to-br ${config.bgGradient}
-                        ${sizes.circle}
+                        ${sizes.circle} ${config.glow}
                     `}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
