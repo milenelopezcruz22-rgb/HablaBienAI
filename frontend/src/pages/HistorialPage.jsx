@@ -110,18 +110,18 @@ function ResumenStats({ sesiones }) {
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-1 shadow-sm">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Promedio</p>
-        <p className="text-3xl font-bold text-slate-900">{promedio}</p>
-        <p className="text-xs text-slate-400">sobre 100</p>
+      <div className="bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl p-4 flex flex-col gap-1 shadow-md hover:shadow-lg hover:border-sky-200 transition-all">
+        <p className="text-xs font-bold text-sky-600 uppercase tracking-wide">Promedio</p>
+        <p className="text-3xl font-bold text-gray-900">{promedio}</p>
+        <p className="text-xs text-gray-600">sobre 100</p>
       </div>
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-1 shadow-sm">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Mejor sesión</p>
+      <div className="bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl p-4 flex flex-col gap-1 shadow-md hover:shadow-lg hover:border-sky-200 transition-all">
+        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Mejor sesión</p>
         <p className="text-3xl font-bold text-emerald-600">{mejor}</p>
-        <p className="text-xs text-slate-400">puntos</p>
+        <p className="text-xs text-gray-600">puntos</p>
       </div>
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-1 shadow-sm">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Tendencia</p>
+      <div className="bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl p-4 flex flex-col gap-1 shadow-md hover:shadow-lg hover:border-sky-200 transition-all">
+        <p className="text-xs font-bold text-sky-600 uppercase tracking-wide">Tendencia</p>
         {tendencia === null ? (
           <p className="text-3xl font-bold text-slate-400">—</p>
         ) : tendencia > 0 ? (
@@ -179,36 +179,36 @@ export default function HistorialPage() {
   const tendencia = calcularTendencia(sesionesConScore);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-50 text-gray-800 font-sans">
       <main className="max-w-[1200px] mx-auto px-6 py-10 flex flex-col gap-8">
 
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-sm">
+            <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white shadow-md">
               <History size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-900">Historial de Sesiones</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Historial de Sesiones</h1>
               {!cargando && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-600">
                   {sesiones.length} sesión{sesiones.length !== 1 ? "es" : ""} registrada{sesiones.length !== 1 ? "s" : ""}
                 </p>
               )}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400 transition-all">
-              <Search size={18} className="text-slate-400" />
+            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-sky-100 rounded-xl px-4 py-2.5 shadow-md focus-within:ring-2 focus-within:ring-sky-400/30 focus-within:border-sky-300 transition-all">
+              <Search size={18} className="text-sky-400" />
               <input
                 type="text"
                 placeholder="Buscar sesión..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm text-slate-700 w-48 placeholder-slate-400"
+                className="bg-transparent border-none outline-none text-sm text-gray-700 w-48 placeholder-gray-500"
               />
             </div>
-            <button className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-all shadow-sm">
+            <button className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm border border-sky-100 rounded-xl text-sky-500 hover:bg-sky-50 hover:text-sky-600 transition-all shadow-md hover:shadow-lg">
               <SlidersHorizontal size={18} />
             </button>
           </div>
@@ -237,9 +237,9 @@ export default function HistorialPage() {
             <ResumenStats sesiones={sesionesConScore} />
 
             {sesionesConScore.length >= 2 && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl p-6 shadow-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold text-slate-900">Evolución del Puntaje</h2>
+                  <h2 className="text-base font-bold text-gray-900">Evolución del Puntaje</h2>
                   {tendencia !== null && (
                     <span className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border ${
                       tendencia > 0 ? "bg-emerald-50 text-emerald-600 border-emerald-200"
@@ -259,7 +259,7 @@ export default function HistorialPage() {
 
         {/* Lista de sesiones — pasa sesiones ya cargadas para evitar doble fetch */}
         <div>
-          <h2 className="text-base font-semibold text-slate-900 mb-4">Todas las sesiones</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-4">Todas las sesiones</h2>
           <Historial busqueda={busqueda} sesionesExternas={sesiones} cargandoExterno={cargando} />
         </div>
 

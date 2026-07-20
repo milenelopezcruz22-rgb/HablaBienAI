@@ -42,21 +42,21 @@ function Navbar() {
     );
 
     return (
-        <nav className="relative flex w-full items-center justify-between p-4 sm:px-6 lg:px-12 border-b border-gray-200 shadow-lg bg-white/80 backdrop-blur-md z-50">
-            <div className="flex items-center gap-2 font-semibold">
-                <MicrophoneIcon className="text-sky-400" />
-                <NavLink className="text-xl" to="/" onClick={closeMenu}>
+        <nav className="relative flex w-full items-center justify-between p-4 sm:px-6 lg:px-12 border-b border-sky-100 shadow-lg bg-white/95 backdrop-blur-md z-50">
+            <div className="flex items-center gap-2 font-bold">
+                <MicrophoneIcon className="text-sky-500" />
+                <NavLink className="text-xl text-gray-900" to="/" onClick={closeMenu}>
                     Habla Bien IA
                 </NavLink>
             </div>
 
             {/* Hamburger button */}
             <button onClick={() => setMenuOpen(!menuOpen)}
-                className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-sky-50 transition-colors"
                 aria-label="Menú">
-                <span className={`block w-6 h-0.5 bg-sky-500 rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-sky-500 rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-sky-500 rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                <span className={`block w-6 h-0.5 bg-sky-600 rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                <span className={`block w-6 h-0.5 bg-sky-600 rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+                <span className={`block w-6 h-0.5 bg-sky-600 rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
             </button>
 
             {/* Desktop nav */}

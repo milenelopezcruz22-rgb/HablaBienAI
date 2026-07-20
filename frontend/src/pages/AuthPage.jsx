@@ -5,7 +5,6 @@ import { MicrophoneIcon } from "../icons";
 import { useAuth } from "../context/AuthContext";
 import { animations } from "../hooks/useAnimations";
 
-// eslint-disable-next-line no-unused-vars
 function PasswordInput({ value, onChange, error, placeholder, name, autoComplete, inputClass }) {
     const [show, setShow] = useState(false);
     return (

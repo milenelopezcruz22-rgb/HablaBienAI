@@ -63,6 +63,6 @@ export async function analizarAudio(videoBlob) {
 
     return res.json();
   } catch (error) {
-    throw new Error(error.message || "Error de conexión con el servicio de análisis");
+    throw new Error(error.message || "Error de conexión con el servicio de análisis", { cause: error });
   }
 }

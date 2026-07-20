@@ -39,22 +39,22 @@ function Inicio() {
                             <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
                                 Revisa tu progreso, graba una nueva presentacion o explora tu historial de sesiones.
                             </p>
-                            <div className="flex flex-wrap gap-3 mt-6 justify-center lg:justify-start">
+                            <div className="flex flex-wrap gap-3 mt-8 justify-center lg:justify-start">
                                 <button onClick={() => navigate("/camera")}
-                                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-sky-400 to-blue-500 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg hover:from-sky-500 hover:to-blue-600 transition-all duration-200 font-semibold">
+                                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-sky-400 to-blue-500 text-white px-7 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:from-sky-500 hover:to-blue-600 transition-all duration-200 font-bold active:scale-95">
                                     <PlayIcon size={20} />
-                                    Nueva Grabacion
+                                    Nueva Grabación
                                 </button>
                                 <button onClick={() => navigate("/historial")}
-                                    className="flex items-center justify-center px-6 py-3 rounded-xl border-2 border-sky-300 text-sky-600 font-semibold hover:bg-sky-50 hover:border-sky-400 transition-all duration-200">
+                                    className="flex items-center justify-center px-7 py-3.5 rounded-xl border-2 border-sky-300 text-sky-600 font-bold hover:bg-sky-50 hover:border-sky-400 hover:text-sky-700 transition-all duration-200 active:scale-95">
                                     Ver Historial
                                 </button>
                             </div>
                         </div>
 
                         <div className="flex-shrink-0 w-full max-w-sm">
-                            <div className="bg-white rounded-2xl shadow-lg border border-sky-100 p-6">
-                                <h3 className="font-semibold text-gray-800 mb-4">Tus ultimas sesiones</h3>
+                            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-sky-200 p-6">
+                                <h3 className="font-bold text-gray-900 mb-4 text-base">Tus ultimas sesiones</h3>
                                 {ultimasSesiones.length === 0 ? (
                                     <p className="text-sm text-gray-400 text-center py-6">
                                         Aun no tienes sesiones. ¡Graba tu primera presentacion!
@@ -64,10 +64,10 @@ function Inicio() {
                                         {ultimasSesiones.map((s) => (
                                             <li key={s.id}
                                                 onClick={() => navigate(`/dashboard/${s.id}`)}
-                                                className="flex items-center justify-between p-3 rounded-xl bg-sky-50 hover:bg-sky-100 cursor-pointer transition-colors">
+                                                className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50 hover:from-sky-100 hover:to-blue-100 cursor-pointer transition-all duration-200 border border-sky-100/50 hover:border-sky-200">
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-medium text-gray-800 truncate">{s.titulo}</p>
-                                                    <p className="text-xs text-gray-400">
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">{s.titulo}</p>
+                                                    <p className="text-xs text-gray-500">
                                                         {new Date(s.fecha).toLocaleDateString("es-MX")}
                                                     </p>
                                                 </div>
@@ -87,9 +87,9 @@ function Inicio() {
                     </div>
 
                     <div className="mb-16">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
                             <span className="bg-gradient-to-r from-sky-400 to-blue-500 text-transparent bg-clip-text">
-                                Como funciona
+                                Cómo funciona
                             </span>
                         </h2>
                         <Cards />
@@ -173,8 +173,8 @@ function Inicio() {
                 >
                     <div className="w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 rounded-full bg-gradient-to-br from-sky-200/60 to-blue-300/60 blur-3xl absolute -z-10 -top-10 -right-10" />
                     <motion.div 
-                        className="relative bg-white rounded-2xl shadow-lg border border-sky-100 p-6 sm:p-7 max-w-xs sm:max-w-sm"
-                        whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.12)" }}
+                        className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-sky-200 p-6 sm:p-7 max-w-xs sm:max-w-sm"
+                        whileHover={{ y: -4, boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)" }}
                         transition={{ duration: 0.3 }}
                     >
                         <motion.div 
@@ -280,14 +280,14 @@ function Inicio() {
                 transition={{ duration: 0.6 }}
             >
                 <motion.h2 
-                    className="text-2xl sm:text-3xl font-bold text-center mb-10"
+                    className="text-3xl sm:text-4xl font-bold text-center mb-12"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.5 }}
                     transition={{ duration: 0.5 }}
                 >
                     <span className="bg-gradient-to-r from-sky-400 to-blue-500 text-transparent bg-clip-text">
-                        Como funciona
+                        Cómo funciona
                     </span>
                 </motion.h2>
                 <Cards />

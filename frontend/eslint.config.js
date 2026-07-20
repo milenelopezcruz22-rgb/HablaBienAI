@@ -25,6 +25,7 @@ export default defineConfig([
       'react-hooks/static-components': 'off',
       'react-refresh/only-export-components': 'off',
       'no-loss-of-precision': 'off',
+      'preserve-caught-error': 'off',
     },
   },
 ])

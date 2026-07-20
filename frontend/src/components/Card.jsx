@@ -12,10 +12,10 @@ function Card({
 }) {
 
     const baseStyles =
-        "bg-white border border-gray-200 rounded-lg shadow-sm transition-all duration-300"
+        "bg-white/90 backdrop-blur-sm border border-sky-100 rounded-2xl shadow-md transition-all duration-300"
 
     const clickable = onClick
-        ? "cursor-pointer hover:shadow-md hover:border-blue-300"
+        ? "cursor-pointer hover:shadow-xl hover:border-sky-300 hover:bg-white"
         : ""
 
     const paddingStyles = {
@@ -36,14 +36,14 @@ function Card({
             transition={{ duration: 0.3 }}
         >
             {(title || subtitle) && (
-                <div className="mb-4">
+                <div className="mb-5">
                     {title && (
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-bold text-gray-900">
                             {title}
                         </h3>
                     )}
                     {subtitle && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-600 mt-1">
                             {subtitle}
                         </p>
                     )}

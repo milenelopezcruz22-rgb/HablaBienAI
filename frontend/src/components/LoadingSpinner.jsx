@@ -21,15 +21,15 @@ function LoadingSpinner({ message = "Cargando...", size = "md" }) {
       transition={{ duration: 0.3 }}
     >
       <motion.div
-        className={`${sizeClasses[size]} border-2 border-blue-200 border-t-blue-600 rounded-full`}
+        className={`${sizeClasses[size]} border-3 border-sky-100 border-t-sky-500 rounded-full shadow-md`}
         animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
       />
       {message && (
         <motion.p
-          className="text-sm text-gray-600 font-medium"
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          className="text-sm text-gray-700 font-semibold"
+          animate={{ opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
         >
           {message}
         </motion.p>

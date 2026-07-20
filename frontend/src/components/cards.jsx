@@ -45,13 +45,13 @@ function Cards() {
                 const Icon = card.icon;
                 return (
                     <div key={i}
-                        className="group bg-white rounded-xl p-6 text-center border border-sky-100/50 shadow-sm hover:shadow-lg hover:border-sky-200 transition-all duration-300 relative overflow-hidden">
-                        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.color}`} />
-                        <div className={`w-12 h-12 flex items-center justify-center rounded-xl mx-auto mb-4 ${card.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
-                            <Icon size={24} className={card.iconColor} />
+                        className="group bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center border border-sky-200/60 shadow-md hover:shadow-2xl hover:border-sky-300 transition-all duration-300 relative overflow-hidden">
+                        <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${card.color}`} />
+                        <div className={`w-14 h-14 flex items-center justify-center rounded-xl mx-auto mb-4 ${card.iconBg} shadow-md transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1`}>
+                            <Icon size={28} className={card.iconColor} />
                         </div>
-                        <h3 className="font-bold text-lg text-gray-800 mb-2">{card.title}</h3>
-                        <p className="text-gray-500 text-sm leading-relaxed">
+                        <h3 className="font-bold text-lg text-gray-900 mb-3">{card.title}</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
                             {card.desc}
                         </p>
                     </div>
